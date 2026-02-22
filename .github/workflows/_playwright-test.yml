@@ -19,7 +19,7 @@ on:
   workflow_call:
     inputs:
       test-type:
-        description: "テスト種別 (vrt / e2e)"
+        description: "テスト種別 (storybook-vrt / web-e2e)"
         required: true
         type: string
       working-directory:
@@ -49,6 +49,11 @@ jobs:
   test:
     name: ${{ inputs.report-title }}
     runs-on: ubuntu-latest
+    # gh-pages ブランチへの push が競合しないようにキューイング
+    # （VRT と E2E が同時実行されても deploy は順番に処理される）
+    concurrency:
+      group: gh-pages-deploy
+      cancel-in-progress: false
     steps:
       # ────────────────────────────────────────
       # セットアップ
@@ -181,35 +186,27 @@ jobs:
           path: ${{ inputs.working-directory }}/allure-report/
           retention-days: 30
 
-      # 以下3ステップ: 各レポートを GitHub Pages にデプロイ
-      # デプロイ先: {REPORT_PREFIX}/{test-type}/{レポート種別}/
+      # 全レポートを1つのディレクトリにまとめ、1回の push でデプロイする。
+      # 3回に分けると gh-pages ブランチへの push が競合しやすいため統合している。
       # keep_files: true で既存のレポートを保持する（他の PR のレポートを消さない）
+      - name: Stage reports for GitHub Pages
+        if: always()
+        run: |
+          DEST="${{ env.REPORT_PREFIX }}/${{ inputs.test-type }}"
+          mkdir -p _gh-pages-staging/${DEST}/html-report
+          mkdir -p _gh-pages-staging/${DEST}/allure-report
+          mkdir -p _gh-pages-staging/${DEST}/reg-report
+          cp -r playwright-report/* _gh-pages-staging/${DEST}/html-report/ || true
+          cp -r allure-report/* _gh-pages-staging/${DEST}/allure-report/ || true
+          cp -r .reg/* _gh-pages-staging/${DEST}/reg-report/ || true
+        working-directory: ${{ inputs.working-directory }}
 
-      - name: Deploy HTML report to GitHub Pages
+      - name: Deploy reports to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ inputs.working-directory }}/playwright-report
-          destination_dir: ${{ env.REPORT_PREFIX }}/${{ inputs.test-type }}/html-report
-          keep_files: true
-
-      - name: Deploy Allure report to GitHub Pages
-        if: always()
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ inputs.working-directory }}/allure-report
-          destination_dir: ${{ env.REPORT_PREFIX }}/${{ inputs.test-type }}/allure-report
-          keep_files: true
-
-      - name: Deploy reg-cli report to GitHub Pages
-        if: always()
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ inputs.working-directory }}/.reg
-          destination_dir: ${{ env.REPORT_PREFIX }}/${{ inputs.test-type }}/reg-report
+          publish_dir: ${{ inputs.working-directory }}/_gh-pages-staging
           keep_files: true
 
       # ────────────────────────────────────────

@@ -21,7 +21,7 @@ jobs:
     # ローカルの workflow_call を解決できない拡張の既知の制限であり、実際の実行には影響しない。
     uses: ./.github/workflows/_playwright-test.yml
     with:
-      test-type: e2e
+      test-type: web-e2e
       working-directory: apps/web
       build-command: bun run build
       report-script: e2e:report:reg
