@@ -4,21 +4,13 @@
  * Storybook で描画されたコンポーネントのスクリーンショットを撮影し、
  * リファレンス画像と比較することで意図しない見た目の変更を検出する。
  *
- * 実行: bun run storybook:vrt
- * リファレンス画像更新: bun run storybook:vrt:update-snapshots:local
+ * 実行: bun run storybook:vrt:playwright
  */
 import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   // テストファイルの配置ディレクトリ
   testDir: "./vrt",
-
-  // リファレンス画像（スナップショット）の保存先ディレクトリ
-  snapshotDir: "./vrt/screenshots",
-
-  // スナップショットのファイルパステンプレート
-  // 例: vrt/screenshots/darwin/Components/Button/Primary.png
-  snapshotPathTemplate: "{snapshotDir}/{platform}/{arg}{ext}",
 
   // テストを並列実行する（独立したコンポーネントのスクリーンショットなので並列で問題ない）
   fullyParallel: true,
@@ -55,14 +47,6 @@ export default defineConfig({
 
     // テスト失敗時の自動スクリーンショットは無効（VRT 自体がスクリーンショット比較のため不要）
     screenshot: "off",
-  },
-
-  expect: {
-    toHaveScreenshot: {
-      // ピクセル差分の許容率（1%）
-      // アンチエイリアシングやフォントレンダリングの微差を吸収するための閾値
-      maxDiffPixelRatio: 0.01,
-    },
   },
 
   // ビルド済み Storybook を http-server で配信（index.json の読み取りにビルドが必要）

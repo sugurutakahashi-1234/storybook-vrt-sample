@@ -40,9 +40,6 @@ pre-push:
     # Next.js ビルド
     - name: build
       run: bun run build
-    # Playwright バージョン整合性チェック（package.json vs Docker イメージ）
-    - name: playwright-version-check
-      run: bun run scripts/check-playwright-version.ts
     # bun バージョン整合性チェック（packageManager vs インストール済みバージョン）
     - name: bun-version-check
       run: bun run scripts/check-bun-version.ts

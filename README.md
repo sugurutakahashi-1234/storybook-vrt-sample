@@ -79,33 +79,42 @@ bun run test
 コンポーネントの見た目が意図せず変わっていないかをスクリーンショット比較で検証します。
 
 ```bash
-# VRT テスト実行（Storybook ビルド + スクリーンショット比較）
+# VRT テスト実行（Storybook ビルド + スクリーンショット撮影）
 bun run storybook:vrt:playwright
 ```
 
 ### E2E テスト
 
-Next.js アプリに対するシナリオベースのテスト + ページ全体のスクリーンショット比較です。
+Next.js アプリに対するシナリオベースのテスト + ページ全体のスクリーンショット撮影です。
 
 ```bash
 # E2E テスト実行（Next.js dev サーバーが自動起動）
 bun run web:e2e:playwright
 ```
 
+### ブランチ間のビジュアル比較
+
+ベースブランチ（デフォルト: main）からベースラインを動的生成し、現在のブランチとの差分を reg-cli レポートで確認します。
+スクリーンショットはリポジトリにコミットせず、比較時に毎回生成するため環境差異の問題がありません。
+
+```bash
+# Storybook VRT: current vs main
+bun run storybook:local-vrt-compare
+
+# Storybook VRT: current vs develop
+bun run storybook:local-vrt-compare --base develop
+
+# E2E: current vs main
+bun run e2e:local-vrt-compare
+
+# 両方まとめて
+bun run all:local-vrt-compare
+```
+
 ### reg-cli レポート
 
 テスト実行時にスクリーンショットが `.reg/actual/` に自動保存されます。
-既存のスナップショット（`vrt/screenshots/` / `e2e/screenshots/`）をベースラインとして比較し、リッチな差分 HTML レポートを生成します。
-
-```bash
-# VRT 実行後に reg-cli で比較レポート生成
-bun run storybook:vrt:playwright
-bun run storybook:vrt:report:reg
-
-# E2E 実行後に reg-cli で比較レポート生成
-bun run web:e2e:playwright
-bun run web:e2e:report:reg
-```
+`storybook:local-vrt-compare` / `e2e:local-vrt-compare` を実行すると、ベースブランチのスクリーンショットが `.reg/expected/` に生成され、reg-cli で差分レポートが自動生成されます。
 
 ### Allure レポート
 
@@ -119,44 +128,6 @@ bun run web:e2e:report:allure
 bun run storybook:vrt:report:allure
 ```
 
-### スナップショット更新
-
-スナップショット（リファレンス画像）は OS ごとに分離管理されています（`darwin/` と `linux/`）。
-`update-snapshots` コマンドを使うと、ローカル（macOS）と Docker（Linux/CI 用）の両方を一括更新できます。
-
-更新時は該当プラットフォームのスクリーンショットディレクトリを事前削除してから再生成するため、ストーリーの削除やリネーム後に古いファイルが残ることはありません。
-
-```bash
-# 全部まとめて更新（VRT + E2E、ローカル + Docker）
-bun run update-snapshots
-
-# VRT のみ更新（ローカル + Docker）
-bun run storybook:vrt:update-snapshots
-
-# E2E のみ更新（ローカル + Docker）
-bun run web:e2e:update-snapshots
-```
-
-個別のプラットフォームだけ更新したい場合:
-
-```bash
-# VRT: ローカル（darwin）のみ / Docker（linux）のみ
-bun run storybook:vrt:update-snapshots:local
-bun run storybook:vrt:update-snapshots:docker
-
-# E2E: ローカル（darwin）のみ / Docker（linux）のみ
-bun run web:e2e:update-snapshots:local
-bun run web:e2e:update-snapshots:docker
-```
-
-### VRT ワークフロー
-
-1. `bun run storybook:vrt:playwright` でテスト実行 → 全テストパス
-2. コンポーネントのスタイルを変更
-3. `bun run storybook:vrt:playwright` で再テスト → 差分検出で失敗
-4. 変更が意図通りなら `bun run update-snapshots` でリファレンス画像を再生成
-5. リファレンス画像をコミット
-
 ## Git Hooks（Lefthook）
 
 | フック | ジョブ | 内容 |
@@ -168,33 +139,33 @@ bun run web:e2e:update-snapshots:docker
 | pre-push | lint-check | Biome リント + フォーマットチェック（CI 同等） |
 | pre-push | typecheck | TypeScript 型チェック |
 | pre-push | build | Next.js ビルド |
-| pre-push | playwright-version-check | Playwright バージョン整合性チェック |
 | pre-push | bun-version-check | bun バージョン整合性チェック |
-| pre-push | storybook-vrt | Storybook VRT（コンポーネントのスクリーンショット比較） |
-| pre-push | web-e2e | Web E2E テスト（ページ全体のスクリーンショット比較 + シナリオテスト） |
+| pre-push | dependency-version-consistency-check | 依存パッケージバージョン整合性チェック |
+| pre-push | knip | 未使用ファイル・依存関係チェック |
 
 ## CI/CD
 
-PR 作成時に GitHub Actions が自動実行されます。
+PR 作成時に GitHub Actions が自動実行されます。Docker コンテナは使用せず、CI ランナー上で直接 Playwright を実行します。
 
 - **Lint & Format** (`lint.yml`): 全 PR で Biome によるリント + フォーマットチェック
 - **Storybook VRT** (`vrt.yml`): `packages/ui/` の変更時に実行
 - **E2E テスト** (`e2e.yml`): `apps/web/` または `packages/ui/` の変更時に実行
 
-失敗時はテスト結果と差分レポートがアーティファクトとしてダウンロードできます。
+PR 時はベースブランチからベースラインを動的生成し、reg-cli で差分レポートを生成します。
+テスト自体は `toHaveScreenshot()` を使わないため、ビジュアル変更があってもテストは失敗しません。差分は reg-cli レポートで確認します。
+
 Allure レポートもアーティファクトとしてアップロードされ、テスト結果の詳細分析が可能です。
 
 ### テスト構成の棲み分け
 
 | レイヤー | 役割 | ツール | CI での判定 |
 |---------|------|--------|-----------|
-| Playwright VRT | コンポーネントのスクリーンショット比較 assertion | `toHaveScreenshot()` | pass/fail |
-| Playwright E2E | ページ遷移・レスポンシブ表示の assertion | `toHaveScreenshot()` + 機能テスト | pass/fail |
+| Playwright VRT | コンポーネントのスクリーンショット撮影 | Playwright | pass/fail（機能テストのみ） |
+| Playwright E2E | ページ遷移・レスポンシブ表示のスクリーンショット撮影 + 機能テスト | Playwright | pass/fail（機能テストのみ） |
 | reg-cli | リッチな差分レポート生成（スライド / オーバーレイ / 2up / ブレンド） | `reg-cli` | レポートのみ（fail しない） |
 
-- Playwright の `toHaveScreenshot()` が CI の pass/fail を判定する
-- reg-cli は同じテスト実行中に `.reg/actual/` に保存されたスクリーンショットを使い、既存のスナップショットと比較してレポートを生成する
-- ベースライン画像は `vrt/screenshots/` / `e2e/screenshots/` で一元管理（reg-cli 専用のベースラインは持たない）
+- ベースライン画像はリポジトリにコミットせず、ベースブランチから動的生成する
+- reg-cli はテスト実行時に `.reg/actual/` に保存されたスクリーンショットと、ベースブランチから生成した `.reg/expected/` を比較してレポートを生成する
 
 ### GitHub Pages レポート構成
 

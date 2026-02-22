@@ -4,21 +4,13 @@
  * Next.js アプリケーションに対するエンドツーエンドテストの設定。
  * ページ遷移、レスポンシブ表示、スクリーンショット比較などを検証する。
  *
- * 実行: bun run web:e2e
- * リファレンス画像更新: bun run web:e2e:update-snapshots:local
+ * 実行: bun run web:e2e:playwright
  */
 import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   // テストファイルの配置ディレクトリ
   testDir: "./e2e",
-
-  // リファレンス画像（スナップショット）の保存先ディレクトリ
-  snapshotDir: "./e2e/screenshots",
-
-  // スナップショットのファイルパステンプレート
-  // 例: e2e/screenshots/darwin/home.spec.ts/ホームページのスクリーンショット-1.png
-  snapshotPathTemplate: "{snapshotDir}/{platform}/{testFilePath}/{arg}{ext}",
 
   // テストを並列実行する
   fullyParallel: true,
@@ -55,14 +47,6 @@ export default defineConfig({
 
     // テスト失敗時の自動スクリーンショットは無効（E2E テスト内で明示的に撮影するため不要）
     screenshot: "off",
-  },
-
-  expect: {
-    toHaveScreenshot: {
-      // ピクセル差分の許容率（1%）
-      // アンチエイリアシングやフォントレンダリングの微差を吸収するための閾値
-      maxDiffPixelRatio: 0.01,
-    },
   },
 
   // テスト実行前に Next.js dev サーバーを自動起動する設定

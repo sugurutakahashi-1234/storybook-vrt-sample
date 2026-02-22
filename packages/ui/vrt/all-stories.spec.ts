@@ -6,15 +6,14 @@
  * これにより、新しいストーリーを追加しても VRT テストファイルの変更は不要。
  *
  * 前提: テスト実行前に `storybook build` が必要（storybook-static/index.json を参照するため）
- *       package.json の vrt / vrt:update-snapshots スクリプトにはビルドが組み込み済み。
+ *       package.json の vrt スクリプトにはビルドが組み込み済み。
  *
- * 実行: bun run storybook:vrt
- * リファレンス画像更新: bun run storybook:vrt:update-snapshots:local
+ * 実行: bun run storybook:vrt:playwright
  */
 import { mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { expect, test } from "@playwright/test";
+import { test } from "@playwright/test";
 
 // ESM では __dirname が未定義のため、import.meta.url から取得
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -37,12 +36,11 @@ for (const story of stories as any[]) {
     await page.goto(`/iframe.html?id=${story.id}&viewMode=story`);
     const root = page.locator("#storybook-root");
 
-    // #storybook-root 内のコンポーネントをスクリーンショット撮影し、リファレンス画像と比較
+    // #storybook-root 内のコンポーネントをスクリーンショット撮影
     // story.title の階層構造をディレクトリとして使用（例: "Components/Badge/Error.png"）
     const name = [...story.title.split("/"), `${story.name}.png`];
-    await expect(root).toHaveScreenshot(name);
 
-    // reg-cli 用: 同じスクリーンショットを .reg/actual/ にも保存
+    // reg-cli 用: スクリーンショットを .reg/actual/ に保存
     const regPath = join(".reg", "actual", ...name);
     mkdirSync(dirname(regPath), { recursive: true });
     await root.screenshot({ path: regPath });

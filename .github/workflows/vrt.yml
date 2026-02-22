@@ -1,8 +1,8 @@
 # Storybook VRT（ビジュアルリグレッションテスト）ワークフロー
 #
 # packages/ui/ 配下のファイルが変更された PR で自動実行される。
-# Storybook をビルドし、各コンポーネントのスクリーンショットを
-# リファレンス画像と比較して意図しない見た目の変更を検出する。
+# Storybook をビルドし、各コンポーネントのスクリーンショットを撮影。
+# PR 時はベースブランチからベースラインを動的生成し、reg-cli で差分レポートを生成する。
 name: Storybook VRT
 
 on:
@@ -24,39 +24,52 @@ jobs:
   vrt:
     name: Visual Regression Test
     runs-on: ubuntu-latest
-    # Playwright の公式 Docker イメージを使用（ブラウザがプリインストール済み）
-    # バージョンは @playwright/test のバージョンと一致させること
-    container:
-      image: mcr.microsoft.com/playwright:v1.58.2-noble
     steps:
       - uses: actions/checkout@v6
-
-      # Playwright Docker イメージに unzip が未同梱のため追加（setup-bun に必要）
-      - run: apt-get update && apt-get install -y unzip jq
+        with:
+          fetch-depth: 0
 
       # bun をセットアップ（パッケージマネージャー）
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
+      # Playwright ブラウザをインストール
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps
+
       # モノレポ全体の依存関係をインストール（lockfile を厳密に使用）
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      # ベースブランチからベースラインを動的生成（PR 時のみ）
+      - name: Generate baselines from base branch
+        if: github.event_name == 'pull_request'
+        run: |
+          BASE_REF="${{ github.event.pull_request.base.ref }}"
+          git worktree add /tmp/baseline "origin/${BASE_REF}" --detach
+          cd /tmp/baseline
+          bun install --frozen-lockfile
+          cd packages/ui
+          bun run build-storybook
+          bunx playwright test || true
+          cp -r .reg/actual/ $GITHUB_WORKSPACE/packages/ui/.reg/expected/
+          cd $GITHUB_WORKSPACE
+          git worktree remove /tmp/baseline --force
+
       # Storybook を静的ビルド（storybook-static/ に出力）
-      # VRT では dev サーバーではなくビルド済みの静的ファイルを使用する
       - name: Build Storybook
         run: bun run build-storybook
         working-directory: packages/ui
 
-      # VRT 実行: 各コンポーネントのスクリーンショットをリファレンス画像と比較
+      # VRT 実行: 各コンポーネントのスクリーンショットを撮影
       - name: Run VRT
         run: bunx playwright test
         working-directory: packages/ui
         env:
           CI: true
 
-      # テスト失敗時: 差分画像を含むテスト結果をアップロード
+      # テスト失敗時: テスト結果をアップロード
       - name: Upload test results
         if: failure()
         uses: actions/upload-artifact@v6
@@ -109,7 +122,7 @@ jobs:
           destination_dir: ${{ env.REPORT_PREFIX }}/vrt/allure-report
           keep_files: true
 
-      # reg-cli: ベースラインと比較してレポート生成（VRT 実行時に .reg/actual/ へ自動保存済み）
+      # reg-cli: ベースラインと比較してレポート生成
       - name: Run reg-cli comparison
         if: always()
         id: reg-result
