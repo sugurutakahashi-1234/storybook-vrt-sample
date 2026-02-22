@@ -20,7 +20,11 @@
       "mcp__plugin_web-dev-plugin_chrome-devtools__navigate_page",
       "mcp__plugin_web-dev-plugin_chrome-devtools__list_network_requests",
       "Bash(bunx allure:*)",
-      "WebFetch(domain:sugurutakahashi-1234.github.io)"
+      "WebFetch(domain:sugurutakahashi-1234.github.io)",
+      "Bash(cp -r .reg/actual .reg/expected && bun run reg:compare 2>&1)",
+      "Bash(cd /Users/sugurutakahashi/git/loki-sample && rm -rf packages/ui/.reg && bun run lint 2>&1)",
+      "Bash(cd /Users/sugurutakahashi/git/loki-sample && rm -rf packages/ui/.reg && bun run storybook:reg 2>&1)",
+      "Bash(wc:*)"
     ]
   }
 }

@@ -11,7 +11,7 @@
  * 実行: bun run storybook:vrt
  * リファレンス画像更新: bun run storybook:vrt:update-snapshots:local
  */
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
@@ -35,12 +35,16 @@ for (const story of stories as any[]) {
   test(`${story.title} - ${story.name}`, async ({ page }) => {
     // Storybook の iframe モードでストーリーを単独描画
     await page.goto(`/iframe.html?id=${story.id}&viewMode=story`);
+    const root = page.locator("#storybook-root");
+
     // #storybook-root 内のコンポーネントをスクリーンショット撮影し、リファレンス画像と比較
     // story.title の階層構造をディレクトリとして使用（例: "Components/Badge/Error.png"）
-    // 配列で渡すことで各要素がパスセグメントとなり、実際のディレクトリ階層が作成される
-    await expect(page.locator("#storybook-root")).toHaveScreenshot([
-      ...story.title.split("/"),
-      `${story.name}.png`,
-    ]);
+    const name = [...story.title.split("/"), `${story.name}.png`];
+    await expect(root).toHaveScreenshot(name);
+
+    // reg-cli 用: 同じスクリーンショットを .reg/actual/ にも保存
+    const regPath = join(".reg", "actual", ...name);
+    mkdirSync(dirname(regPath), { recursive: true });
+    await root.screenshot({ path: regPath });
   });
 }
