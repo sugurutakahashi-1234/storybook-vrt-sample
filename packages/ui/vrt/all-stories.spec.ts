@@ -46,7 +46,12 @@ for (const story of stories as any[]) {
     // story.title の階層構造をディレクトリとして使用（例: "Components/Badge/Error.png"）
     const name = [...story.title.split("/"), `${story.name}.png`];
 
-    // reg-cli 用: スクリーンショットを .reg/actual/ に保存
+    // git 管理用: vrt/screenshots/ に保存（変更履歴を追跡）
+    const screenshotPath = join("vrt", "screenshots", ...name);
+    mkdirSync(dirname(screenshotPath), { recursive: true });
+    await root.screenshot({ path: screenshotPath });
+
+    // reg-cli 用: .reg/actual/ に保存（CI での差分比較に使用）
     const regPath = join(".reg", "actual", ...name);
     mkdirSync(dirname(regPath), { recursive: true });
     await root.screenshot({ path: regPath });

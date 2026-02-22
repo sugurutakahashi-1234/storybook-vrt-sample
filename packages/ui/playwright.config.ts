@@ -9,6 +9,9 @@
 import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
+  // テスト実行前にスクリーンショットディレクトリをクリア（削除されたストーリーの残存防止）
+  globalSetup: "./vrt/global-setup.ts",
+
   // テストファイルの配置ディレクトリ
   testDir: "./vrt",
 
