@@ -14,9 +14,10 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "typecheck": "tsc --noEmit",
-    "vrt": "storybook build && bunx playwright test",
+    "vrt:playwright": "storybook build && bunx playwright test",
     "vrt:update-snapshots": "storybook build && node -e \"require('fs').rmSync('vrt/screenshots/'+process.platform,{recursive:true,force:true})\" && bunx playwright test --update-snapshots",
-    "vrt:report": "bunx allure serve allure-results"
+    "vrt:report:allure": "bunx allure serve allure-results",
+    "vrt:report:reg": "mkdir -p .reg/report && reg-cli .reg/actual vrt/screenshots/$(node -p process.platform) .reg/diff -R .reg/report/index.html -J .reg/out.json -M 0.01"
   },
   "dependencies": {
     "clsx": "^2.1.1",

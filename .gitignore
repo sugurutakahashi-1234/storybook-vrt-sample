@@ -33,6 +33,9 @@ allure-report/
 # https://nextjs.org/docs/app/api-reference/config/typescript
 next-env.d.ts
 
+# reg-cli（既存の vrt/screenshots/ e2e/screenshots/ をベースラインとして使用）
+.reg/
+
 # OS 生成ファイル
 .DS_Store
 Thumbs.db

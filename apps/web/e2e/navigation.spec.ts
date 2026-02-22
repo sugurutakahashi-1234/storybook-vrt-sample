@@ -5,6 +5,7 @@
  * スクリーンショット比較で検証する。
  */
 import { expect, test } from "@playwright/test";
+import { expectScreenshot } from "./reg-screenshot";
 
 test.describe("Navigation", () => {
   /** <title> タグが正しく設定されていることを確認 */
@@ -18,7 +19,8 @@ test.describe("Navigation", () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page).toHaveScreenshot("mobile.png", { fullPage: true });
+    // reg-cli 用のスクリーンショットも同時に .reg/actual/ へ保存
+    await expectScreenshot(page, { fullPage: true });
   });
 
   /** タブレット（iPad: 768x1024）でのレスポンシブ表示を検証 */
@@ -26,6 +28,7 @@ test.describe("Navigation", () => {
     await page.setViewportSize({ width: 768, height: 1024 });
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page).toHaveScreenshot("tablet.png", { fullPage: true });
+    // reg-cli 用のスクリーンショットも同時に .reg/actual/ へ保存
+    await expectScreenshot(page, { fullPage: true });
   });
 });

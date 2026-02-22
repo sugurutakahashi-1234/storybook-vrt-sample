@@ -17,6 +17,9 @@ permissions:
   contents: write      # peaceiris/actions-gh-pages が gh-pages に push
   pull-requests: write # PR コメント投稿
 
+env:
+  REPORT_PREFIX: ${{ github.event.pull_request.number && format('pr/{0}', github.event.pull_request.number) || format('manual/{0}', github.run_id) }}
+
 jobs:
   vrt:
     name: Visual Regression Test
@@ -93,7 +96,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: packages/ui/playwright-report
-          destination_dir: vrt/html-report
+          destination_dir: ${{ env.REPORT_PREFIX }}/vrt/html-report
           keep_files: true
 
       # Allure レポートを GitHub Pages にデプロイ（/vrt/allure-report/ 配下）
@@ -103,8 +106,59 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: packages/ui/allure-report
-          destination_dir: vrt/allure-report
+          destination_dir: ${{ env.REPORT_PREFIX }}/vrt/allure-report
           keep_files: true
+
+      # reg-cli: ベースラインと比較してレポート生成（VRT 実行時に .reg/actual/ へ自動保存済み）
+      - name: Run reg-cli comparison
+        if: always()
+        id: reg-result
+        run: |
+          bun run vrt:report:reg || true
+
+          CHANGED=$(jq '.diffItems | length' .reg/out.json)
+          PASSED=$(jq '.passedItems | length' .reg/out.json)
+          NEW=$(jq '.newItems | length' .reg/out.json)
+          DELETED=$(jq '.deletedItems | length' .reg/out.json)
+
+          VRT_TABLE="| Status | Count |
+          |--------|-------|"
+          [ "$CHANGED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
+          | Changed | $CHANGED |"
+          [ "$PASSED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
+          | Passed | $PASSED |"
+          [ "$NEW" -gt 0 ] && VRT_TABLE="$VRT_TABLE
+          | New | $NEW |"
+          [ "$DELETED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
+          | Deleted | $DELETED |"
+
+          echo "vrt-table<<EOF" >> $GITHUB_OUTPUT
+          echo "$VRT_TABLE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        working-directory: packages/ui
+
+      # reg-cli レポートを GitHub Pages にデプロイ
+      - name: Deploy reg-cli report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: packages/ui/.reg/report
+          destination_dir: ${{ env.REPORT_PREFIX }}/vrt/reg-report
+          keep_files: true
+
+      # PR に reg-cli レポートリンクをコメント
+      - name: Comment PR with reg-cli results
+        if: always()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: vrt-reg-report
+          message: |
+            ## Storybook VRT - reg-cli Report
+
+            ${{ steps.reg-result.outputs.vrt-table }}
+
+            **View Report**: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/vrt/reg-report/
 
       # PR にレポートへのリンクをコメント
       - name: Comment PR with report links
@@ -117,8 +171,8 @@ jobs:
 
             | Report | Link |
             |--------|------|
-            | Playwright HTML | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/vrt/html-report/ |
-            | Allure | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/vrt/allure-report/ |
+            | Playwright HTML | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/vrt/html-report/ |
+            | Allure | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/vrt/allure-report/ |
 
             <details>
             <summary>Artifacts</summary>

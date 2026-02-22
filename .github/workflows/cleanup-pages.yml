@@ -1,0 +1,31 @@
+# GitHub Pages クリーンアップワークフロー
+#
+# PR がクローズ（マージ含む）されたら、該当 PR のレポートディレクトリを
+# gh-pages ブランチから削除し、不要なファイルが蓄積するのを防ぐ。
+name: Cleanup GitHub Pages
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+
+      - name: Remove PR directory
+        run: |
+          PR_DIR="pr/${{ github.event.pull_request.number }}"
+          if [ -d "$PR_DIR" ]; then
+            git rm -rf "$PR_DIR"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: cleanup GitHub Pages for PR #${{ github.event.pull_request.number }}"
+            git push
+          fi
