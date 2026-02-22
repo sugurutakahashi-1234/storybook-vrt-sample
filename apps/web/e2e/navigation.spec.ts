@@ -11,7 +11,7 @@ test.describe("Navigation", () => {
   /** <title> タグが正しく設定されていることを確認 */
   test("ページタイトルが正しい", async ({ page }) => {
     await page.goto("/");
-    await expect(page).toHaveTitle(/Loki Sample/);
+    await expect(page).toHaveTitle(/Storybook VRT Sample/);
   });
 
   /** モバイル（iPhone X: 375x812）でのレスポンシブ表示を検証 */

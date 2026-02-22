@@ -1,4 +1,4 @@
-const SITE_NAME = "Loki Sample";
+const SITE_NAME = "Storybook VRT Sample";
 
 /**
  * ページタイトルをサイト名付きでフォーマットする

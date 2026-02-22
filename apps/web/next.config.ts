@@ -7,9 +7,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // モノレポ内の内部パッケージをトランスパイル対象に含める
-  // @loki-sample/ui は TypeScript のソースを直接参照しているため、
+  // @storybook-vrt-sample/ui は TypeScript のソースを直接参照しているため、
   // Next.js のビルド時にトランスパイルが必要
-  transpilePackages: ["@loki-sample/ui"],
+  transpilePackages: ["@storybook-vrt-sample/ui"],
 };
 
 export default nextConfig;

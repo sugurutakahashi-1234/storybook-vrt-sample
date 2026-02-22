@@ -6,7 +6,7 @@
  * Next.js アプリ側でも正しく解決される。
  */
 @import "tailwindcss";
-@import "@loki-sample/ui/styles.css";
+@import "@storybook-vrt-sample/ui/styles.css";
 
 /* UI パッケージのコンポーネントで使われている Tailwind クラスを検出対象に追加 */
 /* Tailwind v4 の自動検出は apps/web 内のみが対象のため、モノレポの別パッケージは明示的に指定が必要 */

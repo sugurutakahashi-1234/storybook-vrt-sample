@@ -4,7 +4,7 @@
  * UI パッケージの共有コンポーネント（Button, Card, Badge）を一覧表示するデモページ。
  * 各コンポーネントのバリアントやサイズを確認できる。
  */
-import { Badge, Button, Card } from "@loki-sample/ui";
+import { Badge, Button, Card } from "@storybook-vrt-sample/ui";
 
 export default function Home() {
   return (

@@ -1,8 +1,8 @@
 /**
- * @loki-sample/ui パッケージのエントリーポイント
+ * @storybook-vrt-sample/ui パッケージのエントリーポイント
  *
  * 共有 UI コンポーネントとその型定義を re-export する。
- * apps/web から import { Button } from "@loki-sample/ui" のように使用される。
+ * apps/web から import { Button } from "@storybook-vrt-sample/ui" のように使用される。
  */
 
 export type { BadgeProps } from "./components/Badge";

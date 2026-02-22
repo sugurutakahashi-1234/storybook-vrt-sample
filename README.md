@@ -18,7 +18,7 @@ Playwright を使ったビジュアルリグレッションテスト（VRT）と
 ## プロジェクト構成
 
 ```
-loki-sample/
+storybook-vrt-sample/
 ├── apps/
 │   └── web/                  # Next.js アプリ + E2E テスト
 ├── packages/

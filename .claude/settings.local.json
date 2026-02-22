@@ -22,10 +22,11 @@
       "Bash(bunx allure:*)",
       "WebFetch(domain:sugurutakahashi-1234.github.io)",
       "Bash(cp -r .reg/actual .reg/expected && bun run reg:compare 2>&1)",
-      "Bash(cd /Users/sugurutakahashi/git/loki-sample && rm -rf packages/ui/.reg && bun run lint 2>&1)",
-      "Bash(cd /Users/sugurutakahashi/git/loki-sample && rm -rf packages/ui/.reg && bun run storybook:reg 2>&1)",
+      "Bash(cd /Users/sugurutakahashi/git/storybook-vrt-sample && rm -rf packages/ui/.reg && bun run lint 2>&1)",
+      "Bash(cd /Users/sugurutakahashi/git/storybook-vrt-sample && rm -rf packages/ui/.reg && bun run storybook:reg 2>&1)",
       "Bash(wc:*)",
-      "Bash(echo All YAML files are valid:*)"
+      "Bash(echo All YAML files are valid:*)",
+      "Bash(bunx knip:*)"
     ]
   }
 }
