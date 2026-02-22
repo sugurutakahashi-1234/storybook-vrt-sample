@@ -9,9 +9,7 @@ import { Badge, Button, Card } from "@storybook-vrt-sample/ui";
 export default function Home() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="mb-8 font-bold text-4xl">
-        Playwright VRT + Storybook Demo
-      </h1>
+      <h1 className="mb-8 font-bold text-4xl">Storybook VRT Sample</h1>
       <p className="mb-12 text-gray-600 text-lg">
         Playwrightを使ったビジュアルリグレッションテスト（VRT）とE2Eテストのサンプルプロジェクトです。
       </p>
