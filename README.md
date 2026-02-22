@@ -80,7 +80,7 @@ bun run test
 
 ```bash
 # VRT テスト実行（Storybook ビルド + スクリーンショット撮影）
-bun run storybook:vrt:playwright
+bun run storybook:vrt
 ```
 
 ### E2E テスト

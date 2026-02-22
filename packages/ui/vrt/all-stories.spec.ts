@@ -14,7 +14,7 @@
  * 前提: テスト実行前に `storybook build` が必要（storybook-static/index.json を参照するため）
  *       package.json の vrt スクリプトにはビルドが組み込み済み。
  *
- * 実行: bun run storybook:vrt:playwright
+ * 実行: bun run vrt:playwright（ルートからは bun run storybook:vrt）
  */
 import { mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
