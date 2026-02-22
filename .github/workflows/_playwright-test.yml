@@ -117,6 +117,22 @@ jobs:
       # レポート生成
       # ────────────────────────────────────────
 
+      # GitHub Pages から共有の Allure 履歴をダウンロードし、allure-results/history/ に配置する。
+      # allure generate が履歴データを自動的に取り込み、トレンドグラフを表示できるようになる。
+      # 初回実行時やページ未デプロイ時は 404 になるが、|| true で無視する。
+      - name: Download previous Allure history
+        if: always()
+        run: |
+          PAGES_BASE="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          HISTORY_URL="${PAGES_BASE}/latest/${{ inputs.test-type }}/allure-history"
+
+          mkdir -p allure-results/history
+
+          for file in history.json history-trend.json categories-trend.json duration-trend.json retry-trend.json; do
+            curl -sSfL "${HISTORY_URL}/${file}" -o "allure-results/history/${file}" || true
+          done
+        working-directory: ${{ inputs.working-directory }}
+
       # allure-results/ から Allure レポートを生成（リッチなテスト結果ビューア）
       - name: Generate Allure report
         if: always()
@@ -199,6 +215,10 @@ jobs:
           cp -r playwright-report/* _gh-pages-staging/${DEST}/html-report/ || true
           cp -r allure-report/* _gh-pages-staging/${DEST}/allure-report/ || true
           cp -r .reg/* _gh-pages-staging/${DEST}/reg-report/ || true
+
+          # Allure 履歴を共有パスにもコピー（全 PR で履歴を共有するため）
+          mkdir -p _gh-pages-staging/latest/${{ inputs.test-type }}/allure-history
+          cp -r allure-report/history/* _gh-pages-staging/latest/${{ inputs.test-type }}/allure-history/ || true
         working-directory: ${{ inputs.working-directory }}
 
       - name: Deploy reports to GitHub Pages
