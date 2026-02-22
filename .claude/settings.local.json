@@ -19,7 +19,8 @@
       "mcp__plugin_web-dev-plugin_chrome-devtools__list_console_messages",
       "mcp__plugin_web-dev-plugin_chrome-devtools__navigate_page",
       "mcp__plugin_web-dev-plugin_chrome-devtools__list_network_requests",
-      "Bash(bunx allure:*)"
+      "Bash(bunx allure:*)",
+      "WebFetch(domain:sugurutakahashi-1234.github.io)"
     ]
   }
 }
