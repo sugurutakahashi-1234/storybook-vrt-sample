@@ -1,7 +1,7 @@
 # GitHub Pages クリーンアップワークフロー
 #
 # PR がクローズ（マージ含む）されたときに gh-pages のサイズをチェックし、
-# 500MB を超えている場合のみ該当 PR のディレクトリを削除する。
+# 800MB を超えている場合は古い PR ディレクトリから順に削除して 800MB 以下にする。
 # レポートは可能な限り残しておき、容量が逼迫した場合にだけクリーンアップする。
 name: Cleanup GitHub Pages
 
@@ -19,31 +19,56 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: gh-pages
+          fetch-depth: 0
 
       - name: Check size and cleanup if needed
         run: |
           SIZE_MB=$(du -sm . 2>/dev/null | cut -f1)
           echo "GitHub Pages total size: ${SIZE_MB}MB"
 
-          PR_DIR="pr/${{ github.event.pull_request.number }}"
-
-          if [ ! -d "$PR_DIR" ]; then
-            echo "PR directory does not exist, nothing to clean up"
+          if [ ! -d "pr" ]; then
+            echo "No PR directories exist, nothing to clean up"
             exit 0
           fi
 
-          PR_SIZE_MB=$(du -sm "$PR_DIR" 2>/dev/null | cut -f1)
-          echo "PR #${{ github.event.pull_request.number }} size: ${PR_SIZE_MB}MB"
-
-          # 500MB 未満なら残しておく
-          if [ "$SIZE_MB" -lt 500 ]; then
-            echo "Total size is under 500MB, keeping PR reports"
+          # 800MB 未満なら残しておく
+          if [ "$SIZE_MB" -lt 800 ]; then
+            echo "Total size is under 800MB, keeping all PR reports"
             exit 0
           fi
 
-          echo "Total size exceeds 500MB, cleaning up PR #${{ github.event.pull_request.number }}"
-          git rm -rf "$PR_DIR"
+          echo "Total size exceeds 800MB, starting cleanup from oldest PR directories..."
+
+          # PR ディレクトリを番号の小さい（古い）順にソートして取得
+          PR_DIRS=$(ls -1d pr/[0-9]* 2>/dev/null | sort -t/ -k2 -n)
+
+          if [ -z "$PR_DIRS" ]; then
+            echo "No PR directories found"
+            exit 0
+          fi
+
+          DELETED=0
+          for DIR in $PR_DIRS; do
+            # 削除途中でサイズを再計算し、800MB 以下なら終了
+            SIZE_MB=$(du -sm . 2>/dev/null | cut -f1)
+            if [ "$SIZE_MB" -lt 800 ]; then
+              echo "Size is now ${SIZE_MB}MB (< 800MB), stopping cleanup"
+              break
+            fi
+
+            PR_NUM=$(basename "$DIR")
+            DIR_SIZE_MB=$(du -sm "$DIR" 2>/dev/null | cut -f1)
+            echo "Removing pr/${PR_NUM} (${DIR_SIZE_MB}MB) - total: ${SIZE_MB}MB"
+            git rm -rf "$DIR"
+            DELETED=$((DELETED + 1))
+          done
+
+          if [ "$DELETED" -eq 0 ]; then
+            echo "No PR directories were removed"
+            exit 0
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: cleanup GitHub Pages for PR #${{ github.event.pull_request.number }} (${SIZE_MB}MB > 500MB)"
+          git commit -m "chore: cleanup ${DELETED} old PR directories from GitHub Pages (was ${SIZE_MB}MB > 800MB)"
           git push
