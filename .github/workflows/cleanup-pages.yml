@@ -1,7 +1,8 @@
 # GitHub Pages クリーンアップワークフロー
 #
-# PR がクローズ（マージ含む）されたら、該当 PR のレポートディレクトリを
-# gh-pages ブランチから削除し、不要なファイルが蓄積するのを防ぐ。
+# PR がクローズ（マージ含む）されたときに gh-pages のサイズをチェックし、
+# 500MB を超えている場合のみ該当 PR のディレクトリを削除する。
+# レポートは可能な限り残しておき、容量が逼迫した場合にだけクリーンアップする。
 name: Cleanup GitHub Pages
 
 on:
@@ -19,13 +20,30 @@ jobs:
         with:
           ref: gh-pages
 
-      - name: Remove PR directory
+      - name: Check size and cleanup if needed
         run: |
+          SIZE_MB=$(du -sm . 2>/dev/null | cut -f1)
+          echo "GitHub Pages total size: ${SIZE_MB}MB"
+
           PR_DIR="pr/${{ github.event.pull_request.number }}"
-          if [ -d "$PR_DIR" ]; then
-            git rm -rf "$PR_DIR"
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git commit -m "chore: cleanup GitHub Pages for PR #${{ github.event.pull_request.number }}"
-            git push
+
+          if [ ! -d "$PR_DIR" ]; then
+            echo "PR directory does not exist, nothing to clean up"
+            exit 0
           fi
+
+          PR_SIZE_MB=$(du -sm "$PR_DIR" 2>/dev/null | cut -f1)
+          echo "PR #${{ github.event.pull_request.number }} size: ${PR_SIZE_MB}MB"
+
+          # 500MB 未満なら残しておく
+          if [ "$SIZE_MB" -lt 500 ]; then
+            echo "Total size is under 500MB, keeping PR reports"
+            exit 0
+          fi
+
+          echo "Total size exceeds 500MB, cleaning up PR #${{ github.event.pull_request.number }}"
+          git rm -rf "$PR_DIR"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: cleanup GitHub Pages for PR #${{ github.event.pull_request.number }} (${SIZE_MB}MB > 500MB)"
+          git push

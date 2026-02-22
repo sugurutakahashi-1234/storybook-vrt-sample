@@ -162,6 +162,33 @@ jobs:
           destination_dir: ${{ env.REPORT_PREFIX }}/e2e/reg-report
           keep_files: true
 
+      # GitHub Pages のディスク使用量をレポート
+      - name: Report disk usage
+        if: always()
+        run: |
+          echo "## GitHub Pages Disk Usage" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # gh-pages ブランチをチェックアウトしてサイズを確認
+          git fetch origin gh-pages --depth=1 2>/dev/null || true
+          if git rev-parse --verify origin/gh-pages >/dev/null 2>&1; then
+            SIZE_MB=$(git archive origin/gh-pages | wc -c | awk '{printf "%.0f", $1/1024/1024}')
+            echo "Current total size: **${SIZE_MB}MB**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            if [ "$SIZE_MB" -gt 800 ]; then
+              echo "### CRITICAL: Near GitHub Pages Limit!" >> $GITHUB_STEP_SUMMARY
+              echo "Size is **${SIZE_MB}MB** (>80% of 1GB limit). Take action immediately!" >> $GITHUB_STEP_SUMMARY
+            elif [ "$SIZE_MB" -gt 500 ]; then
+              echo "### WARNING: Size Limit Alert" >> $GITHUB_STEP_SUMMARY
+              echo "Size is **${SIZE_MB}MB** (>500MB threshold). Old PR reports will be auto-cleaned on PR close." >> $GITHUB_STEP_SUMMARY
+            else
+              echo "Size is within limits." >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "gh-pages branch not found." >> $GITHUB_STEP_SUMMARY
+          fi
+
       # PR にレポートリンクをコメント
       - name: Comment PR with report links
         if: always()
