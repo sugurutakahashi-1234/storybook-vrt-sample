@@ -178,12 +178,3 @@ jobs:
             | reg-cli | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/e2e/reg-report/report/ |
             | Playwright HTML | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/e2e/html-report/ |
             | Allure | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/e2e/allure-report/ |
-
-            <details>
-            <summary>Artifacts</summary>
-
-            GitHub Pages のデプロイに失敗した場合は、Actions の Artifacts からもダウンロードできます。
-            - `e2e-html-report` — Playwright HTML レポート
-            - `e2e-allure-report` — Allure レポート
-
-            </details>
