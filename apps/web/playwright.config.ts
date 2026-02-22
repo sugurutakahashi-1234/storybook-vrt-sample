@@ -9,6 +9,9 @@
 import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
+  // テスト実行前にスクリーンショットディレクトリをクリア（古い画像の残存を防止）
+  globalSetup: "./e2e/global-setup.ts",
+
   // テストファイルの配置ディレクトリ
   testDir: "./e2e",
 

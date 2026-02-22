@@ -1,7 +1,10 @@
 /**
- * reg-cli 用スクリーンショットユーティリティ
+ * スクリーンショットユーティリティ
  *
- * reg-cli 用の .reg/actual/ へのスクリーンショット保存を行う。
+ * スクリーンショットを2箇所に保存する:
+ * - e2e/screenshots/ : git 管理用（変更履歴を追跡）
+ * - .reg/actual/     : reg-cli 比較用（CI でベースラインとの差分検出）
+ *
  * テストファイル名・スクリーンショット名は test.info() から自動生成する。
  */
 import { mkdirSync } from "node:fs";
@@ -27,6 +30,13 @@ export async function takeScreenshot(
     .replace(/-{2,}/g, "-")}-${count}.png`;
 
   const testFile = basename(info.file);
+
+  // git 管理用: e2e/screenshots/ に保存（lefthook で常に最新化される）
+  const screenshotPath = join("e2e", "screenshots", testFile, name);
+  mkdirSync(dirname(screenshotPath), { recursive: true });
+  await target.screenshot({ path: screenshotPath, ...options });
+
+  // reg-cli 用: .reg/actual/ に保存（CI での差分比較に使用）
   const regPath = join(".reg", "actual", testFile, name);
   mkdirSync(dirname(regPath), { recursive: true });
   await target.screenshot({ path: regPath, ...options });
