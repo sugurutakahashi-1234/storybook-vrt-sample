@@ -49,6 +49,9 @@ pre-push:
     # 依存パッケージバージョン整合性チェック（モノレポ内で同一パッケージのバージョンが揃っているか）
     - name: dependency-version-consistency-check
       run: bun syncpack lint
+    # 未使用ファイル・依存関係チェック
+    - name: knip
+      run: bun run knip
     # ユニットテスト（bun test）
     - name: unit-test
       run: bun run test

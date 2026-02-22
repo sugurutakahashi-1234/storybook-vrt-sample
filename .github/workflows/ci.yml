@@ -1,7 +1,7 @@
 # CI ワークフロー
 #
 # 全 PR で自動実行される。
-# リント・フォーマット、型チェック、ユニットテスト、ビルドを検証する。
+# リント・フォーマット、型チェック、未使用コード検出、ユニットテスト、ビルドを検証する。
 name: CI
 
 on:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   ci:
-    name: Lint / Typecheck / Test / Build
+    name: Lint / Typecheck / Knip / Test / Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -24,6 +24,9 @@ jobs:
 
       - name: Type Check
         run: bun run typecheck
+
+      - name: Knip (unused code detection)
+        run: bun run knip
 
       - name: Unit Test
         run: bun run test
