@@ -1,0 +1,30 @@
+# Storybook VRT（ビジュアルリグレッションテスト）ワークフロー
+#
+# packages/ui/ 配下のファイルが変更された PR で自動実行される。
+# Storybook をビルドし、各コンポーネントのスクリーンショットを撮影。
+# PR 時はベースブランチからベースラインを動的生成し、reg-cli で差分レポートを生成する。
+name: Storybook VRT
+
+on:
+  pull_request:
+    branches: [main]
+    # packages/ui/ の変更時のみ実行（apps/web/ のみの変更では不要）
+    paths:
+      - "packages/ui/**"
+  workflow_dispatch:
+
+jobs:
+  vrt:
+    # NOTE: VS Code の GitHub Actions 拡張が "Unable to find reusable workflow" と表示するが、
+    # ローカルの workflow_call を解決できない拡張の既知の制限であり、実際の実行には影響しない。
+    uses: ./.github/workflows/_playwright-test.yml
+    with:
+      test-type: vrt
+      working-directory: packages/ui
+      build-command: bun run build-storybook
+      report-script: vrt:report:reg
+      report-title: 📸 Storybook VRT Report
+    permissions:
+      contents: write
+      pull-requests: write
+    secrets: inherit

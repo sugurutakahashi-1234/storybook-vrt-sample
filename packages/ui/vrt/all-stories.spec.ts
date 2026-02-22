@@ -5,6 +5,12 @@
  * 全ストーリーに対して動的にテストケースを生成する。
  * これにより、新しいストーリーを追加しても VRT テストファイルの変更は不要。
  *
+ * なぜ Playwright テストランナーを使うのか:
+ *   スクリーンショット撮影だけなら Storycap 等の専用ツールや単純な Node スクリプトでも可能だが、
+ *   E2E テスト（apps/web）と同じ Playwright テストランナーを使うことで、
+ *   ブラウザインストール・テスト実行コマンド・レポート出力（HTML / Allure）・CI ワークフローを
+ *   すべて共通化できる（.github/workflows/_playwright-test.yml）。
+ *
  * 前提: テスト実行前に `storybook build` が必要（storybook-static/index.json を参照するため）
  *       package.json の vrt スクリプトにはビルドが組み込み済み。
  *
