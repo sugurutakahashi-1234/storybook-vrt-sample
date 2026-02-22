@@ -90,7 +90,8 @@ jobs:
           cd ${{ inputs.working-directory }}
           ${{ inputs.build-command }}
           bunx playwright test || true
-          cp -r .reg/actual/ $GITHUB_WORKSPACE/${{ inputs.working-directory }}/.reg/expected/
+          mkdir -p $GITHUB_WORKSPACE/${{ inputs.working-directory }}/.reg/expected/
+          cp -r .reg/actual/* $GITHUB_WORKSPACE/${{ inputs.working-directory }}/.reg/expected/ || true
           cd $GITHUB_WORKSPACE
           git worktree remove /tmp/baseline --force
 
