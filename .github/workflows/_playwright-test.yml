@@ -115,26 +115,28 @@ jobs:
       # レポート生成
       # ────────────────────────────────────────
 
-      # GitHub Pages から共有の Allure 履歴をダウンロードし、allure-results/history/ に配置する。
-      # allure generate が履歴データを自動的に取り込み、トレンドグラフを表示できるようになる。
+      # GitHub Pages から Allure 履歴ファイル（JSONL）をダウンロードする。
+      # Allure Report v3 では history/ ディレクトリではなく単一の JSONL ファイルで履歴を管理する。
       # 初回実行時やページ未デプロイ時は 404 になるが、|| true で無視する。
       - name: Download previous Allure history
         if: always()
         run: |
           PAGES_BASE="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
-          HISTORY_URL="${PAGES_BASE}/latest/${{ inputs.test-type }}/allure-history"
-
-          mkdir -p allure-results/history
-
-          for file in history.json history-trend.json categories-trend.json duration-trend.json retry-trend.json; do
-            curl -sSfL "${HISTORY_URL}/${file}" -o "allure-results/history/${file}" || true
-          done
+          HISTORY_URL="${PAGES_BASE}/latest/${{ inputs.test-type }}/allure-history.jsonl"
+          curl -sSfL "${HISTORY_URL}" -o "allure-history.jsonl" || true
         working-directory: ${{ inputs.working-directory }}
 
       # allure-results/ から Allure レポートを生成（リッチなテスト結果ビューア）
+      # --history-path で JSONL 履歴ファイルを指定すると、トレンドグラフが表示される。
+      # appendHistory（デフォルト true）により現在の実行結果が履歴ファイルに追記される。
       - name: Generate Allure report
         if: always()
-        run: rm -rf allure-report && bunx allure generate allure-results -o allure-report
+        run: |
+          HISTORY_OPT=""
+          if [ -f allure-history.jsonl ]; then
+            HISTORY_OPT="--history-path allure-history.jsonl"
+          fi
+          rm -rf allure-report && bunx allure generate allure-results -o allure-report $HISTORY_OPT
         working-directory: ${{ inputs.working-directory }}
 
       # reg-cli: .reg/expected/（ベースライン）と .reg/actual/（現在）を比較し、
@@ -214,9 +216,11 @@ jobs:
           cp -r allure-report/* _gh-pages-staging/${DEST}/allure-report/ || true
           cp -r .reg/* _gh-pages-staging/${DEST}/reg-report/ || true
 
-          # Allure 履歴を共有パスにもコピー（全 PR で履歴を共有するため）
-          mkdir -p _gh-pages-staging/latest/${{ inputs.test-type }}/allure-history
-          cp -r allure-report/history/* _gh-pages-staging/latest/${{ inputs.test-type }}/allure-history/ || true
+          # Allure 履歴ファイル（JSONL）を共有パスにコピー（全 PR で履歴を共有するため）
+          if [ -f allure-history.jsonl ]; then
+            mkdir -p _gh-pages-staging/latest/${{ inputs.test-type }}
+            cp allure-history.jsonl _gh-pages-staging/latest/${{ inputs.test-type }}/allure-history.jsonl
+          fi
         working-directory: ${{ inputs.working-directory }}
 
       # deploy ジョブに渡すためのアーティファクト（ステージング済みディレクトリ一式）

@@ -36,6 +36,9 @@ next-env.d.ts
 # reg-cli
 .reg/
 
+# Playwright MCP（ブラウザ操作ツールの一時ファイル）
+.playwright-mcp/
+
 # OS 生成ファイル
 .DS_Store
 Thumbs.db
