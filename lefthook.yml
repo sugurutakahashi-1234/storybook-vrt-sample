@@ -44,7 +44,7 @@ pre-push:
     - name: bun-version-check
       run: bun run scripts/check-bun-version.ts
     # 依存パッケージバージョン整合性チェック（モノレポ内で同一パッケージのバージョンが揃っているか）
-    - name: dependency-version-consistency-check
+    - name: syncpack
       run: bun syncpack lint
     # 未使用ファイル・依存関係チェック
     - name: knip
@@ -52,3 +52,6 @@ pre-push:
     # ユニットテスト（bun test）
     - name: unit-test
       run: bun run test
+    # E2E テスト（Playwright / Next.js dev サーバーを自動起動して実行）
+    - name: e2e-test
+      run: cd apps/web && bunx playwright test

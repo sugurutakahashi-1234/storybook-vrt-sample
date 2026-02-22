@@ -92,29 +92,10 @@ Next.js アプリに対するシナリオベースのテスト + ページ全体
 bun run web:e2e:playwright
 ```
 
-### ブランチ間のビジュアル比較
-
-ベースブランチ（デフォルト: main）からベースラインを動的生成し、現在のブランチとの差分を reg-cli レポートで確認します。
-スクリーンショットはリポジトリにコミットせず、比較時に毎回生成するため環境差異の問題がありません。
-
-```bash
-# Storybook VRT: current vs main
-bun run storybook:local-vrt-compare
-
-# Storybook VRT: current vs develop
-bun run storybook:local-vrt-compare --base develop
-
-# E2E: current vs main
-bun run e2e:local-vrt-compare
-
-# 両方まとめて
-bun run all:local-vrt-compare
-```
-
 ### reg-cli レポート
 
 テスト実行時にスクリーンショットが `.reg/actual/` に自動保存されます。
-`storybook:local-vrt-compare` / `e2e:local-vrt-compare` を実行すると、ベースブランチのスクリーンショットが `.reg/expected/` に生成され、reg-cli で差分レポートが自動生成されます。
+CI（PR 時）ではベースブランチからベースラインを動的生成し、reg-cli で差分レポートを自動作成して GitHub Pages にデプロイします。
 
 ### Allure レポート
 
