@@ -4,11 +4,14 @@
  * Storybook で描画されたコンポーネントのスクリーンショットを撮影し、
  * リファレンス画像と比較することで意図しない見た目の変更を検出する。
  *
- * 実行: bun run storybook:vrt:playwright
+ * 実行: bun run vrt:playwright（ルートからは bun run storybook:vrt）
  */
 import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
+  // テスト実行前にスクリーンショットディレクトリをクリア（削除されたストーリーの残存防止）
+  globalSetup: "./vrt/global-setup.ts",
+
   // テストファイルの配置ディレクトリ
   testDir: "./vrt",
 

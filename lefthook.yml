@@ -44,7 +44,7 @@ pre-push:
     - name: bun-version-check
       run: bun run scripts/check-bun-version.ts
     # 依存パッケージバージョン整合性チェック（モノレポ内で同一パッケージのバージョンが揃っているか）
-    - name: dependency-version-consistency-check
+    - name: syncpack
       run: bun syncpack lint
     # 未使用ファイル・依存関係チェック
     - name: knip
@@ -52,3 +52,11 @@ pre-push:
     # ユニットテスト（bun test）
     - name: unit-test
       run: bun run test
+    # Storybook VRT（Playwright / Storybook ビルド→スクリーンショット撮影）
+    # スクリーンショットに差分があれば push を失敗させる（コミットし忘れ防止）
+    - name: storybook-test
+      run: bun run storybook:vrt && git diff --quiet packages/ui/vrt/screenshots/ && ! git ls-files --others --exclude-standard packages/ui/vrt/screenshots/ | grep -q . || (echo "VRT スクリーンショットに差分があります。コミットしてから再度 push してください。" && exit 1)
+    # E2E テスト（Playwright / Next.js dev サーバーを自動起動して実行）
+    # スクリーンショットに差分があれば push を失敗させる（コミットし忘れ防止）
+    - name: e2e-test
+      run: bun run e2e && git diff --quiet apps/web/e2e/screenshots/ && ! git ls-files --others --exclude-standard apps/web/e2e/screenshots/ | grep -q . || (echo "E2E スクリーンショットに差分があります。コミットしてから再度 push してください。" && exit 1)

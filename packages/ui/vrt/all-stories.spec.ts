@@ -5,10 +5,16 @@
  * 全ストーリーに対して動的にテストケースを生成する。
  * これにより、新しいストーリーを追加しても VRT テストファイルの変更は不要。
  *
+ * なぜ Playwright テストランナーを使うのか:
+ *   スクリーンショット撮影だけなら Storycap 等の専用ツールや単純な Node スクリプトでも可能だが、
+ *   E2E テスト（apps/web）と同じ Playwright テストランナーを使うことで、
+ *   ブラウザインストール・テスト実行コマンド・レポート出力（HTML / Allure）・CI ワークフローを
+ *   すべて共通化できる（.github/workflows/_playwright-test.yml）。
+ *
  * 前提: テスト実行前に `storybook build` が必要（storybook-static/index.json を参照するため）
  *       package.json の vrt スクリプトにはビルドが組み込み済み。
  *
- * 実行: bun run storybook:vrt:playwright
+ * 実行: bun run vrt:playwright（ルートからは bun run storybook:vrt）
  */
 import { mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -40,7 +46,12 @@ for (const story of stories as any[]) {
     // story.title の階層構造をディレクトリとして使用（例: "Components/Badge/Error.png"）
     const name = [...story.title.split("/"), `${story.name}.png`];
 
-    // reg-cli 用: スクリーンショットを .reg/actual/ に保存
+    // git 管理用: vrt/screenshots/ に保存（変更履歴を追跡）
+    const screenshotPath = join("vrt", "screenshots", ...name);
+    mkdirSync(dirname(screenshotPath), { recursive: true });
+    await root.screenshot({ path: screenshotPath });
+
+    // reg-cli 用: .reg/actual/ に保存（CI での差分比較に使用）
     const regPath = join(".reg", "actual", ...name);
     mkdirSync(dirname(regPath), { recursive: true });
     await root.screenshot({ path: regPath });

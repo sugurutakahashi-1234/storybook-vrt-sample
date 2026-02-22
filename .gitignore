@@ -36,10 +36,6 @@ next-env.d.ts
 # reg-cli
 .reg/
 
-# スクリーンショット（動的生成するためコミットしない）
-**/vrt/screenshots/
-**/e2e/screenshots/
-
 # OS 生成ファイル
 .DS_Store
 Thumbs.db
