@@ -31,12 +31,14 @@ export async function takeScreenshot(
 
   const testFile = basename(info.file);
 
-  // git 管理用: e2e/screenshots/ に保存（lefthook で常に最新化される）
-  const screenshotPath = join("e2e", "screenshots", testFile, name);
-  mkdirSync(dirname(screenshotPath), { recursive: true });
-  await target.screenshot({ path: screenshotPath, ...options });
+  // git 管理用: e2e/screenshots/ に保存（Mac のみ・変更履歴を追跡）
+  if (process.platform === "darwin") {
+    const screenshotPath = join("e2e", "screenshots", testFile, name);
+    mkdirSync(dirname(screenshotPath), { recursive: true });
+    await target.screenshot({ path: screenshotPath, ...options });
+  }
 
-  // reg-cli 用: .reg/actual/ に保存（CI での差分比較に使用）
+  // reg-cli 用: .reg/actual/ に保存（常に実行・CI での差分比較に使用）
   const regPath = join(".reg", "actual", testFile, name);
   mkdirSync(dirname(regPath), { recursive: true });
   await target.screenshot({ path: regPath, ...options });
