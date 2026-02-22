@@ -11,6 +11,7 @@
     "build": "bun run --filter web build",
     "typecheck": "bun run --filter '*' typecheck",
     "storybook": "bun run --filter @loki-sample/ui storybook",
+    "e2e": "bun run --filter web e2e:playwright",
     "knip": "knip",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",

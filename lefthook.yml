@@ -54,4 +54,4 @@ pre-push:
       run: bun run test
     # E2E テスト（Playwright / Next.js dev サーバーを自動起動して実行）
     - name: e2e-test
-      run: cd apps/web && bunx playwright test
+      run: bun run e2e
