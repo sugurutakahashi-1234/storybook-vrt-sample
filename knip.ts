@@ -1,6 +1,7 @@
 import type { KnipConfig } from "knip";
 
 const config: KnipConfig = {
+  ignoreBinaries: ["tar"],
   workspaces: {
     ".": {},
     "apps/web": {
