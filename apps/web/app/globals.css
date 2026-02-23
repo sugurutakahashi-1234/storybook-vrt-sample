@@ -8,6 +8,10 @@
 @import "tailwindcss";
 @import "@storybook-vrt-sample/ui/styles.css";
 
+/* Tailwind CSS v4 でクラスベースのダークモードを有効化 */
+/* UI パッケージの @variant は import 経由で伝搬しないため、アプリ側でも個別に指定が必要 */
+@variant dark (&:where(.dark, .dark *));
+
 /* UI パッケージのコンポーネントで使われている Tailwind クラスを検出対象に追加 */
 /* Tailwind v4 の自動検出は apps/web 内のみが対象のため、モノレポの別パッケージは明示的に指定が必要 */
 @source "../../../packages/ui/src";

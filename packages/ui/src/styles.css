@@ -5,3 +5,7 @@
  * このファイルは Storybook の preview.ts と apps/web の globals.css から参照される。
  */
 @import "tailwindcss";
+
+/* Tailwind CSS v4 でクラスベースのダークモードを有効化 */
+/* html 要素に "dark" クラスが付与されたとき、dark: バリアントが適用される */
+@variant dark (&:where(.dark, .dark *));

@@ -11,8 +11,9 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
 /** バリアントごとの Tailwind CSS クラス定義 */
 const variantStyles: Record<string, string> = {
-  default: "bg-white shadow-md",
-  outlined: "bg-white border border-gray-200",
+  default: "bg-white shadow-md dark:bg-gray-800 dark:shadow-gray-900/50",
+  outlined:
+    "bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700",
 };
 
 /**
@@ -39,11 +40,13 @@ export function Card({
       {...props}
     >
       {header && (
-        <div className="border-gray-100 border-b px-6 py-4 font-semibold text-gray-900">
+        <div className="border-gray-100 border-b px-6 py-4 font-semibold text-gray-900 dark:border-gray-700 dark:text-gray-100">
           {header}
         </div>
       )}
-      <div className="px-6 py-4 text-gray-700">{children}</div>
+      <div className="px-6 py-4 text-gray-700 dark:text-gray-300">
+        {children}
+      </div>
     </div>
   );
 }

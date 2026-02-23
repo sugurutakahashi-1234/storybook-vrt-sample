@@ -4,6 +4,8 @@
  * 全ストーリーに適用されるグローバル設定を定義する。
  * デコレーター、パラメーター、グローバルスタイルの読み込みなど。
  */
+
+import { withThemeByClassName } from "@storybook/addon-themes";
 import type { Preview } from "@storybook/react";
 
 // グローバル CSS を読み込み（Tailwind CSS のベーススタイル）
@@ -11,6 +13,15 @@ import type { Preview } from "@storybook/react";
 import "../src/styles.css";
 
 const preview: Preview = {
+  decorators: [
+    withThemeByClassName({
+      themes: {
+        light: "",
+        dark: "dark",
+      },
+      defaultTheme: "light",
+    }),
+  ],
   parameters: {
     controls: {
       // Storybook Controls パネルの自動マッチング設定

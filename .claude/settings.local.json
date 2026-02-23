@@ -33,7 +33,9 @@
       "mcp__plugin_web-dev-plugin_chrome-devtools__evaluate_script",
       "Bash(bunx vitest:*)",
       "Bash(tail:*)",
-      "mcp__plugin_web-dev-plugin_chrome-devtools__press_key"
+      "mcp__plugin_web-dev-plugin_chrome-devtools__press_key",
+      "WebFetch(domain:heroicons.com)",
+      "WebFetch(domain:lucide.dev)"
     ]
   }
 }

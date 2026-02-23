@@ -17,8 +17,10 @@ export interface TextFieldProps
 
 /** バリアントごとの Tailwind CSS クラス定義 */
 const variantStyles: Record<string, string> = {
-  default: "border-gray-300 bg-white",
-  outlined: "border-gray-400 bg-transparent",
+  default:
+    "border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100",
+  outlined:
+    "border-gray-400 bg-transparent dark:border-gray-500 dark:text-gray-100",
 };
 
 /**
@@ -52,7 +54,10 @@ export function TextField({
   return (
     <div className={cn("flex flex-col gap-1", className)}>
       {label && (
-        <label className="font-medium text-gray-700 text-sm" htmlFor={id}>
+        <label
+          className="font-medium text-gray-700 text-sm dark:text-gray-300"
+          htmlFor={id}
+        >
           {label}
         </label>
       )}
@@ -60,19 +65,28 @@ export function TextField({
         aria-describedby={getAriaDescribedBy()}
         aria-invalid={error ? true : undefined}
         className={cn(
-          "rounded-md border px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50",
-          error ? "border-red-500 focus:ring-red-500" : variantStyles[variant]
+          "rounded-md border px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-gray-900",
+          error
+            ? "border-red-500 focus:ring-red-500 dark:border-red-400"
+            : variantStyles[variant]
         )}
         id={id}
         {...props}
       />
       {error && (
-        <p className="text-red-600 text-sm" id={`${id}-error`} role="alert">
+        <p
+          className="text-red-600 text-sm dark:text-red-400"
+          id={`${id}-error`}
+          role="alert"
+        >
           {error}
         </p>
       )}
       {!error && helperText && (
-        <p className="text-gray-500 text-sm" id={`${id}-helper`}>
+        <p
+          className="text-gray-500 text-sm dark:text-gray-400"
+          id={`${id}-helper`}
+        >
           {helperText}
         </p>
       )}
