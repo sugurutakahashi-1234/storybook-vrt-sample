@@ -57,6 +57,9 @@ pre-push:
     # ユニットテスト（bun test）
     - name: unit-test
       run: bun run test
+    # Storybook コンポーネントテスト（Vitest: Interactions + a11y）
+    - name: storybook-vitest
+      run: bun run --filter @storybook-vrt-sample/ui test:storybook
     # Storybook VRT（Playwright / Storybook ビルド→スクリーンショット撮影）
     # スクリーンショットに差分があれば push を失敗させる（コミットし忘れ防止）
     - name: storybook-test

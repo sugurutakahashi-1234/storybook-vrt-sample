@@ -10,8 +10,7 @@
     "./styles.css": "./src/styles.css"
   },
   "scripts": {
-    "test": "bun run test:unit && bun run test:storybook",
-    "test:unit": "bun test src/",
+    "test": "bun test src/",
     "test:storybook": "vitest run --project=storybook",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
