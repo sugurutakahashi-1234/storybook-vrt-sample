@@ -68,9 +68,27 @@ jobs:
         with:
           bun-version: latest
 
-      # Chromium 等のブラウザバイナリをインストール（--with-deps でシステム依存も含む）
+      # Playwright ブラウザバイナリのキャッシュ（Chromium のみ）
+      # キーに Playwright バージョンを含め、バージョン更新時に自動で再ダウンロードされる
+      - name: Get Playwright version
+        id: pw-version
+        run: echo "version=$(bunx playwright --version | awk '{print $2}')" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw-version.outputs.version }}
+
       - name: Install Playwright browsers
-        run: bunx playwright install --with-deps
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: bunx playwright install --with-deps chromium
+
+      # キャッシュヒット時もシステム依存（libgbm 等）のインストールは必要
+      - name: Install Playwright system dependencies
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: bunx playwright install-deps chromium
 
       # モノレポ全体の依存関係をインストール（lockfile を厳密に使用）
       - name: Install dependencies
