@@ -48,13 +48,18 @@ export default defineConfig({
     // Storybook の URL
     baseURL: "http://localhost:6006",
 
+    // テーマをライトモードに固定（OS のカラースキーム設定への暗黙依存を断ち切り、
+    // スクリーンショットの一貫性を保証する）
+    colorScheme: "light",
+
     // テスト失敗時の自動スクリーンショットは無効（VRT 自体がスクリーンショット比較のため不要）
     screenshot: "off",
   },
 
   // ビルド済み Storybook を http-server で配信（index.json の読み取りにビルドが必要）
   webServer: {
-    command: "bunx http-server storybook-static --port 6006 --silent",
+    command:
+      "PLAYWRIGHT=1 bunx http-server storybook-static --port 6006 --silent",
     url: "http://localhost:6006",
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,

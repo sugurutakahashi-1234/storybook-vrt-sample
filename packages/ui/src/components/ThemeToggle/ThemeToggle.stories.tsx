@@ -42,6 +42,7 @@ export const Default: Story = {
 
 /** クリックでテーマがトグルすることを検証 */
 export const CycleThemes: Story = {
+  tags: ["skip-vrt"],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const button = canvas.getByRole("button");

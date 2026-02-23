@@ -48,6 +48,10 @@ export default defineConfig({
     // Next.js dev サーバーの URL
     baseURL: "http://localhost:3000",
 
+    // テーマをライトモードに固定（layout.tsx の FOUC 防止スクリプトが
+    // prefers-color-scheme を参照するため、明示的に設定してテスト間の一貫性を保証）
+    colorScheme: "light",
+
     // テスト失敗時の自動スクリーンショットは無効（E2E テスト内で明示的に撮影するため不要）
     screenshot: "off",
   },
@@ -55,7 +59,7 @@ export default defineConfig({
   // テスト実行前に Next.js dev サーバーを自動起動する設定
   webServer: {
     // Next.js を Turbopack モードで起動（ルートの bun run dev 経由）
-    command: "bun run dev",
+    command: "PLAYWRIGHT=1 bun run dev",
     url: "http://localhost:3000",
 
     // ローカルでは既に起動済みのサーバーを再利用（開発効率向上）
