@@ -41,6 +41,12 @@ for (const story of stories as any[]) {
   test(`${story.title} - ${story.name}`, async ({ page }) => {
     // Storybook の iframe モードでストーリーを単独描画
     await page.goto(`/iframe.html?id=${story.id}&viewMode=story`);
+
+    // #storybook-root を inline-block にしてコンポーネントサイズにフィットさせる
+    // デフォルトは display:block（全幅）のため、小さなコンポーネントでも大きな空白が入ってしまう
+    await page.addStyleTag({
+      content: "#storybook-root { display: inline-block; }",
+    });
     const root = page.locator("#storybook-root");
 
     // #storybook-root 内のコンポーネントをスクリーンショット撮影

@@ -172,17 +172,17 @@ jobs:
           NEW=$(jq '.newItems | length' .reg/out.json)
           DELETED=$(jq '.deletedItems | length' .reg/out.json)
 
-          # PR コメント用のサマリーテーブルを組み立て（件数が 0 のカテゴリは省略）
+          # PR コメント用のサマリーテーブルを組み立て（reg-cli レポートと同じ順序、件数 0 は省略）
           VRT_TABLE="| Status | Count |
           |--------|-------|"
-          [ "$PASSED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
-          | ✅ Unchanged | $PASSED |"
           [ "$CHANGED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
-          | 🔄 Changed | $CHANGED |"
+          | ⚠️ Changed | $CHANGED |"
           [ "$NEW" -gt 0 ] && VRT_TABLE="$VRT_TABLE
-          | ✨ New | $NEW |"
+          | 🆕 New | $NEW |"
           [ "$DELETED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
           | 🗑️ Deleted | $DELETED |"
+          [ "$PASSED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
+          | ✅ Passed | $PASSED |"
 
           # GITHUB_OUTPUT にヒアドキュメントで出力（複数行対応）
           echo "vrt-table<<EOF" >> $GITHUB_OUTPUT
