@@ -14,7 +14,8 @@ export { Button } from "./components/Button";
 export type { CardProps } from "./components/Card";
 // Card コンポーネント: Default（シャドウ）/ Outlined（ボーダー）の2バリアント
 export { Card } from "./components/Card";
+export type { TextFieldProps } from "./components/TextField";
+// TextField コンポーネント: ラベル、エラー、ヘルパーテキスト対応の入力フィールド
+export { TextField } from "./components/TextField";
 // ユーティリティ: クラス名結合（clsx + tailwind-merge）
 export { cn } from "./utils/cn";
-// ユーティリティ: カウント表示フォーマット
-export { formatCount } from "./utils/format-count";

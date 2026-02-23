@@ -22,6 +22,13 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    // アクセシビリティチェックのグローバル設定
+    // コンポーネント単位のストーリーでは landmark region が存在しないため無効化
+    a11y: {
+      config: {
+        rules: [{ id: "region", enabled: false }],
+      },
+    },
   },
 };
 

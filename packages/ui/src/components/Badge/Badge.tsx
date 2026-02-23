@@ -1,6 +1,6 @@
 import { cn } from "@ui/utils/cn";
-import { formatCount } from "@ui/utils/format-count";
 import type { HTMLAttributes } from "react";
+import { formatCount } from "./format-count";
 
 /** Badge コンポーネントの Props */
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {

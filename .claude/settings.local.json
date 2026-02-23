@@ -26,7 +26,12 @@
       "Bash(cd /Users/sugurutakahashi/git/storybook-vrt-sample && rm -rf packages/ui/.reg && bun run storybook:reg 2>&1)",
       "Bash(wc:*)",
       "Bash(echo All YAML files are valid:*)",
-      "Bash(bunx knip:*)"
+      "Bash(bunx knip:*)",
+      "WebFetch(domain:lefthook.dev)",
+      "mcp__plugin_web-dev-plugin_chrome-devtools__click",
+      "mcp__plugin_web-dev-plugin_chrome-devtools__wait_for",
+      "mcp__plugin_web-dev-plugin_chrome-devtools__evaluate_script",
+      "Bash(bunx vitest:*)"
     ]
   }
 }

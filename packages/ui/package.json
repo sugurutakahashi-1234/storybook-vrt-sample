@@ -10,15 +10,17 @@
     "./styles.css": "./src/styles.css"
   },
   "scripts": {
-    "test": "bun test src/",
+    "test": "bun run test:unit && bun run test:storybook",
+    "test:unit": "bun test src/",
+    "test:storybook": "vitest run --project=storybook",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "typecheck": "tsc --noEmit",
-    "vrt:playwright": "storybook build && bunx playwright test",
+    "vrt:snapshot": "storybook build && bunx playwright test",
     "vrt:report:allure": "bunx allure serve allure-results",
     "vrt:report:reg": "mkdir -p .reg/report .reg/expected && reg-cli .reg/actual .reg/expected .reg/diff -R .reg/report/index.html -J .reg/out.json -M 0.01",
     "vrt:baseline:local": "rm -rf .reg/expected && mkdir -p .reg/expected && (git -C $(git rev-parse --show-toplevel) archive $(git merge-base HEAD main):packages/ui/vrt/screenshots/ 2>/dev/null | tar -x -C .reg/expected/ || true)",
-    "vrt:report:reg:local": "bun run vrt:baseline:local && bun run vrt:playwright && bun run vrt:report:reg"
+    "vrt:report:reg:local": "bun run vrt:baseline:local && bun run vrt:snapshot && bun run vrt:report:reg"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -28,15 +30,22 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
+    "@storybook/addon-a11y": "^10.2.10",
+    "@storybook/addon-docs": "^10.2.10",
+    "@storybook/addon-vitest": "^10.2.10",
     "@storybook/react": "^10.2.10",
     "@storybook/react-vite": "^10.2.10",
     "@tailwindcss/vite": "^4.2.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vitest/browser-playwright": "^4.0.18",
+    "@vitest/coverage-v8": "^4.0.18",
     "allure-playwright": "^3.4.5",
+    "playwright": "^1.58.2",
     "reg-cli": "^0.18.14",
     "storybook": "^10.2.10",
     "tailwindcss": "^4.2.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

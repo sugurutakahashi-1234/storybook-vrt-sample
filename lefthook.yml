@@ -60,7 +60,7 @@ pre-push:
     # Storybook VRT（Playwright / Storybook ビルド→スクリーンショット撮影）
     # スクリーンショットに差分があれば push を失敗させる（コミットし忘れ防止）
     - name: storybook-test
-      run: bun run storybook:vrt && git diff --quiet packages/ui/vrt/screenshots/ && ! git ls-files --others --exclude-standard packages/ui/vrt/screenshots/ | grep -q . || (echo "VRT スクリーンショットに差分があります。コミットしてから再度 push してください。" && exit 1)
+      run: bun run storybook:vrt:snapshot && git diff --quiet packages/ui/vrt/screenshots/ && ! git ls-files --others --exclude-standard packages/ui/vrt/screenshots/ | grep -q . || (echo "VRT スクリーンショットに差分があります。コミットしてから再度 push してください。" && exit 1)
     # E2E テスト（Playwright / Next.js dev サーバーを自動起動して実行）
     # スクリーンショットに差分があれば push を失敗させる（コミットし忘れ防止）
     - name: e2e-test

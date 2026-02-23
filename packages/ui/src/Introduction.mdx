@@ -1,0 +1,84 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Introduction" />
+
+# Storybook VRT Sample — UI コンポーネントライブラリ
+
+このプロジェクトは、Storybook を活用した **ビジュアルリグレッションテスト（VRT）**、**インタラクションテスト**、**アクセシビリティテスト** のサンプル実装です。
+
+## コンポーネント一覧
+
+<table>
+  <thead>
+    <tr>
+      <th>コンポーネント</th>
+      <th>説明</th>
+      <th>バリアント</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Button</strong></td>
+      <td>汎用ボタン</td>
+      <td>Primary / Secondary / Danger、3サイズ（sm / md / lg）</td>
+    </tr>
+    <tr>
+      <td><strong>Card</strong></td>
+      <td>コンテンツカード</td>
+      <td>Default（シャドウ）/ Outlined（ボーダー）</td>
+    </tr>
+    <tr>
+      <td><strong>Badge</strong></td>
+      <td>ステータスラベル</td>
+      <td>Info / Success / Warning / Error</td>
+    </tr>
+    <tr>
+      <td><strong>TextField</strong></td>
+      <td>テキスト入力フィールド</td>
+      <td>Default / Outlined、ラベル・エラー・ヘルパーテキスト対応</td>
+    </tr>
+  </tbody>
+</table>
+
+## テスト機能
+
+### インタラクションテスト（play 関数）
+
+各ストーリーの `play` 関数で、ユーザー操作をシミュレートしたテストを実行します。
+
+- **Button/Primary**: クリック → `onClick` コールバックの呼び出しを検証
+- **Button/Disabled**: `disabled` 属性の設定を検証
+- **Badge/Info**: テキストの表示を検証
+- **TextField/Default**: テキスト入力 → 値の反映を検証
+- **TextField/WithError**: エラーメッセージと `aria-invalid` 属性を検証
+- **TextField/Disabled**: 入力不可状態を検証
+
+下部パネルの **Interactions** タブでテスト結果を確認できます。
+
+### アクセシビリティテスト（addon-a11y）
+
+[axe-core](https://github.com/dequelabs/axe-core) をベースにしたアクセシビリティチェックが全ストーリーで自動実行されます。
+
+下部パネルの **Accessibility** タブで Violations / Passes / Inconclusive の結果を確認できます。
+
+### Testing widget（addon-vitest）
+
+サイドバー左下の **Testing widget** から全ストーリーのテストを一括実行できます。
+各ストーリー名の横に表示されるチェックマークで、テストの成功/失敗が一目で分かります。
+
+### ビジュアルリグレッションテスト（VRT）
+
+Playwright でストーリーのスクリーンショットを撮影し、`reg-cli` で差分比較を行います。
+
+```bash
+bun run vrt:snapshot          # スクリーンショット撮影
+bun run vrt:report:reg:local  # main ブランチとの差分レポート生成
+```
+
+## 技術スタック
+
+- **Storybook 10** — コンポーネントカタログ & テスト基盤
+- **React 19** + **Tailwind CSS v4** — UI 実装
+- **Vitest 4** + **Playwright** — コンポーネントテスト実行
+- **axe-core** — アクセシビリティ検証
+- **reg-cli** — スクリーンショット差分比較
