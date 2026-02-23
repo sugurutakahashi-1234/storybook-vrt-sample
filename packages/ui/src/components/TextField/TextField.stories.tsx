@@ -35,6 +35,10 @@ export const Default: Story = {
     // テキストを入力し、値が反映されることを検証
     await userEvent.type(input, "Hello, World!");
     await expect(input).toHaveValue("Hello, World!");
+
+    // VRT スクリーンショットの安定化: 入力をクリアしてフォーカスを外す
+    await userEvent.clear(input);
+    input.blur();
   },
 };
 
