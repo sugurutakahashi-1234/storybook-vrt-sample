@@ -4,7 +4,7 @@
  * Storybook で描画されたコンポーネントのスクリーンショットを撮影し、
  * リファレンス画像と比較することで意図しない見た目の変更を検出する。
  *
- * 実行: bun run vrt:playwright（ルートからは bun run storybook:vrt）
+ * 実行: bun run vrt:snapshot（ルートからは bun run storybook:vrt:snapshot）
  */
 import { defineConfig } from "@playwright/test";
 

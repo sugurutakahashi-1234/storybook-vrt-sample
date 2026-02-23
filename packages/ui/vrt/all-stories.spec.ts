@@ -14,7 +14,7 @@
  * 前提: テスト実行前に `storybook build` が必要（storybook-static/index.json を参照するため）
  *       package.json の vrt スクリプトにはビルドが組み込み済み。
  *
- * 実行: bun run vrt:playwright（ルートからは bun run storybook:vrt）
+ * 実行: bun run vrt:snapshot（ルートからは bun run storybook:vrt:snapshot）
  */
 import { mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -30,8 +30,9 @@ const indexJson = JSON.parse(
 );
 
 // type === "story" のエントリのみ抽出（docs エントリはスクリーンショット不要）
+// "skip-vrt" タグ付きストーリーは VRT 対象外（play 関数で DOM が変化しスクリーンショットが不安定なため）
 const stories = Object.values(indexJson.entries).filter(
-  (entry: any) => entry.type === "story"
+  (entry: any) => entry.type === "story" && !entry.tags?.includes("skip-vrt")
 );
 
 // 各ストーリーに対してテストケースを動的生成
@@ -40,6 +41,12 @@ for (const story of stories as any[]) {
   test(`${story.title} - ${story.name}`, async ({ page }) => {
     // Storybook の iframe モードでストーリーを単独描画
     await page.goto(`/iframe.html?id=${story.id}&viewMode=story`);
+
+    // #storybook-root を inline-block にしてコンポーネントサイズにフィットさせる
+    // デフォルトは display:block（全幅）のため、小さなコンポーネントでも大きな空白が入ってしまう
+    await page.addStyleTag({
+      content: "#storybook-root { display: inline-block; }",
+    });
     const root = page.locator("#storybook-root");
 
     // #storybook-root 内のコンポーネントをスクリーンショット撮影

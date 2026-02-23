@@ -25,12 +25,15 @@ test.describe("Home Page", () => {
     await takeScreenshot(page, { fullPage: true });
   });
 
-  /** Button / Card / Badge の全セクション見出しが表示されていることを確認 */
+  /** Button / Card / Badge / TextField の全セクション見出しが表示されていることを確認 */
   test("全セクションが表示される", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { name: "Button" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Card" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Badge" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "TextField" })
+    ).toBeVisible();
   });
 
   /** UI パッケージの Button コンポーネントが正しくレンダリングされていることを確認 */

@@ -23,6 +23,8 @@ blob-report/
 # Allure レポート
 allure-results/
 allure-report/
+# Vitest カバレッジ出力
+coverage/
 
 # 環境変数（機密情報を含むためコミットしない）
 .env

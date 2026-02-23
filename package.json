@@ -12,7 +12,7 @@
     "typecheck": "bun run --filter '*' typecheck",
     "storybook": "bun run --filter @storybook-vrt-sample/ui storybook",
     "e2e": "bun run --filter web e2e:playwright",
-    "storybook:vrt": "bun run --filter @storybook-vrt-sample/ui vrt:playwright",
+    "storybook:vrt:snapshot": "bun run --filter @storybook-vrt-sample/ui vrt:snapshot",
     "knip": "knip",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",

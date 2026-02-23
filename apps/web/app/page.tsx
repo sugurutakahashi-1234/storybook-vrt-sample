@@ -4,7 +4,7 @@
  * UI パッケージの共有コンポーネント（Button, Card, Badge）を一覧表示するデモページ。
  * 各コンポーネントのバリアントやサイズを確認できる。
  */
-import { Badge, Button, Card } from "@storybook-vrt-sample/ui";
+import { Badge, Button, Card, TextField } from "@storybook-vrt-sample/ui";
 
 export default function Home() {
   return (
@@ -50,6 +50,21 @@ export default function Home() {
           <Badge variant="success">Success</Badge>
           <Badge variant="warning">Warning</Badge>
           <Badge variant="error">Error</Badge>
+        </div>
+      </section>
+
+      {/* TextField コンポーネントのデモ: Default / WithLabel / WithError / Disabled */}
+      <section className="mb-12">
+        <h2 className="mb-4 font-semibold text-2xl">TextField</h2>
+        <div className="grid gap-6 md:grid-cols-2">
+          <TextField placeholder="Default text field" />
+          <TextField label="Username" placeholder="Enter username..." />
+          <TextField
+            defaultValue="invalid-email"
+            error="Invalid email address"
+            label="Email"
+          />
+          <TextField disabled label="Disabled" placeholder="Cannot type here" />
         </div>
       </section>
     </main>

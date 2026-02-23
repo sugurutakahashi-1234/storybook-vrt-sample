@@ -11,7 +11,15 @@ import tailwindcss from "@tailwindcss/vite";
 const config: StorybookConfig = {
   // ストーリーファイルの探索パターン
   // src/ 配下の全 .stories.ts/.stories.tsx ファイルを対象とする
-  stories: ["../src/**/*.stories.@(ts|tsx)"],
+  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(ts|tsx)"],
+
+  // アドオン設定
+  // addon-a11y: アクセシビリティチェック（axe-core ベース）を Storybook UI に統合
+  addons: [
+    "@storybook/addon-docs",
+    "@storybook/addon-a11y",
+    "@storybook/addon-vitest",
+  ],
 
   // React + Vite をビルドフレームワークとして使用
   framework: "@storybook/react-vite",

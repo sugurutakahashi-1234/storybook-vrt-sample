@@ -11,6 +11,8 @@ const config: KnipConfig = {
     },
     "packages/ui": {
       entry: ["src/**/*.test.ts!"],
+      // vitest --coverage 実行時に動的ロードされるため knip では検出不可
+      ignoreDependencies: ["@vitest/coverage-v8"],
     },
   },
 };
