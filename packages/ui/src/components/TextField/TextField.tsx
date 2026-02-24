@@ -41,14 +41,12 @@ export const TextField = ({
   const generatedId = useId();
   const id = externalId ?? generatedId;
 
-  const getAriaDescribedBy = () => {
-    if (error) {
-      return `${id}-error`;
-    }
-    if (helperText) {
-      return `${id}-helper`;
-    }
-  };
+  let ariaDescribedBy: string | undefined;
+  if (error) {
+    ariaDescribedBy = `${id}-error`;
+  } else if (helperText) {
+    ariaDescribedBy = `${id}-helper`;
+  }
 
   return (
     <div className={cn("flex flex-col gap-1", className)}>
@@ -58,7 +56,7 @@ export const TextField = ({
         </label>
       )}
       <input
-        aria-describedby={getAriaDescribedBy()}
+        aria-describedby={ariaDescribedBy}
         aria-invalid={error ? true : undefined}
         className={cn(
           "rounded-md border px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-ring-offset disabled:cursor-not-allowed disabled:opacity-50",

@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
 
   // E2E テスト時のみデバッグインジケータ（画面右下のバッジ）を無効化
   // Playwright が webServer 経由で dev サーバーを起動する際に PLAYWRIGHT=1 を設定する
-  ...(process.env.PLAYWRIGHT && { devIndicators: false as const }),
+  ...(process.env["PLAYWRIGHT"] && { devIndicators: false as const }),
 };
 
 export default nextConfig;

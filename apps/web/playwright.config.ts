@@ -22,13 +22,13 @@ export default defineConfig({
   fullyParallel: true,
 
   // CI 環境では .only の使用を禁止（テストの実行漏れを防止）
-  forbidOnly: !!process.env.CI,
+  forbidOnly: !!process.env["CI"],
 
   // CI 環境ではフレーキーテスト対策として最大2回リトライ、ローカルではリトライしない
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env["CI"] ? 2 : 0,
 
   // CI 環境では安定性のため1ワーカーに制限、ローカルはCPUに合わせて自動
-  ...(process.env.CI ? { workers: 1 } : {}),
+  ...(process.env["CI"] ? { workers: 1 } : {}),
 
   // テスト結果レポーター
   // - HTML: playwright-report/ に生成（標準レポート）
@@ -71,7 +71,7 @@ export default defineConfig({
 
     // ローカルでは既に起動済みのサーバーを再利用（開発効率向上）
     // CI では常に新規起動（クリーンな環境を保証）
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !process.env["CI"],
 
     // dev サーバーの起動待ちタイムアウト（2分）
     timeout: 120_000,
