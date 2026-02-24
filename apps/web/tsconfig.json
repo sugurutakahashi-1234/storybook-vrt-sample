@@ -5,12 +5,6 @@
     // Next.js の TypeScript プラグイン（型安全なルーティング等を提供）
     "plugins": [{ "name": "next" }],
 
-    // ESNext モジュール（Next.js が処理するため ESNext のまま）
-    "module": "ESNext",
-
-    // バンドラー向けモジュール解決（Next.js のビルドシステムと連携）
-    "moduleResolution": "bundler",
-
     // Next.js が独自に JSX を処理するため preserve を指定
     "jsx": "preserve",
 
@@ -22,8 +16,7 @@
     "paths": {
       "@/*": ["./app/*"],
       "@ui/*": ["../../packages/ui/src/*"]
-    },
-    "strictNullChecks": true
+    }
   },
   // コンパイル対象のファイル
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

@@ -4,7 +4,6 @@
   "compilerOptions": {
     // ビルド出力先ディレクトリ
     "outDir": "./dist",
-    "strictNullChecks": true,
     // パスエイリアス: 深い相対パスを避ける
     "paths": {
       "@ui/*": ["./src/*"]

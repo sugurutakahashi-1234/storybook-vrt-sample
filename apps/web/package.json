@@ -8,7 +8,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsgo --noEmit",
     "e2e:playwright": "bunx playwright test",
     "e2e:report:allure": "bunx allure serve allure-results",
     "e2e:report:reg": "mkdir -p .reg/report .reg/expected && reg-cli .reg/actual .reg/expected .reg/diff -R .reg/report/index.html -J .reg/out.json -M 0.01",

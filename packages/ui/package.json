@@ -14,7 +14,7 @@
     "test:storybook": "vitest run --project=storybook",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsgo --noEmit",
     "vrt:snapshot": "storybook build --test && playwright test",
     "vrt:report:allure": "bunx allure serve allure-results",
     "vrt:report:reg": "mkdir -p .reg/report .reg/expected && reg-cli .reg/actual .reg/expected .reg/diff -R .reg/report/index.html -J .reg/out.json -M 0.01",

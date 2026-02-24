@@ -47,7 +47,7 @@ pre-push:
     # Oxlint + Oxfmt によるリント + フォーマットチェック（修正なし、CI と同等）
     - name: lint-check
       run: bun run lint
-    # TypeScript 型チェック（tsc --noEmit）
+    # TypeScript 型チェック（tsgo --noEmit）
     - name: typecheck
       run: bun run typecheck
     # Next.js ビルド

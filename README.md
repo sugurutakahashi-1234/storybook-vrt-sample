@@ -13,7 +13,7 @@ Playwright を使ったビジュアルリグレッションテスト（VRT）と
 | Tailwind CSS v4 | スタイリング                                                       |
 | Oxlint + Oxfmt  | リンター + フォーマッター                                          |
 | bun             | パッケージマネージャー + モノレポ管理                              |
-| TypeScript      | 型安全性                                                           |
+| TypeScript      | 型安全性（tsgo による高速型チェック）                              |
 
 ## プロジェクト構成
 

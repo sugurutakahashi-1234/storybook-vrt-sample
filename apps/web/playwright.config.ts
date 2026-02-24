@@ -28,7 +28,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
 
   // CI 環境では安定性のため1ワーカーに制限、ローカルはCPUに合わせて自動
-  workers: process.env.CI ? 1 : undefined,
+  ...(process.env.CI ? { workers: 1 } : {}),
 
   // テスト結果レポーター
   // - HTML: playwright-report/ に生成（標準レポート）
