@@ -1,4 +1,13 @@
 {
+  // ==============================
+  // モノレポ共通ベース TypeScript 設定（tsgo --init デフォルト準拠）
+  // ==============================
+  // - このファイルは tsgo --init の出力をベースにしている
+  // - strict 系オプションを緩める変更は禁止（型安全性が低下する）
+  // - Style Options は oxlint / oxfmt に委譲しているため有効化しない
+  // - 各ワークスペース（apps/web, packages/ui）は extends で継承し、
+  //   バンドラー固有の設定のみ上書きする
+  //
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
@@ -21,10 +30,12 @@
     "declarationMap": true,
 
     // Stricter Typechecking Options
+    // ※ 以下のオプションを false にしたり削除しないこと（型安全性の低下に直結する）
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
 
-    // Style Options（oxlint / oxfmt に委譲）
+    // Style Options（oxlint / oxfmt に委譲するため有効化しない）
+    // ※ 有効化すると oxlint ルール（no-useless-return 等）と競合するため、コメントアウトのまま維持すること
     // "noImplicitReturns": true,
     // "noImplicitOverride": true,
     // "noUnusedLocals": true,
@@ -33,6 +44,7 @@
     // "noPropertyAccessFromIndexSignature": true,
 
     // Recommended Options
+    // ※ 以下のオプションを false にしたり削除しないこと
     "strict": true,
     "jsx": "react-jsx",
     "verbatimModuleSyntax": true,

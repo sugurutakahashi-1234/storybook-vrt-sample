@@ -1,4 +1,11 @@
 {
+  // ==============================
+  // packages/ui 用 TypeScript 設定
+  // ==============================
+  // - ルートの tsconfig.json を継承し、バンドラー固有の設定のみ上書きする
+  // - ルートの strict 系オプションを緩める変更は禁止（型安全性が低下する）
+  // - include は src/ のみ。設定ファイル（playwright.config.ts 等）は対象外だが、
+  //   VS Code の Language Server で型チェックされる
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     // バンドラー環境向けにモジュール設定を上書き（Vite / Storybook）
