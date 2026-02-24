@@ -19,7 +19,7 @@
     "check": "ultracite check",
     "fix": "ultracite fix",
     "ci": "bun run fix && bun run --parallel typecheck test knip && bun run build",
-    "clean": "rm -rf bun.lock node_modules apps/*/node_modules packages/*/node_modules apps/*/.next packages/*/storybook-static dist coverage *.tsbuildinfo",
+    "clean": "rm -rf bun.lock node_modules apps/*/node_modules packages/*/node_modules apps/*/.next packages/*/storybook-static dist coverage *.tsbuildinfo .reg apps/*/.reg packages/*/.reg apps/*/allure-results packages/*/allure-results allure-report apps/*/playwright-report packages/*/playwright-report apps/*/test-results packages/*/test-results blob-report .oxc_cache",
     "clean:install": "bun run clean && bun install",
     "clean:build": "bun run clean:install && bun run ci",
     "prepare": "lefthook install",
