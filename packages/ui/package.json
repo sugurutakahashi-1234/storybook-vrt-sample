@@ -19,7 +19,8 @@
     "vrt:report:allure": "bunx allure serve allure-results",
     "vrt:report:reg": "mkdir -p .reg/report .reg/expected && reg-cli .reg/actual .reg/expected .reg/diff -R .reg/report/index.html -J .reg/out.json -M 0.01",
     "vrt:baseline:local": "rm -rf .reg/expected && mkdir -p .reg/expected && (git -C $(git rev-parse --show-toplevel) archive $(git merge-base HEAD main):packages/ui/vrt/screenshots/ 2>/dev/null | tar -x -C .reg/expected/ || true)",
-    "vrt:report:reg:local": "bun run vrt:baseline:local && bun run vrt:snapshot && bun run vrt:report:reg"
+    "vrt:report:reg:local": "bun run vrt:baseline:local && bun run vrt:snapshot && bun run vrt:report:reg",
+    "deps:update": "bun update --latest"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -35,7 +36,7 @@
     "@storybook/addon-vitest": "^10.2.10",
     "@storybook/react": "^10.2.10",
     "@storybook/react-vite": "^10.2.10",
-    "@tailwindcss/vite": "^4.2.0",
+    "@tailwindcss/vite": "^4.2.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitest/browser-playwright": "^4.0.18",
@@ -45,7 +46,7 @@
     "playwright": "^1.58.2",
     "reg-cli": "^0.18.14",
     "storybook": "^10.2.10",
-    "tailwindcss": "^4.2.0",
+    "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   }

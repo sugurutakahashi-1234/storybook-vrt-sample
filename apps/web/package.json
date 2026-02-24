@@ -13,7 +13,8 @@
     "e2e:report:allure": "bunx allure serve allure-results",
     "e2e:report:reg": "mkdir -p .reg/report .reg/expected && reg-cli .reg/actual .reg/expected .reg/diff -R .reg/report/index.html -J .reg/out.json -M 0.01",
     "e2e:baseline:local": "rm -rf .reg/expected && mkdir -p .reg/expected && (git -C $(git rev-parse --show-toplevel) archive $(git merge-base HEAD main):apps/web/e2e/screenshots/ 2>/dev/null | tar -x -C .reg/expected/ || true)",
-    "e2e:report:reg:local": "bun run e2e:baseline:local && bun run e2e:playwright && bun run e2e:report:reg"
+    "e2e:report:reg:local": "bun run e2e:baseline:local && bun run e2e:playwright && bun run e2e:report:reg",
+    "deps:update": "bun update --latest"
   },
   "dependencies": {
     "@storybook-vrt-sample/ui": "workspace:*",
@@ -23,14 +24,14 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
-    "@tailwindcss/postcss": "^4.2.0",
+    "@tailwindcss/postcss": "^4.2.1",
     "@types/node": "^25.3.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "allure-playwright": "^3.4.5",
     "postcss": "^8.5.6",
     "reg-cli": "^0.18.14",
-    "tailwindcss": "^4.2.0",
+    "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3"
   }
 }
