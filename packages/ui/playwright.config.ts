@@ -19,13 +19,13 @@ export default defineConfig({
   fullyParallel: true,
 
   // CI 環境では .only の使用を禁止（テストの実行漏れを防止）
-  forbidOnly: !!process.env["CI"],
+  forbidOnly: !!process.env.CI,
 
   // CI 環境ではフレーキーテスト対策として最大2回リトライ、ローカルではリトライしない
-  retries: process.env["CI"] ? 2 : 0,
+  retries: process.env.CI ? 2 : 0,
 
   // CI 環境ではスクリーンショットの一貫性のため1ワーカーに制限、ローカルはCPUに合わせて自動
-  workers: process.env["CI"] ? 1 : undefined,
+  workers: process.env.CI ? 1 : undefined,
 
   // テスト結果レポーター
   // - HTML: playwright-report/ に生成（標準レポート）
@@ -57,7 +57,7 @@ export default defineConfig({
     command:
       "PLAYWRIGHT=1 npx http-server storybook-static --port 6006 --silent",
     url: "http://localhost:6006",
-    reuseExistingServer: !process.env["CI"],
+    reuseExistingServer: !process.env.CI,
     timeout: 30_000,
   },
 });
