@@ -16,9 +16,7 @@ import type { Decorator, Preview } from "@storybook/react";
 // これにより全ストーリーで Tailwind のユーティリティクラスが使用可能になる
 import "../src/styles.css";
 
-const withTheme: Decorator = (Story, context) => {
-  const theme = context.globals.theme;
-
+const withTheme: Decorator = (Story, { globals: { theme } }) => {
   if (theme === "side-by-side") {
     // Light 側に "light" クラスを付与し、OS ダークモード時でもライトテーマを強制する
     return (
@@ -43,12 +41,10 @@ const withTheme: Decorator = (Story, context) => {
     );
   }
 
-  let isDark: boolean;
-  if (theme === "auto") {
-    isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  } else {
-    isDark = theme === "dark";
-  }
+  const isDark =
+    theme === "auto"
+      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+      : theme === "dark";
 
   return (
     <div className={isDark ? "dark bg-background" : "bg-background"}>

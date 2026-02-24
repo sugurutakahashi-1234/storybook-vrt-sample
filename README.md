@@ -4,16 +4,16 @@ Playwright を使ったビジュアルリグレッションテスト（VRT）と
 
 ## 技術スタック
 
-| 技術 | 用途 |
-|------|------|
-| Next.js 16 | アプリケーション |
-| Storybook 10 | コンポーネントカタログ |
-| Playwright | VRT + E2E テスト |
-| reg-cli | VRT 差分 HTML レポート（スライド / オーバーレイ / 2up / ブレンド） |
-| Tailwind CSS v4 | スタイリング |
-| Ultracite (Biome) | リンター + フォーマッター |
-| bun | パッケージマネージャー + モノレポ管理 |
-| TypeScript | 型安全性 |
+| 技術            | 用途                                                               |
+| --------------- | ------------------------------------------------------------------ |
+| Next.js 16      | アプリケーション                                                   |
+| Storybook 10    | コンポーネントカタログ                                             |
+| Playwright      | VRT + E2E テスト                                                   |
+| reg-cli         | VRT 差分 HTML レポート（スライド / オーバーレイ / 2up / ブレンド） |
+| Tailwind CSS v4 | スタイリング                                                       |
+| Oxlint + Oxfmt  | リンター + フォーマッター                                          |
+| bun             | パッケージマネージャー + モノレポ管理                              |
+| TypeScript      | 型安全性                                                           |
 
 ## プロジェクト構成
 
@@ -62,6 +62,26 @@ bun run lint
 # リント + フォーマット自動修正（ローカル開発用）
 bun run lint:fix
 ```
+
+### リント & フォーマット設定（Ultracite）
+
+Ultracite のゼロコンフィグプリセットで Oxlint + Oxfmt を管理しています。
+Ultracite のアップデート時は、以下のコマンドを対話的に実行して設定を再生成してください:
+
+```bash
+bunx ultracite init
+```
+
+**選択肢の推奨設定:**
+
+| 項目         | 選択                       |
+| ------------ | -------------------------- |
+| Linter       | Oxlint + Oxfmt             |
+| Frameworks   | React, Next.js             |
+| Editors      | VSCode / Cursor / Windsurf |
+| Agents       | Claude Code                |
+| Agent hooks  | Claude Code                |
+| Integrations | Lefthook pre-commit hook   |
 
 ## テスト
 
@@ -118,10 +138,10 @@ CI（PR 時）ではベースブランチからベースラインを動的生成
 
 VRT / E2E テスト実行時、スクリーンショットは **2箇所** に保存されます。
 
-| 保存先 | 用途 | 保存条件 |
-|--------|------|----------|
+| 保存先                                  | 用途                                     | 保存条件            |
+| --------------------------------------- | ---------------------------------------- | ------------------- |
 | `vrt/screenshots/` / `e2e/screenshots/` | git 管理用（PR diff で視覚的変更を確認） | Mac（`darwin`）のみ |
-| `.reg/actual/` | reg-cli 用（差分レポート生成） | 常に保存 |
+| `.reg/actual/`                          | reg-cli 用（差分レポート生成）           | 常に保存            |
 
 **git 管理用は Mac のみ保存する理由:**
 開発は Mac を前提としており、OS 間のレンダリング差異（フォント・アンチエイリアス等）で無意味な diff が出るのを防ぐため、`process.platform === "darwin"` の場合のみ保存します。
@@ -149,26 +169,27 @@ bun run storybook:vrt:report:allure
 
 ## Git Hooks（Lefthook）
 
-| フック | ジョブ | 内容 |
-|-------|--------|------|
-| pre-commit | lint-fix | Biome によるリント + フォーマット自動修正 |
-| pre-commit | conflict-markers | コンフリクトマーカーの残存チェック |
-| pre-commit | no-secrets | .env ファイルの誤コミット防止 |
-| pre-push | unit-test | ユニットテスト（bun test） |
-| pre-push | lint-check | Biome リント + フォーマットチェック（CI 同等） |
-| pre-push | typecheck | TypeScript 型チェック |
-| pre-push | build | Next.js ビルド |
-| pre-push | bun-version-check | bun バージョン整合性チェック |
-| pre-push | dependency-version-consistency-check | 依存パッケージバージョン整合性チェック |
-| pre-push | knip | 未使用ファイル・依存関係チェック |
+| フック     | ジョブ                               | 内容                                                    |
+| ---------- | ------------------------------------ | ------------------------------------------------------- |
+| pre-commit | oxlint-fix                           | Oxlint によるリント自動修正                             |
+| pre-commit | oxfmt-fix                            | Oxfmt によるフォーマット自動修正                        |
+| pre-commit | conflict-markers                     | コンフリクトマーカーの残存チェック                      |
+| pre-commit | no-secrets                           | .env ファイルの誤コミット防止                           |
+| pre-push   | unit-test                            | ユニットテスト（bun test）                              |
+| pre-push   | lint-check                           | Oxlint + Oxfmt リント + フォーマットチェック（CI 同等） |
+| pre-push   | typecheck                            | TypeScript 型チェック                                   |
+| pre-push   | build                                | Next.js ビルド                                          |
+| pre-push   | bun-version-check                    | bun バージョン整合性チェック                            |
+| pre-push   | dependency-version-consistency-check | 依存パッケージバージョン整合性チェック                  |
+| pre-push   | knip                                 | 未使用ファイル・依存関係チェック                        |
 
 ## CI/CD
 
 PR 作成時に GitHub Actions が自動実行されます。Docker コンテナは使用せず、CI ランナー上で直接 Playwright を実行します。
 
-- **Lint & Format** (`lint.yml`): 全 PR で Biome によるリント + フォーマットチェック
-- **Storybook VRT** (`vrt.yml`): `packages/ui/` の変更時に実行
-- **E2E テスト** (`e2e.yml`): `apps/web/` または `packages/ui/` の変更時に実行
+- **CI** (`ci.yml`): 全 PR で Lint / Typecheck / Knip / Test / Build を実行
+- **Storybook VRT** (`storybook-vrt.yml`): `packages/ui/` の変更時に実行
+- **E2E テスト** (`web-e2e.yml`): `apps/web/` または `packages/ui/` の変更時に実行
 
 PR 時はベースブランチからベースラインを動的生成し、reg-cli で差分レポートを生成します。
 テスト自体は `toHaveScreenshot()` を使わないため、ビジュアル変更があってもテストは失敗しません。差分は reg-cli レポートで確認します。
@@ -177,11 +198,11 @@ Allure レポートもアーティファクトとしてアップロードされ�
 
 ### テスト構成の棲み分け
 
-| レイヤー | 役割 | ツール | CI での判定 |
-|---------|------|--------|-----------|
-| Playwright VRT | コンポーネントのスクリーンショット撮影 | Playwright | pass/fail（機能テストのみ） |
-| Playwright E2E | ページ遷移・レスポンシブ表示のスクリーンショット撮影 + 機能テスト | Playwright | pass/fail（機能テストのみ） |
-| reg-cli | リッチな差分レポート生成（スライド / オーバーレイ / 2up / ブレンド） | `reg-cli` | レポートのみ（fail しない） |
+| レイヤー       | 役割                                                                 | ツール     | CI での判定                 |
+| -------------- | -------------------------------------------------------------------- | ---------- | --------------------------- |
+| Playwright VRT | コンポーネントのスクリーンショット撮影                               | Playwright | pass/fail（機能テストのみ） |
+| Playwright E2E | ページ遷移・レスポンシブ表示のスクリーンショット撮影 + 機能テスト    | Playwright | pass/fail（機能テストのみ） |
+| reg-cli        | リッチな差分レポート生成（スライド / オーバーレイ / 2up / ブレンド） | `reg-cli`  | レポートのみ（fail しない） |
 
 - ベースライン画像はリポジトリにコミットせず、ベースブランチから動的生成する
 - reg-cli はテスト実行時に `.reg/actual/` に保存されたスクリーンショットと、ベースブランチから生成した `.reg/expected/` を比較してレポートを生成する

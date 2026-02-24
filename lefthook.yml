@@ -16,10 +16,18 @@ output:
 pre-commit:
   parallel: true
   jobs:
-    # Biome によるリント + フォーマット自動修正（修正後に再ステージ）
-    - name: lint-fix
-      run: bunx biome check --write {staged_files}
-      glob: "**/*.{js,jsx,ts,tsx,json,jsonc,css}"
+    # Oxlint によるリント自動修正
+    # oxlint は JS/TS のみ対応のため、JSON/CSS は対象外
+    - name: oxlint-fix
+      run: bunx oxlint --fix {staged_files}
+      glob: "**/*.{js,jsx,ts,tsx}"
+      exclude: "**/next-env.d.ts"
+      stage_fixed: true
+    # Oxfmt によるフォーマット自動修正
+    # oxfmt は JSON/JSONC/CSS/MD/YML もフォーマット可能なため、oxlint より対象を広げている
+    - name: oxfmt-fix
+      run: bunx oxfmt --write {staged_files}
+      glob: "**/*.{js,jsx,ts,tsx,json,jsonc,css,md,yml}"
       exclude: "**/next-env.d.ts"
       stage_fixed: true
     # コンフリクトマーカー（<<<<<<< 等）の残存チェック
@@ -36,7 +44,7 @@ pre-commit:
 pre-push:
   parallel: true
   jobs:
-    # Biome によるリント + フォーマットチェック（修正なし、CI と同等）
+    # Oxlint + Oxfmt によるリント + フォーマットチェック（修正なし、CI と同等）
     - name: lint-check
       run: bun run lint
     # TypeScript 型チェック（tsc --noEmit）

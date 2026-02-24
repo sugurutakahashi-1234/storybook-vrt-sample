@@ -3,8 +3,10 @@ import type { InputHTMLAttributes } from "react";
 import { useId } from "react";
 
 /** TextField コンポーネントの Props */
-export interface TextFieldProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
+export interface TextFieldProps extends Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "size"
+> {
   /** エラーメッセージ（指定時はエラースタイルが適用される） */
   error?: string;
   /** 補足テキスト（入力フィールドの下に表示） */
@@ -27,7 +29,7 @@ const variantStyles: Record<string, string> = {
  * ラベル、エラー表示、ヘルパーテキストを備えた入力フィールド。
  * default / outlined の2バリアントを提供する。
  */
-export function TextField({
+export const TextField = ({
   label,
   error,
   helperText,
@@ -35,7 +37,7 @@ export function TextField({
   className,
   id: externalId,
   ...props
-}: TextFieldProps) {
+}: TextFieldProps) => {
   const generatedId = useId();
   const id = externalId ?? generatedId;
 
@@ -46,7 +48,6 @@ export function TextField({
     if (helperText) {
       return `${id}-helper`;
     }
-    return undefined;
   };
 
   return (
@@ -78,4 +79,4 @@ export function TextField({
       )}
     </div>
   );
-}
+};

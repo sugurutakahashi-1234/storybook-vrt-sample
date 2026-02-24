@@ -22,6 +22,7 @@
 import { mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
 import { test } from "@playwright/test";
 
 // ESM では __dirname が未定義のため、import.meta.url から取得
@@ -29,7 +30,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // storybook-static/index.json にはビルド済み Storybook の全エントリ（story / docs）が含まれる
 const indexJson = JSON.parse(
-  readFileSync(join(__dirname, "../storybook-static/index.json"), "utf-8")
+  readFileSync(join(__dirname, "../storybook-static/index.json"), "utf8")
 );
 
 // type === "story" のエントリのみ抽出（docs エントリはスクリーンショット不要）

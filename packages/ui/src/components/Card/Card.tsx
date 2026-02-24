@@ -22,28 +22,26 @@ const variantStyles: Record<string, string> = {
  * default（シャドウ付き）と outlined（ボーダー付き）の2バリアントを提供する。
  * header を指定するとヘッダー部分が表示される。
  */
-export function Card({
+export const Card = ({
   variant = "default",
   header,
   className,
   children,
   ...props
-}: CardProps) {
-  return (
-    <div
-      className={cn(
-        "overflow-hidden rounded-lg",
-        variantStyles[variant],
-        className
-      )}
-      {...props}
-    >
-      {header && (
-        <div className="border-border-subtle border-b px-6 py-4 font-semibold text-on-background">
-          {header}
-        </div>
-      )}
-      <div className="px-6 py-4 text-on-surface">{children}</div>
-    </div>
-  );
-}
+}: CardProps) => (
+  <div
+    className={cn(
+      "overflow-hidden rounded-lg",
+      variantStyles[variant],
+      className
+    )}
+    {...props}
+  >
+    {header && (
+      <div className="border-border-subtle border-b px-6 py-4 font-semibold text-on-background">
+        {header}
+      </div>
+    )}
+    <div className="px-6 py-4 text-on-surface">{children}</div>
+  </div>
+);

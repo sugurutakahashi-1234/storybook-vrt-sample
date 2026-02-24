@@ -1,0 +1,22 @@
+{
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxc": "explicit"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "npm.packageManager": "bun",
+  "npm.scriptRunner": "bun",
+  "npm.scriptExplorerAction": "run",
+  "css.lint.unknownAtRules": "ignore",
+  "json.schemas": [
+    {
+      "fileMatch": [".oxfmtrc.jsonc"],
+      "url": "./node_modules/oxfmt/configuration_schema.json"
+    },
+    {
+      "fileMatch": [".oxlintrc.json"],
+      "url": "./node_modules/oxlint/configuration_schema.json"
+    }
+  ]
+}

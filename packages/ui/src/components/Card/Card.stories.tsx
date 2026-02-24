@@ -5,6 +5,7 @@
  * VRT テスト（vrt/card.spec.ts）でスクリーンショット比較の対象となる。
  */
 import type { Meta, StoryObj } from "@storybook/react";
+
 import { Card } from "./Card";
 
 const meta = {

@@ -1,0 +1,42 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": [
+    "./node_modules/ultracite/config/oxlint/core/.oxlintrc.json",
+    "./node_modules/ultracite/config/oxlint/react/.oxlintrc.json",
+    "./node_modules/ultracite/config/oxlint/next/.oxlintrc.json"
+  ],
+  "rules": {
+    "unicorn/filename-case": "off",
+    "jsdoc/require-param-type": "off",
+    "jsdoc/require-returns-type": "off",
+    "jsdoc/check-tag-names": "off",
+    "vitest/consistent-test-filename": "off",
+    // ultracite デフォルトでは有効だが、設定ファイルのキー順序は論理的なグルーピング（セットアップ → 動作設定 → 依存サービス）を優先するため無効化
+    "eslint/sort-keys": "off",
+    // ultracite デフォルトでは有効だが、`!== undefined` は存在チェックとして自然な表現であり、正常系を先に書く方が可読性が高いため無効化
+    "eslint/no-negated-condition": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*.config.ts",
+        "scripts/**",
+        "**/e2e/**",
+        "**/vrt/**",
+        "**/.storybook/**"
+      ],
+      "rules": {
+        "import/no-nodejs-modules": "off",
+        "import/no-relative-parent-imports": "off",
+        "jest/no-hooks": "off",
+        "jest/require-top-level-describe": "off",
+        "jest/require-hook": "off",
+        "jest/prefer-each": "off",
+        "jest/no-conditional-in-test": "off",
+        "vitest/no-importing-vitest-globals": "off",
+        "typescript/no-explicit-any": "off",
+        "max-statements": "off"
+      }
+    }
+  ]
+}

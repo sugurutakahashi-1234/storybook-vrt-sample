@@ -5,6 +5,7 @@
  * スクリーンショット比較で検証する。
  */
 import { expect, test } from "@playwright/test";
+
 import { takeScreenshot } from "./reg-screenshot";
 
 test.describe("Navigation", () => {

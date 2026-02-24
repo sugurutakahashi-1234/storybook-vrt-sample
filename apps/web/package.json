@@ -16,10 +16,10 @@
     "e2e:report:reg:local": "bun run e2e:baseline:local && bun run e2e:playwright && bun run e2e:report:reg"
   },
   "dependencies": {
+    "@storybook-vrt-sample/ui": "workspace:*",
     "next": "^16.1.6",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "@storybook-vrt-sample/ui": "workspace:*"
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
@@ -28,8 +28,8 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "allure-playwright": "^3.4.5",
-    "reg-cli": "^0.18.14",
     "postcss": "^8.5.6",
+    "reg-cli": "^0.18.14",
     "tailwindcss": "^4.2.0",
     "typescript": "^5.9.3"
   }

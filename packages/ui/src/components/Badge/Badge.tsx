@@ -1,5 +1,6 @@
 import { cn } from "@ui/utils/cn";
 import type { HTMLAttributes } from "react";
+
 import { formatCount } from "./format-count";
 
 /** Badge コンポーネントの Props */
@@ -26,14 +27,14 @@ const variantStyles: Record<string, string> = {
  * ステータスやラベルをインラインで表示するための小さなタグ。
  * info / success / warning / error の4バリアントを提供する。
  */
-export function Badge({
+export const Badge = ({
   variant = "info",
   className,
   count,
   maxCount,
   children,
   ...props
-}: BadgeProps) {
+}: BadgeProps) => {
   const formattedCount =
     count !== undefined ? formatCount(count, maxCount) : undefined;
 
@@ -49,4 +50,4 @@ export function Badge({
       {formattedCount || children}
     </span>
   );
-}
+};

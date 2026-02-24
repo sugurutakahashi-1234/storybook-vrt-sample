@@ -13,7 +13,7 @@ const rootDir = join(import.meta.dirname, "..");
 
 // package.json から packageManager のバージョンを取得（bun@1.3.9 → 1.3.9）
 const pkgJson = await Bun.file(join(rootDir, "package.json")).json();
-const packageManager: string | undefined = pkgJson.packageManager;
+const { packageManager } = pkgJson;
 
 if (!packageManager) {
   console.error("ERROR: packageManager が package.json に見つかりません");
@@ -26,11 +26,12 @@ if (!match) {
   process.exit(1);
 }
 
-const pkgVersion = match[1];
+const [, pkgVersion] = match;
 
 // bun --version で実際のバージョンを取得
 const proc = Bun.spawn(["bun", "--version"], { stdout: "pipe" });
-const installedVersion = (await new Response(proc.stdout).text()).trim();
+const text = await new Response(proc.stdout).text();
+const installedVersion = text.trim();
 
 // package.json と インストール済みバージョンの整合性チェック（不一致はエラー）
 if (pkgVersion !== installedVersion) {

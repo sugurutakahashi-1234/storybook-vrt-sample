@@ -45,11 +45,12 @@ next-env.d.ts
 .DS_Store
 Thumbs.db
 
-# Biome キャッシュ
-.biome/
+# OXC キャッシュ
+.oxc_cache/
 
 # IDE 設定
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo

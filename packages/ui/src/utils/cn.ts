@@ -1,4 +1,5 @@
-import { type ClassValue, clsx } from "clsx";
+import { clsx } from "clsx";
+import type { ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 /**
@@ -11,6 +12,4 @@ import { twMerge } from "tailwind-merge";
  * cn("px-2 py-1", isActive && "bg-blue-500", className)
  * cn("text-sm text-red-500", "text-blue-500") // → "text-sm text-blue-500"
  */
-export function cn(...inputs: ClassValue[]): string {
-  return twMerge(clsx(inputs));
-}
+export const cn = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));

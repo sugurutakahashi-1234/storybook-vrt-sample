@@ -6,6 +6,7 @@
  */
 import type { Meta, StoryObj } from "@storybook/react";
 import { expect, userEvent, within } from "storybook/test";
+
 import { ThemeToggle } from "./ThemeToggle";
 
 const meta = {
@@ -46,25 +47,17 @@ export const CycleThemes: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const button = canvas.getByRole("button");
-
-    // 初期状態を取得
     const initialLabel = button.getAttribute("aria-label") || "";
     const startsLight = /ライト/.test(initialLabel);
 
     // 1回クリック: light → dark または dark → light
     await userEvent.click(button);
-    if (startsLight) {
-      await expect(button).toHaveAccessibleName(/ダーク/);
-    } else {
-      await expect(button).toHaveAccessibleName(/ライト/);
-    }
+    const expectedAfterFirst = startsLight ? /ダーク/ : /ライト/;
+    await expect(button).toHaveAccessibleName(expectedAfterFirst);
 
     // 2回クリック: 元に戻る
     await userEvent.click(button);
-    if (startsLight) {
-      await expect(button).toHaveAccessibleName(/ライト/);
-    } else {
-      await expect(button).toHaveAccessibleName(/ダーク/);
-    }
+    const expectedAfterSecond = startsLight ? /ライト/ : /ダーク/;
+    await expect(button).toHaveAccessibleName(expectedAfterSecond);
   },
 };

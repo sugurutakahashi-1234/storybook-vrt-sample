@@ -5,7 +5,8 @@
       "WebFetch(domain:www.ultracite.ai)",
       "WebFetch(domain:docs.ultracite.ai)",
       "Bash(bunx lefthook:*)",
-      "Bash(bunx biome:*)",
+      "Bash(bunx oxlint:*)",
+      "Bash(bunx oxfmt:*)",
       "Bash(git:*)",
       "Bash(mise latest:*)",
       "WebFetch(domain:argos-ci.com)",
@@ -37,7 +38,9 @@
       "WebFetch(domain:heroicons.com)",
       "WebFetch(domain:lucide.dev)",
       "WebFetch(domain:oxc.rs)",
-      "WebFetch(domain:yannbraga.dev)"
+      "WebFetch(domain:yannbraga.dev)",
+      "Bash(bunx ultracite:*)",
+      "Bash(grep:*)"
     ]
   }
 }

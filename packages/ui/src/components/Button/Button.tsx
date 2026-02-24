@@ -29,24 +29,23 @@ const sizeStyles: Record<string, string> = {
  * 3つのバリアント（primary / secondary / danger）と3つのサイズ（sm / md / lg）を提供する。
  * HTML の button 要素の全属性を透過的に受け付ける。
  */
-export function Button({
+export const Button = ({
   variant = "primary",
   size = "md",
   className,
   children,
   ...props
-}: ButtonProps) {
-  return (
-    <button
-      className={cn(
-        "inline-flex items-center justify-center rounded-full font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-ring-offset disabled:pointer-events-none disabled:opacity-50",
-        variantStyles[variant],
-        sizeStyles[size],
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-}
+}: ButtonProps) => (
+  <button
+    type="button"
+    className={cn(
+      "inline-flex items-center justify-center rounded-full font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-ring-offset disabled:pointer-events-none disabled:opacity-50",
+      variantStyles[variant],
+      sizeStyles[size],
+      className
+    )}
+    {...props}
+  >
+    {children}
+  </button>
+);

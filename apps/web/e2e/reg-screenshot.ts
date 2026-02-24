@@ -10,21 +10,22 @@
  */
 import { mkdirSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
+
 import type { Locator, Page } from "@playwright/test";
 import { test } from "@playwright/test";
 
-export async function takeScreenshot(
+export const takeScreenshot = async (
   target: Page | Locator,
   options?: { fullPage?: boolean }
-) {
+) => {
   const info = test.info();
   const theme = info.project.name;
 
   const name = `${info.titlePath
     .slice(1)
     .join("-")
-    .replace(/\s+/g, "-")
-    .replace(/-{2,}/g, "-")}-${theme}.png`;
+    .replaceAll(/\s+/g, "-")
+    .replaceAll(/-{2,}/g, "-")}-${theme}.png`;
 
   const testFile = basename(info.file);
 
@@ -39,4 +40,4 @@ export async function takeScreenshot(
   const regPath = join(".reg", "actual", testFile, name);
   mkdirSync(dirname(regPath), { recursive: true });
   await target.screenshot({ path: regPath, ...options });
-}
+};

@@ -226,20 +226,18 @@ const colorGroups: ColorGroup[] = [
 ];
 
 /** 単一カラースウォッチ */
-function ColorSwatch({ token }: { token: ColorToken }) {
-  return (
-    <div className="flex items-center gap-3">
-      <div
-        className="h-10 w-10 shrink-0 rounded-md border border-border"
-        style={{ backgroundColor: `var(${token.variable})` }}
-      />
-      <div className="min-w-0">
-        <p className="font-mono text-on-background text-sm">{token.variable}</p>
-        <p className="text-on-surface-muted text-xs">{token.description}</p>
-      </div>
+const ColorSwatch = ({ token }: { token: ColorToken }) => (
+  <div className="flex items-center gap-3">
+    <div
+      className="h-10 w-10 shrink-0 rounded-md border border-border"
+      style={{ backgroundColor: `var(${token.variable})` }}
+    />
+    <div className="min-w-0">
+      <p className="font-mono text-on-background text-sm">{token.variable}</p>
+      <p className="text-on-surface-muted text-xs">{token.description}</p>
     </div>
-  );
-}
+  </div>
+);
 
 /**
  * カラーパレットコンポーネント
@@ -247,28 +245,26 @@ function ColorSwatch({ token }: { token: ColorToken }) {
  * セマンティックカラートークンの一覧をグループごとに表示する。
  * Storybook の addon-themes でテーマを切り替えると dark 値がリアルタイムで反映される。
  */
-export function ColorPalette() {
-  return (
-    <div className="space-y-8 p-6">
-      <div>
-        <h1 className="font-bold text-2xl text-on-background">Color Palette</h1>
-        <p className="mt-1 text-on-surface-muted">
-          セマンティックカラートークンの一覧です。テーマを切り替えると値が変化します。
-        </p>
-      </div>
-
-      {colorGroups.map((group) => (
-        <section key={group.title}>
-          <h2 className="mb-3 border-border-subtle border-b pb-2 font-semibold text-lg text-on-background">
-            {group.title}
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {group.tokens.map((token) => (
-              <ColorSwatch key={token.variable} token={token} />
-            ))}
-          </div>
-        </section>
-      ))}
+export const ColorPalette = () => (
+  <div className="space-y-8 p-6">
+    <div>
+      <h1 className="font-bold text-2xl text-on-background">Color Palette</h1>
+      <p className="mt-1 text-on-surface-muted">
+        セマンティックカラートークンの一覧です。テーマを切り替えると値が変化します。
+      </p>
     </div>
-  );
-}
+
+    {colorGroups.map((group) => (
+      <section key={group.title}>
+        <h2 className="mb-3 border-border-subtle border-b pb-2 font-semibold text-lg text-on-background">
+          {group.title}
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {group.tokens.map((token) => (
+            <ColorSwatch key={token.variable} token={token} />
+          ))}
+        </div>
+      </section>
+    ))}
+  </div>
+);

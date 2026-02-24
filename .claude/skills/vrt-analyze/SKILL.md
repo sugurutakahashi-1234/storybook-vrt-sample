@@ -50,6 +50,7 @@ cd packages/ui && bun run vrt:report:reg:local
 ```
 
 このコマンドは以下を一括実行する:
+
 - `vrt:baseline:local`: main ブランチの baseline スクリーンショットを `.reg/expected/` に取得
 - `vrt:snapshot`: Storybook ビルド（--test）+ Playwright スクリーンショット撮影（`.reg/actual/` にスクリーンショット保存）
 - `vrt:report:reg`: reg-cli で expected vs actual を比較し `.reg/out.json` と `.reg/diff/` を生成
@@ -59,6 +60,7 @@ cd packages/ui && bun run vrt:report:reg:local
 ### 2. 差分サマリー取得
 
 `packages/ui/.reg/out.json` を Read で読み取り、以下を集計する:
+
 - `failedItems`（changed）: 差分が検出された画像
 - `newItems`: 新規追加された画像
 - `deletedItems`: 削除された画像
@@ -83,13 +85,16 @@ git diff main -- packages/ui/
 **まず diff 画像を優先的に確認する。** diff 画像は変更箇所が赤くハイライトされており、これだけで差分の性質を把握できることが多い。diff 画像だけでは判断が難しい場合のみ expected（main 版）と actual（現在版）を追加で確認する。
 
 各 failedItem について:
+
 - `.reg/diff/<name>` （差分ハイライト画像）を Read で確認（必須）
 - `.reg/expected/<name>` と `.reg/actual/<name>` は diff 画像だけでは不明な場合のみ確認
 
 各 newItem について:
+
 - `.reg/actual/<name>` を Read で確認
 
 各 deletedItem について:
+
 - `.reg/expected/<name>` を Read で確認
 
 #### 3c. コード変更と視覚的差分の対応分析
@@ -122,6 +127,7 @@ git diff main -- packages/ui/
 ```
 
 判定カテゴリ:
+
 - **意図的な変更**: コード変更と視覚的差分が明確に対応している
 - **意図的な追加**: 新規コンポーネントやバリアントの追加に伴う新規スクリーンショット
 - **意図的な削除**: コンポーネントやバリアントの削除に伴うスクリーンショットの削除

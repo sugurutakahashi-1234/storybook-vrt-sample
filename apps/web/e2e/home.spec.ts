@@ -5,6 +5,7 @@
  * コンテンツの表示確認とスクリーンショット比較を行う。
  */
 import { expect, test } from "@playwright/test";
+
 import { takeScreenshot } from "./reg-screenshot";
 
 test.describe("Home Page", () => {
