@@ -83,6 +83,23 @@ bun run test
 bun run storybook:vrt:snapshot
 ```
 
+#### VRT 対象外ストーリー（`skip-vrt` タグ）
+
+play 関数で DOM を変更するストーリー（テキスト入力、テーマトグルなど）は、
+スクリーンショットが実行タイミングにより不安定になるため VRT 対象外にできます。
+
+ストーリーの `tags` に `"skip-vrt"` を追加すると、VRT テスト（`packages/ui/vrt/all-stories.spec.ts`）が
+自動的にそのストーリーをスクリーンショット撮影対象から除外します。
+
+```typescript
+export const Typing: Story = {
+  tags: ["skip-vrt"],
+  play: async ({ canvasElement }) => {
+    // DOM を変更する play 関数
+  },
+};
+```
+
 ### E2E テスト
 
 Next.js アプリに対するシナリオベースのテスト + ページ全体のスクリーンショット撮影です。

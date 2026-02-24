@@ -6,6 +6,7 @@
  */
 import type { Metadata } from "next";
 import "./globals.css";
+import { ThemeToggle } from "@storybook-vrt-sample/ui";
 import { formatPageTitle } from "./utils/format";
 
 /** サイト全体のメタデータ（<title> や <meta> タグに反映される） */
@@ -20,8 +21,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja">
-      <body className="min-h-screen bg-gray-50 text-gray-900 antialiased">
+    <html lang="ja" suppressHydrationWarning>
+      <head>
+        {/* ページ描画前にテーマを適用し、ちらつき（FOUC）を防止する */}
+        {/* localStorage に値がなければ OS のカラースキームに従う */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var theme = localStorage.getItem('theme');
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (theme === 'dark' || (!theme && prefersDark)) {
+                  document.documentElement.classList.add('dark');
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className="min-h-screen bg-background text-on-background antialiased">
+        <header className="flex justify-end px-4 py-3">
+          <ThemeToggle />
+        </header>
         {children}
       </body>
     </html>

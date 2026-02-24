@@ -19,7 +19,6 @@ test.describe("Navigation", () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    // reg-cli 用のスクリーンショットを .reg/actual/ へ保存
     await takeScreenshot(page, { fullPage: true });
   });
 
@@ -28,7 +27,6 @@ test.describe("Navigation", () => {
     await page.setViewportSize({ width: 768, height: 1024 });
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    // reg-cli 用のスクリーンショットを .reg/actual/ へ保存
     await takeScreenshot(page, { fullPage: true });
   });
 });

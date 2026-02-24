@@ -4,7 +4,8 @@
   "extends": ["ultracite/core", "ultracite/react", "ultracite/next"],
   "files": {
     // bun.lock は Biome の解析対象外（独自フォーマットのため）
-    "includes": ["!!bun.lock"]
+    // CSS ファイルは Tailwind CSS v4 の @variant / @source 構文を Biome が未サポートのため除外
+    "includes": ["!!bun.lock", "!**/*.css"]
   },
   "linter": {
     "rules": {
@@ -26,8 +27,12 @@
   },
   "overrides": [
     {
-      // Playwright テストファイル: テスト内での正規表現リテラル使用を許可
-      "includes": ["**/*.spec.{ts,tsx}", "**/*.test.{ts,tsx}"],
+      // テストファイル・ストーリーファイル: テスト内での正規表現リテラル使用を許可
+      "includes": [
+        "**/*.spec.{ts,tsx}",
+        "**/*.test.{ts,tsx}",
+        "**/*.stories.{ts,tsx}"
+      ],
       "linter": {
         "rules": {
           "performance": {
@@ -41,6 +46,17 @@
       "includes": ["scripts/**"],
       "javascript": {
         "globals": ["Bun"]
+      }
+    },
+    {
+      // layout.tsx: FOUC 防止用の静的スクリプトで dangerouslySetInnerHTML を使用するため許可
+      "includes": ["apps/web/app/layout.tsx"],
+      "linter": {
+        "rules": {
+          "security": {
+            "noDangerouslySetInnerHtml": "off"
+          }
+        }
       }
     }
   ]

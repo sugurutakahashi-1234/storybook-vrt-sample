@@ -51,7 +51,7 @@ cd packages/ui && bun run vrt:report:reg:local
 
 このコマンドは以下を一括実行する:
 - `vrt:baseline:local`: main ブランチの baseline スクリーンショットを `.reg/expected/` に取得
-- `vrt:snapshot`: Storybook ビルド + Playwright スクリーンショット撮影（`.reg/actual/` にスクリーンショット保存）
+- `vrt:snapshot`: Storybook ビルド（--test）+ Playwright スクリーンショット撮影（`.reg/actual/` にスクリーンショット保存）
 - `vrt:report:reg`: reg-cli で expected vs actual を比較し `.reg/out.json` と `.reg/diff/` を生成
 
 差分検出時は reg-cli が exit code 1 を返すが、これは正常動作。

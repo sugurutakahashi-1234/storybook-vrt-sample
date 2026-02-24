@@ -21,7 +21,6 @@ test.describe("Home Page", () => {
   test("ホームページのスクリーンショット", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    // reg-cli 用のスクリーンショットを .reg/actual/ へ保存
     await takeScreenshot(page, { fullPage: true });
   });
 

@@ -5,6 +5,9 @@
  * 全ストーリーに対して動的にテストケースを生成する。
  * これにより、新しいストーリーを追加しても VRT テストファイルの変更は不要。
  *
+ * ライト・ダーク各テーマで個別にスクリーンショットを撮影する。
+ * テスト数はストーリー数 × 2（light / dark）。
+ *
  * なぜ Playwright テストランナーを使うのか:
  *   スクリーンショット撮影だけなら Storycap 等の専用ツールや単純な Node スクリプトでも可能だが、
  *   E2E テスト（apps/web）と同じ Playwright テストランナーを使うことで、
@@ -12,7 +15,7 @@
  *   すべて共通化できる（.github/workflows/_playwright-test.yml）。
  *
  * 前提: テスト実行前に `storybook build` が必要（storybook-static/index.json を参照するため）
- *       package.json の vrt スクリプトにはビルドが組み込み済み。
+ *       package.json の vrt:snapshot にはビルドが組み込み済み。
  *
  * 実行: bun run vrt:snapshot（ルートからは bun run storybook:vrt:snapshot）
  */
@@ -35,34 +38,38 @@ const stories = Object.values(indexJson.entries).filter(
   (entry: any) => entry.type === "story" && !entry.tags?.includes("skip-vrt")
 );
 
-// 各ストーリーに対してテストケースを動的生成
-// テスト名: "Components/Button - Primary" のように title と name を結合
+// 各ストーリー × テーマ（light / dark）に対してテストケースを動的生成
+const themes = ["light", "dark"] as const;
+
 for (const story of stories as any[]) {
-  test(`${story.title} - ${story.name}`, async ({ page }) => {
-    // Storybook の iframe モードでストーリーを単独描画
-    await page.goto(`/iframe.html?id=${story.id}&viewMode=story`);
+  for (const theme of themes) {
+    test(`${story.title} - ${story.name} [${theme}]`, async ({ page }) => {
+      await page.goto(
+        `/iframe.html?id=${story.id}&viewMode=story&globals=theme:${theme}`
+      );
 
-    // #storybook-root を inline-block にしてコンポーネントサイズにフィットさせる
-    // デフォルトは display:block（全幅）のため、小さなコンポーネントでも大きな空白が入ってしまう
-    await page.addStyleTag({
-      content: "#storybook-root { display: inline-block; }",
+      // #storybook-root を inline-block にしてコンポーネントサイズにフィットさせる
+      // デフォルトは display:block（全幅）のため、小さなコンポーネントでも大きな空白が入ってしまう
+      await page.addStyleTag({
+        content: "#storybook-root { display: inline-block; }",
+      });
+      const root = page.locator("#storybook-root");
+
+      // #storybook-root 内のコンポーネントをスクリーンショット撮影
+      // story.title の階層構造をディレクトリとして使用（例: "Components/Badge/Error-light.png"）
+      const name = [...story.title.split("/"), `${story.name}-${theme}.png`];
+
+      // git 管理用: vrt/screenshots/ に保存（Mac のみ・変更履歴を追跡）
+      if (process.platform === "darwin") {
+        const screenshotPath = join("vrt", "screenshots", ...name);
+        mkdirSync(dirname(screenshotPath), { recursive: true });
+        await root.screenshot({ path: screenshotPath });
+      }
+
+      // reg-cli 用: .reg/actual/ に保存（常に実行・CI での差分比較に使用）
+      const regPath = join(".reg", "actual", ...name);
+      mkdirSync(dirname(regPath), { recursive: true });
+      await root.screenshot({ path: regPath });
     });
-    const root = page.locator("#storybook-root");
-
-    // #storybook-root 内のコンポーネントをスクリーンショット撮影
-    // story.title の階層構造をディレクトリとして使用（例: "Components/Badge/Error.png"）
-    const name = [...story.title.split("/"), `${story.name}.png`];
-
-    // git 管理用: vrt/screenshots/ に保存（Mac のみ・変更履歴を追跡）
-    if (process.platform === "darwin") {
-      const screenshotPath = join("vrt", "screenshots", ...name);
-      mkdirSync(dirname(screenshotPath), { recursive: true });
-      await root.screenshot({ path: screenshotPath });
-    }
-
-    // reg-cli 用: .reg/actual/ に保存（常に実行・CI での差分比較に使用）
-    const regPath = join(".reg", "actual", ...name);
-    mkdirSync(dirname(regPath), { recursive: true });
-    await root.screenshot({ path: regPath });
-  });
+  }
 }

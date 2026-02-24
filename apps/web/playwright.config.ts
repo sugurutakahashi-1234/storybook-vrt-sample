@@ -4,6 +4,9 @@
  * Next.js アプリケーションに対するエンドツーエンドテストの設定。
  * ページ遷移、レスポンシブ表示、スクリーンショット比較などを検証する。
  *
+ * light / dark の2プロジェクトで同じテストを実行し、
+ * 各テーマのスクリーンショットを撮影する。
+ *
  * 実行: bun run web:e2e:playwright
  */
 import { defineConfig } from "@playwright/test";
@@ -52,10 +55,18 @@ export default defineConfig({
     screenshot: "off",
   },
 
+  // ライト・ダーク両テーマでテストを実行
+  // layout.tsx の FOUC 防止スクリプトが prefers-color-scheme を参照するため、
+  // colorScheme の設定だけで初回描画からテーマが正しく適用される
+  projects: [
+    { name: "light", use: { colorScheme: "light" } },
+    { name: "dark", use: { colorScheme: "dark" } },
+  ],
+
   // テスト実行前に Next.js dev サーバーを自動起動する設定
   webServer: {
     // Next.js を Turbopack モードで起動（ルートの bun run dev 経由）
-    command: "bun run dev",
+    command: "PLAYWRIGHT=1 bun run dev",
     url: "http://localhost:3000",
 
     // ローカルでは既に起動済みのサーバーを再利用（開発効率向上）

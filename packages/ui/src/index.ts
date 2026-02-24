@@ -17,5 +17,8 @@ export { Card } from "./components/Card";
 export type { TextFieldProps } from "./components/TextField";
 // TextField コンポーネント: ラベル、エラー、ヘルパーテキスト対応の入力フィールド
 export { TextField } from "./components/TextField";
+export type { Theme } from "./components/ThemeToggle";
+// ThemeToggle コンポーネント: system / light / dark の3状態テーマ切り替えボタン
+export { ThemeToggle } from "./components/ThemeToggle";
 // ユーティリティ: クラス名結合（clsx + tailwind-merge）
 export { cn } from "./utils/cn";
