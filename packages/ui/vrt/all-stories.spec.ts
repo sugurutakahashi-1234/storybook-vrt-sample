@@ -45,12 +45,8 @@ const themes = ["light", "dark"] as const;
 for (const story of stories as any[]) {
   for (const theme of themes) {
     test(`${story.title} - ${story.name} [${theme}]`, async ({ page }) => {
-      // デフォルトの "load" だと storybook v10.2.11 以降で iframe の load イベントが
-      // 発火せずハングするため "domcontentloaded" を指定。
-      // VRT では DOM 構築完了時点で #storybook-root にアクセスできれば十分。
       await page.goto(
-        `/iframe.html?id=${story.id}&viewMode=story&globals=theme:${theme}`,
-        { waitUntil: "domcontentloaded" }
+        `/iframe.html?id=${story.id}&viewMode=story&globals=theme:${theme}`
       );
 
       // #storybook-root を inline-block にしてコンポーネントサイズにフィットさせる
