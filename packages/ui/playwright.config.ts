@@ -48,10 +48,6 @@ export default defineConfig({
     // Storybook の URL
     baseURL: "http://localhost:6006",
 
-    // テーマをライトモードに固定（OS のカラースキーム設定への暗黙依存を断ち切り、
-    // スクリーンショットの一貫性を保証する）
-    colorScheme: "light",
-
     // テスト失敗時の自動スクリーンショットは無効（VRT 自体がスクリーンショット比較のため不要）
     screenshot: "off",
   },

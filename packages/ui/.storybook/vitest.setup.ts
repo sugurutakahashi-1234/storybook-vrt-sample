@@ -8,6 +8,8 @@ import * as previewAnnotations from "./preview";
 const annotations = setProjectAnnotations([
   a11yAddonAnnotations,
   previewAnnotations,
+  // テスト時は side-by-side を無効化（Story が2重レンダリングされ play 関数が複数要素を検出するため）
+  { initialGlobals: { theme: "light" } },
 ]);
 
 beforeAll(annotations.beforeAll);

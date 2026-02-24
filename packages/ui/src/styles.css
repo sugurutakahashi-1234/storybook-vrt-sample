@@ -7,8 +7,26 @@
 @import "tailwindcss";
 
 /* Tailwind CSS v4 でクラスベースのダークモードを有効化 */
-/* html 要素に "dark" クラスが付与されたとき、dark: バリアントが適用される */
+/* .dark クラスが付与されたとき、dark: バリアントが適用される */
 @variant dark (&:where(.dark, .dark *));
+
+/*
+ * color-scheme ベースのテーマ切り替え
+ *
+ * light-dark() 関数により、各トークンに light/dark 両方の値を1箇所で定義できる。
+ * .dark / .light クラスで color-scheme を切り替えるだけでテーマが変わる。
+ */
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+.light {
+  color-scheme: light;
+}
 
 /*
  * セマンティックカラートークン
@@ -16,7 +34,7 @@
  * @theme で CSS カスタムプロパティを定義し、Tailwind ユーティリティクラスを自動生成する。
  * 例: --color-surface → bg-surface, text-surface, border-surface 等
  *
- * .dark セレクタで上書きすることで、コンポーネント側の dark: プレフィックスが不要になる。
+ * light-dark(light値, dark値) で両テーマの値を一元管理する。
  */
 @theme {
   /* デフォルトカラーパレットを無効化 — セマンティックトークンのみ使用可能にする */
@@ -31,97 +49,48 @@
   --color-shadow-dark: #111827;
 
   /* Surface 系 — ページ・カードの背景とテキスト */
-  --color-background: #f9fafb;
-  --color-surface: #ffffff;
-  --color-on-background: #111827;
-  --color-on-surface: #374151;
-  --color-on-surface-muted: #6b7280;
+  --color-background: light-dark(#f9fafb, #111827);
+  --color-surface: light-dark(#ffffff, #1f2937);
+  --color-on-background: light-dark(#111827, #f3f4f6);
+  --color-on-surface: light-dark(#374151, #d1d5db);
+  --color-on-surface-muted: light-dark(#6b7280, #9ca3af);
 
   /* Border 系 */
-  --color-border: #e5e7eb;
-  --color-border-subtle: #f3f4f6;
-  --color-border-input: #d1d5db;
-  --color-border-input-strong: #9ca3af;
+  --color-border: light-dark(#e5e7eb, #374151);
+  --color-border-subtle: light-dark(#f3f4f6, #374151);
+  --color-border-input: light-dark(#d1d5db, #4b5563);
+  --color-border-input-strong: light-dark(#9ca3af, #6b7280);
 
   /* Primary / Secondary / Danger 系 */
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
+  --color-primary: light-dark(#2563eb, #3b82f6);
+  --color-primary-hover: light-dark(#1d4ed8, #60a5fa);
   --color-on-primary: #ffffff;
-  --color-secondary: #e5e7eb;
-  --color-secondary-hover: #d1d5db;
-  --color-on-secondary: #1f2937;
-  --color-danger: #dc2626;
-  --color-danger-hover: #b91c1c;
+  --color-secondary: light-dark(#e5e7eb, #374151);
+  --color-secondary-hover: light-dark(#d1d5db, #4b5563);
+  --color-on-secondary: light-dark(#1f2937, #f3f4f6);
+  --color-danger: light-dark(#dc2626, #ef4444);
+  --color-danger-hover: light-dark(#b91c1c, #f87171);
   --color-on-danger: #ffffff;
 
   /* Error 系 */
-  --color-error: #ef4444;
-  --color-error-text: #dc2626;
+  --color-error: light-dark(#ef4444, #f87171);
+  --color-error-text: light-dark(#dc2626, #f87171);
 
   /* Ring 系 — フォーカスリング */
   --color-ring: #3b82f6;
-  --color-ring-offset: #ffffff;
+  --color-ring-offset: light-dark(#ffffff, #111827);
 
   /* Badge 系 — ステータスバッジ */
-  --color-badge-info-bg: #dbeafe;
-  --color-badge-info-text: #1e40af;
-  --color-badge-success-bg: #dcfce7;
-  --color-badge-success-text: #166534;
-  --color-badge-warning-bg: #fef9c3;
-  --color-badge-warning-text: #854d0e;
-  --color-badge-error-bg: #fee2e2;
-  --color-badge-error-text: #991b1b;
+  --color-badge-info-bg: light-dark(#dbeafe, #1e3a8a);
+  --color-badge-info-text: light-dark(#1e40af, #dbeafe);
+  --color-badge-success-bg: light-dark(#dcfce7, #14532d);
+  --color-badge-success-text: light-dark(#166534, #dcfce7);
+  --color-badge-warning-bg: light-dark(#fef9c3, #713f12);
+  --color-badge-warning-text: light-dark(#854d0e, #fef9c3);
+  --color-badge-error-bg: light-dark(#fee2e2, #7f1d1d);
+  --color-badge-error-text: light-dark(#991b1b, #fee2e2);
 
   /* Interactive 系 — ThemeToggle 等 */
-  --color-interactive-muted: #4b5563;
-  --color-interactive-hover: #e5e7eb;
-}
-
-/* ダークモード時のカラートークン上書き */
-.dark {
-  /* Surface 系 */
-  --color-background: #111827;
-  --color-surface: #1f2937;
-  --color-on-background: #f3f4f6;
-  --color-on-surface: #d1d5db;
-  --color-on-surface-muted: #9ca3af;
-
-  /* Border 系 */
-  --color-border: #374151;
-  --color-border-subtle: #374151;
-  --color-border-input: #4b5563;
-  --color-border-input-strong: #6b7280;
-
-  /* Primary / Secondary / Danger 系 */
-  --color-primary: #3b82f6;
-  --color-primary-hover: #60a5fa;
-  --color-on-primary: #ffffff;
-  --color-secondary: #374151;
-  --color-secondary-hover: #4b5563;
-  --color-on-secondary: #f3f4f6;
-  --color-danger: #ef4444;
-  --color-danger-hover: #f87171;
-  --color-on-danger: #ffffff;
-
-  /* Error 系 */
-  --color-error: #f87171;
-  --color-error-text: #f87171;
-
-  /* Ring 系 */
-  --color-ring: #3b82f6;
-  --color-ring-offset: #111827;
-
-  /* Badge 系 */
-  --color-badge-info-bg: #1e3a8a;
-  --color-badge-info-text: #dbeafe;
-  --color-badge-success-bg: #14532d;
-  --color-badge-success-text: #dcfce7;
-  --color-badge-warning-bg: #713f12;
-  --color-badge-warning-text: #fef9c3;
-  --color-badge-error-bg: #7f1d1d;
-  --color-badge-error-text: #fee2e2;
-
-  /* Interactive 系 */
-  --color-interactive-muted: #9ca3af;
-  --color-interactive-hover: #374151;
+  --color-interactive-muted: light-dark(#4b5563, #9ca3af);
+  --color-interactive-hover: light-dark(#e5e7eb, #374151);
 }

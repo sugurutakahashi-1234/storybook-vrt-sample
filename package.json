@@ -19,8 +19,8 @@
     "prepare": "test -n \"$CI\" || lefthook install",
     "outdated": "bun outdated",
     "update-deps": "bun update --latest && bun update --latest --filter '*'",
-    "pre-commit": "bunx lefthook run pre-commit --force",
-    "pre-push": "bunx lefthook run pre-push --force"
+    "lefthook:pre-commit": "lefthook run pre-commit --force",
+    "lefthook:pre-push": "lefthook run pre-push --force"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.4",

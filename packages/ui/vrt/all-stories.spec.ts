@@ -5,8 +5,8 @@
  * 全ストーリーに対して動的にテストケースを生成する。
  * これにより、新しいストーリーを追加しても VRT テストファイルの変更は不要。
  *
- * ライト・ダーク両テーマのスクリーンショットを撮影し、
- * ファイル名にテーマサフィックス（-light / -dark）を付与する。
+ * ライト・ダーク各テーマで個別にスクリーンショットを撮影する。
+ * テスト数はストーリー数 × 2（light / dark）。
  *
  * なぜ Playwright テストランナーを使うのか:
  *   スクリーンショット撮影だけなら Storycap 等の専用ツールや単純な Node スクリプトでも可能だが、
@@ -15,7 +15,7 @@
  *   すべて共通化できる（.github/workflows/_playwright-test.yml）。
  *
  * 前提: テスト実行前に `storybook build` が必要（storybook-static/index.json を参照するため）
- *       package.json の vrt スクリプトにはビルドが組み込み済み。
+ *       package.json の vrt:snapshot にはビルドが組み込み済み。
  *
  * 実行: bun run vrt:snapshot（ルートからは bun run storybook:vrt:snapshot）
  */
@@ -38,16 +38,14 @@ const stories = Object.values(indexJson.entries).filter(
   (entry: any) => entry.type === "story" && !entry.tags?.includes("skip-vrt")
 );
 
+// 各ストーリー × テーマ（light / dark）に対してテストケースを動的生成
 const themes = ["light", "dark"] as const;
 
-// 各ストーリー × 各テーマに対してテストケースを動的生成
 for (const story of stories as any[]) {
   for (const theme of themes) {
     test(`${story.title} - ${story.name} [${theme}]`, async ({ page }) => {
-      // テーマは Storybook の globals パラメータで指定（カスタムデコレータが処理）
-      const themeParam = theme === "dark" ? "&globals=theme:dark" : "";
       await page.goto(
-        `/iframe.html?id=${story.id}&viewMode=story${themeParam}`
+        `/iframe.html?id=${story.id}&viewMode=story&globals=theme:${theme}`
       );
 
       // #storybook-root を inline-block にしてコンポーネントサイズにフィットさせる

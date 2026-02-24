@@ -5,7 +5,8 @@
  * デコレーター、パラメーター、グローバルスタイルの読み込みなど。
  *
  * テーマ切り替え:
- * ツールバーから Light / Dark / Side by side を選択可能。
+ * ツールバーから Auto / Light / Dark / Side by side を選択可能。
+ * Auto モードでは OS の prefers-color-scheme に従う（Playwright の colorScheme 設定が反映される）。
  * Side by side モードではライト・ダーク両方を横並びで表示する。
  */
 
@@ -19,13 +20,14 @@ const withTheme: Decorator = (Story, context) => {
   const theme = context.globals.theme;
 
   if (theme === "side-by-side") {
+    // Light 側に "light" クラスを付与し、OS ダークモード時でもライトテーマを強制する
     return (
       <div style={{ display: "flex", gap: "24px" }}>
         <div>
           <div style={{ marginBottom: "4px", fontSize: "12px", color: "#666" }}>
             Light
           </div>
-          <div className="bg-background p-4">
+          <div className="light bg-background p-4">
             <Story />
           </div>
         </div>
@@ -41,8 +43,15 @@ const withTheme: Decorator = (Story, context) => {
     );
   }
 
+  let isDark: boolean;
+  if (theme === "auto") {
+    isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  } else {
+    isDark = theme === "dark";
+  }
+
   return (
-    <div className={theme === "dark" ? "dark bg-background" : "bg-background"}>
+    <div className={isDark ? "dark bg-background" : "bg-background"}>
       <Story />
     </div>
   );
@@ -56,16 +65,17 @@ const preview: Preview = {
         title: "Theme",
         icon: "circlehollow",
         items: [
+          { value: "side-by-side", icon: "sidebar", title: "Side by side" },
           { value: "light", icon: "circlehollow", title: "Light" },
           { value: "dark", icon: "circle", title: "Dark" },
-          { value: "side-by-side", icon: "sidebar", title: "Side by side" },
+          { value: "auto", icon: "browser", title: "System" },
         ],
         dynamicTitle: true,
       },
     },
   },
   initialGlobals: {
-    theme: "light",
+    theme: "side-by-side",
   },
   decorators: [withTheme],
   parameters: {
