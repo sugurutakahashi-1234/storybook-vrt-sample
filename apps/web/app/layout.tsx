@@ -1,3 +1,6 @@
+import { ThemeToggle } from "@storybook-vrt-sample/ui";
+
+import "./globals.css";
 /**
  * ルートレイアウト
  *
@@ -6,8 +9,6 @@
  */
 import type { Metadata } from "next";
 
-import "./globals.css";
-import { ThemeToggle } from "@storybook-vrt-sample/ui";
 import { formatPageTitle } from "./utils/format";
 
 /** サイト全体のメタデータ（<title> や <meta> タグに反映される） */
@@ -27,6 +28,7 @@ export default function RootLayout({
         {/* ページ描画前にテーマを適用し、ちらつき（FOUC）を防止する */}
         {/* localStorage に値がなければ OS のカラースキームに従う */}
         <script
+          // oxlint-disable-next-line react/no-danger -- FOUC 防止のためインラインスクリプトが必須
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
