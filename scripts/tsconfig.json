@@ -1,0 +1,17 @@
+{
+  // ==============================
+  // scripts/ 用 TypeScript 設定
+  // ==============================
+  // - ルートの tsconfig.json を継承し、Bun スクリプト向けの設定のみ上書きする
+  // - ルートの strict 系オプションを緩める変更は禁止（型安全性が低下する）
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // Bun がモジュール解決を行うため bundler モードを使用
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+
+    // 自動取り込みする型定義（ルートの types: [] を上書き）
+    "types": ["bun"]
+  },
+  "include": ["./**/*.ts"]
+}

@@ -25,6 +25,7 @@ jobs:
       report-script: vrt:report:reg
       report-title: 📸 Storybook VRT Report
     permissions:
+      actions: read
       contents: write
       pull-requests: write
     secrets: inherit

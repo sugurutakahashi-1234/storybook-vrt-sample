@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - uses: Kesin11/actions-timeline@v3
       - uses: actions/checkout@v6
       - uses: oven-sh/setup-bun@v2
         with:

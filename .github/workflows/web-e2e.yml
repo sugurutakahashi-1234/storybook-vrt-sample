@@ -27,6 +27,7 @@ jobs:
       report-script: e2e:report:reg
       report-title: 🧪 E2E Test Report
     permissions:
+      actions: read
       contents: write
       pull-requests: write
     secrets: inherit
