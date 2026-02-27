@@ -1,19 +1,20 @@
-# Playwright VRT + Storybook Sample
+# Storybook VRT + E2E Sample
 
-Playwright を使ったビジュアルリグレッションテスト（VRT）と E2E テストのサンプルプロジェクトです。
+Storybook コンポーネントのビジュアルリグレッションテスト（VRT）と E2E テストのサンプルプロジェクトです。
 
 ## 技術スタック
 
-| 技術            | 用途                                                               |
-| --------------- | ------------------------------------------------------------------ |
-| Next.js 16      | アプリケーション                                                   |
-| Storybook 10    | コンポーネントカタログ                                             |
-| Playwright      | VRT + E2E テスト                                                   |
-| reg-cli         | VRT 差分 HTML レポート（スライド / オーバーレイ / 2up / ブレンド） |
-| Tailwind CSS v4 | スタイリング                                                       |
-| Oxlint + Oxfmt  | リンター + フォーマッター                                          |
-| bun             | パッケージマネージャー + モノレポ管理                              |
-| TypeScript      | 型安全性（tsgo による高速型チェック）                              |
+| 技術               | 用途                                                               |
+| ------------------ | ------------------------------------------------------------------ |
+| Next.js 16         | アプリケーション                                                   |
+| Storybook 10       | コンポーネントカタログ                                             |
+| storybook-addon-vis | VRT スクリーンショット撮影（vitest browser mode）                 |
+| Playwright         | E2E テスト                                                         |
+| reg-cli            | VRT / E2E 差分 HTML レポート（スライド / オーバーレイ / 2up / ブレンド） |
+| Tailwind CSS v4    | スタイリング                                                       |
+| Oxlint + Oxfmt     | リンター + フォーマッター                                          |
+| bun                | パッケージマネージャー + モノレポ管理                              |
+| TypeScript         | 型安全性（tsgo による高速型チェック）                              |
 
 ## プロジェクト構成
 
@@ -32,7 +33,7 @@ storybook-vrt-sample/
 # 依存関係インストール
 bun install
 
-# Playwright ブラウザインストール
+# Playwright ブラウザインストール（VRT の vitest browser mode + E2E の両方で使用）
 cd packages/ui && bunx playwright install --with-deps && cd ../..
 cd apps/web && bunx playwright install --with-deps && cd ../..
 ```
@@ -99,21 +100,47 @@ bun run test
 コンポーネントの見た目が意図せず変わっていないかをスクリーンショット比較で検証します。
 
 ```bash
-# VRT テスト実行（Storybook ビルド + スクリーンショット撮影）
+# VRT スクリーンショット撮影
 bun run storybook:vrt:snapshot
 ```
 
-#### VRT 対象外ストーリー（`skip-vrt` タグ）
+#### Playwright から storybook-addon-vis への移行
+
+VRT のスクリーンショット撮影を Playwright テストランナーから storybook-addon-vis（vitest browser mode）に移行しました。
+
+**移行の動機: VRT で必要なのは「スクリーンショット撮影」だけ**
+
+VRT の画像比較は reg-cli（REG Suite）が担っており、テストランナー側に求めるのはスクリーンショットを正確に・高速に撮ることだけです。Playwright テストランナーは `storybook build` → `http-server` → ブラウザで撮影という3段階が必要でしたが、storybook-addon-vis は vitest browser mode 上でストーリーを直接レンダリングしてスクリーンショットを撮るため、ビルドもサーバーも不要です。
+
+**移行で得られたメリット:**
+
+| 項目 | Playwright | storybook-addon-vis |
+| --- | --- | --- |
+| 事前ビルド | `storybook build` 必須 | 不要 |
+| HTTP サーバー | `http-server` 必須 | 不要 |
+| スクリーンショット範囲 | 要素セレクタを手動指定 (`#storybook-root`) | body の `display: inline-block` でコンポーネントサイズに自動フィット |
+| テーマ別撮影 | ストーリー URL のクエリパラメータで手動制御 | `vis.setup({ auto: { light, dark } })` で宣言的に設定 |
+| ストーリー列挙 | `index.json` をパースして動的生成 | `@storybook/addon-vitest` が自動列挙 |
+| VRT 除外制御 | 独自タグ `skip-vrt` | Storybook 標準の `!snapshot` タグ |
+| 依存パッケージ | `@playwright/test` + `allure-playwright` + `http-server` | `storybook-addon-vis` のみ（追加） |
+| 実行速度 (24ストーリー) | ~10s（ビルド含む） | ~3s（約70%短縮） |
+
+**検討したが見送ったツール:**
+
+- [storycap-testrun](https://github.com/reg-viz/storycap-testrun): `page.screenshot()` によるビューポート全体キャプチャのみ対応。vitest browser mode ではストーリーのルート要素（`#storybook-root`）が存在せず、要素レベルのスクリーンショットが撮れない。コンポーネント単位の正確な差分検出には不向きなため見送り。storybook-addon-vis は `iframe.locator(selector).screenshot()` で要素レベル SS をネイティブにサポートしている
+
+#### VRT 対象外ストーリー（`!snapshot` タグ）
 
 play 関数で DOM を変更するストーリー（テキスト入力、テーマトグルなど）は、
 スクリーンショットが実行タイミングにより不安定になるため VRT 対象外にできます。
 
-ストーリーの `tags` に `"skip-vrt"` を追加すると、VRT テスト（`packages/ui/vrt/all-stories.spec.ts`）が
-自動的にそのストーリーをスクリーンショット撮影対象から除外します。
+`preview.tsx` で全ストーリーに `tags: ["snapshot"]` を設定し、
+個別のストーリーに `tags: ["!snapshot"]` を追加すると VRT 対象から除外されます。
+これは storybook-addon-vis のネイティブ機能です。
 
 ```typescript
 export const Typing: Story = {
-  tags: ["skip-vrt"],
+  tags: ["!snapshot"],
   play: async ({ canvasElement }) => {
     // DOM を変更する play 関数
   },
@@ -157,14 +184,11 @@ Docker を使えばローカルと CI の環境を統一できますが、セッ
 
 ### Allure レポート
 
-テスト実行後に Allure レポートでリッチな結果を確認できます（ブラウザが自動で開きます）。
+E2E テスト実行後に Allure レポートでリッチな結果を確認できます（ブラウザが自動で開きます）。
 
 ```bash
 # E2E テストの Allure レポートを表示
 bun run web:e2e:report:allure
-
-# VRT の Allure レポートを表示
-bun run storybook:vrt:report:allure
 ```
 
 ## Git Hooks（Lefthook）
@@ -185,24 +209,22 @@ bun run storybook:vrt:report:allure
 
 ## CI/CD
 
-PR 作成時に GitHub Actions が自動実行されます。Docker コンテナは使用せず、CI ランナー上で直接 Playwright を実行します。
+PR 作成時に GitHub Actions が自動実行されます。
 
 - **CI** (`ci.yml`): 全 PR で Lint / Typecheck / Knip / Test / Build を実行
 - **Storybook VRT** (`storybook-vrt.yml`): `packages/ui/` の変更時に実行
 - **E2E テスト** (`web-e2e.yml`): `apps/web/` または `packages/ui/` の変更時に実行
 
 PR 時はベースブランチからベースラインを動的生成し、reg-cli で差分レポートを生成します。
-テスト自体は `toHaveScreenshot()` を使わないため、ビジュアル変更があってもテストは失敗しません。差分は reg-cli レポートで確認します。
-
-Allure レポートもアーティファクトとしてアップロードされ、テスト結果の詳細分析が可能です。
+VRT・E2E ともにスクリーンショット撮影が目的であり、ビジュアル変更があってもテストは失敗しません。差分は reg-cli レポートで確認します。
 
 ### テスト構成の棲み分け
 
-| レイヤー       | 役割                                                                 | ツール     | CI での判定                 |
-| -------------- | -------------------------------------------------------------------- | ---------- | --------------------------- |
-| Playwright VRT | コンポーネントのスクリーンショット撮影                               | Playwright | pass/fail（機能テストのみ） |
-| Playwright E2E | ページ遷移・レスポンシブ表示のスクリーンショット撮影 + 機能テスト    | Playwright | pass/fail（機能テストのみ） |
-| reg-cli        | リッチな差分レポート生成（スライド / オーバーレイ / 2up / ブレンド） | `reg-cli`  | レポートのみ（fail しない） |
+| レイヤー            | 役割                                                                 | ツール               | CI での判定                 |
+| ------------------- | -------------------------------------------------------------------- | -------------------- | --------------------------- |
+| storybook-addon-vis | コンポーネントのスクリーンショット撮影（vitest browser mode）        | storybook-addon-vis  | pass/fail（機能テストのみ） |
+| Playwright E2E      | ページ遷移・レスポンシブ表示のスクリーンショット撮影 + 機能テスト    | Playwright           | pass/fail（機能テストのみ） |
+| reg-cli             | リッチな差分レポート生成（スライド / オーバーレイ / 2up / ブレンド） | reg-cli              | レポートのみ（fail しない） |
 
 - ベースライン画像はリポジトリにコミットせず、ベースブランチから動的生成する
 - reg-cli はテスト実行時に `.reg/actual/` に保存されたスクリーンショットと、ベースブランチから生成した `.reg/expected/` を比較してレポートを生成する
@@ -215,15 +237,13 @@ PR がクローズ（マージ含む）されると、該当ディレクトリ�
 
 ```
 https://<owner>.github.io/<repo>/pr/<pr-number>/
-├── vrt/
-│   ├── html-report/      # Storybook VRT - Playwright HTML レポート
-│   ├── allure-report/     # Storybook VRT - Allure レポート
+├── storybook-vrt/
 │   └── reg-report/        # Storybook VRT - reg-cli 差分レポート
 │       ├── report/        #   HTML レポート（index.html）
 │       ├── actual/        #   実際のスクリーンショット
 │       ├── expected/      #   ベースラインのスクリーンショット
 │       └── diff/          #   差分画像
-└── e2e/
+└── web-e2e/
     ├── html-report/       # E2E - Playwright HTML レポート
     ├── allure-report/     # E2E - Allure レポート
     └── reg-report/        # E2E - reg-cli 差分レポート

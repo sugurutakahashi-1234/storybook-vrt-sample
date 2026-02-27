@@ -73,6 +73,7 @@ const preview: Preview = {
   initialGlobals: {
     theme: "side-by-side",
   },
+  tags: ["snapshot"],
   decorators: [withTheme],
   parameters: {
     controls: {

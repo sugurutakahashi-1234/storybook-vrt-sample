@@ -15,8 +15,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "typecheck": "tsgo --noEmit",
-    "vrt:snapshot": "storybook build --test && playwright test",
-    "vrt:report:allure": "bunx allure serve allure-results",
+    "vrt:snapshot": "vitest run --project=storybook-vrt --update",
     "vrt:report:reg": "mkdir -p .reg/report .reg/expected && reg-cli .reg/actual .reg/expected .reg/diff -R .reg/report/index.html -J .reg/out.json -M 0.01",
     "vrt:baseline:local": "rm -rf .reg/expected && mkdir -p .reg/expected && (git -C $(git rev-parse --show-toplevel) archive $(git merge-base HEAD main):packages/ui/vrt/screenshots/ 2>/dev/null | tar -x -C .reg/expected/ || true)",
     "vrt:report:reg:local": "bun run vrt:baseline:local && bun run vrt:snapshot && bun run vrt:report:reg",
@@ -30,7 +29,6 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^10.2.11",
     "@storybook/addon-docs": "^10.2.11",
     "@storybook/addon-vitest": "^10.2.11",
@@ -41,11 +39,10 @@
     "@types/react-dom": "^19.2.3",
     "@vitest/browser-playwright": "^4.0.18",
     "@vitest/coverage-v8": "^4.0.18",
-    "allure-playwright": "^3.4.5",
-    "http-server": "^14.1.1",
     "playwright": "^1.58.2",
     "reg-cli": "^0.18.14",
     "storybook": "^10.2.11",
+    "storybook-addon-vis": "^3.1.2",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"

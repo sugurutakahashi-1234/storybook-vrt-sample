@@ -36,7 +36,7 @@ export const Typing: Story = {
   args: {
     placeholder: "Enter text...",
   },
-  tags: ["skip-vrt"],
+  tags: ["!snapshot"],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const input = canvas.getByRole("textbox");
