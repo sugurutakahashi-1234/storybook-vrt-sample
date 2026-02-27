@@ -20,6 +20,7 @@ const config: StorybookConfig = {
     "@storybook/addon-docs",
     "@storybook/addon-a11y",
     "@storybook/addon-vitest",
+    "storybook-addon-vis",
   ],
 
   // React + Vite をビルドフレームワークとして使用

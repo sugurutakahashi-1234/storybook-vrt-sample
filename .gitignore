@@ -35,6 +35,12 @@ coverage/
 # https://nextjs.org/docs/app/api-reference/config/typescript
 next-env.d.ts
 
+# storybook-addon-vis（テスト結果・差分画像はコミットしない）
+**/__vis__/__diff_output__
+**/__vis__/**/__diffs__
+**/__vis__/**/__results__
+**/__vis__/local
+
 # reg-cli
 .reg/
 

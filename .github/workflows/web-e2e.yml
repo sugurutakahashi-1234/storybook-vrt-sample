@@ -15,19 +15,278 @@ on:
       - "packages/ui/**"
   workflow_dispatch:
 
+permissions:
+  actions: read
+  contents: write
+  pull-requests: write
+
+# レポートの出力先プレフィックス
+# PR 時: pr/{PR番号}  （例: pr/42）
+# 手動実行時: manual/{実行ID}  （例: manual/12345）
+env:
+  REPORT_PREFIX: ${{ github.event.pull_request.number && format('pr/{0}', github.event.pull_request.number) || format('manual/{0}', github.run_id) }}
+
 jobs:
-  e2e:
-    # NOTE: VS Code の GitHub Actions 拡張が "Unable to find reusable workflow" と表示するが、
-    # ローカルの workflow_call を解決できない拡張の既知の制限であり、実際の実行には影響しない。
-    uses: ./.github/workflows/_playwright-test.yml
-    with:
-      test-type: web-e2e
-      working-directory: apps/web
-      build-command: bun run build
-      report-script: e2e:report:reg
-      report-title: 🧪 E2E Test Report
-    permissions:
-      actions: read
-      contents: write
-      pull-requests: write
-    secrets: inherit
+  test:
+    name: "\U0001F9EA E2E Test Report"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      vrt-table: ${{ steps.reg-result.outputs.vrt-table }}
+    steps:
+      # ────────────────────────────────────────
+      # セットアップ
+      # ────────────────────────────────────────
+
+      - uses: actions/checkout@v6
+        with:
+          # ベースライン生成で base branch を参照するため全履歴が必要
+          fetch-depth: 0
+
+      # bun をセットアップ（パッケージマネージャー）
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # Playwright ブラウザバイナリのキャッシュ（Chromium のみ）
+      # キーに Playwright バージョンを含め、バージョン更新時に自動で再ダウンロードされる
+      - name: Get Playwright version
+        id: pw-version
+        run: echo "version=$(bunx playwright --version | awk '{print $2}')" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: bunx playwright install --with-deps chromium
+
+      # キャッシュヒット時もシステム依存（libgbm 等）のインストールは必要
+      - name: Install Playwright system dependencies
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: bunx playwright install-deps chromium
+
+      # モノレポ全体の依存関係をインストール（lockfile を厳密に使用）
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # ────────────────────────────────────────
+      # ベースライン生成 → ビルド → テスト実行
+      # ────────────────────────────────────────
+
+      # PR 時のみ: ベースブランチのコードからベースラインのスクリーンショットを生成し、
+      # .reg/expected/ にコピーする。これにより reg-cli で差分比較が可能になる。
+      # git worktree を使って別ディレクトリにベースブランチをチェックアウトし、
+      # そこでビルド＆テストを実行してスクリーンショットを取得する。
+      - name: Generate baselines from base branch
+        if: github.event_name == 'pull_request'
+        run: |
+          BASE_REF="${{ github.event.pull_request.base.ref }}"
+          git worktree add /tmp/baseline "origin/${BASE_REF}" --detach
+          cd /tmp/baseline
+          bun install --frozen-lockfile
+          cd apps/web
+          bun run build
+          bunx playwright test || true
+          mkdir -p $GITHUB_WORKSPACE/apps/web/.reg/expected/
+          cp -r .reg/actual/* $GITHUB_WORKSPACE/apps/web/.reg/expected/ || true
+          cd $GITHUB_WORKSPACE
+          git worktree remove /tmp/baseline --force
+
+      # 現在のブランチで Next.js ビルド
+      - name: Build
+        run: bun run build
+        working-directory: apps/web
+
+      # Playwright テスト実行（ページ遷移・レスポンシブ検証）
+      # テスト結果は playwright-report/ と allure-results/ に出力される
+      - name: Run Playwright tests
+        run: bunx playwright test
+        working-directory: apps/web
+        env:
+          CI: true
+
+      # ────────────────────────────────────────
+      # レポート生成
+      # ────────────────────────────────────────
+
+      # GitHub Pages から Allure 履歴ファイル（JSONL）をダウンロードする。
+      # Allure Report v3 では history/ ディレクトリではなく単一の JSONL ファイルで履歴を管理する。
+      # 初回実行時やページ未デプロイ時は 404 になるが、|| true で無視する。
+      - name: Download previous Allure history
+        if: always()
+        run: |
+          PAGES_BASE="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          HISTORY_URL="${PAGES_BASE}/latest/web-e2e/allure-history.jsonl"
+          curl -sSfL "${HISTORY_URL}" -o "allure-history.jsonl" || true
+        working-directory: apps/web
+
+      # allure-results/ から Allure レポートを生成（リッチなテスト結果ビューア）
+      # --history-path で JSONL 履歴ファイルを指定すると、トレンドグラフが表示される。
+      # appendHistory（デフォルト true）により現在の実行結果が履歴ファイルに追記される。
+      - name: Generate Allure report
+        if: always()
+        run: |
+          HISTORY_OPT=""
+          if [ -f allure-history.jsonl ]; then
+            HISTORY_OPT="--history-path allure-history.jsonl"
+          fi
+          rm -rf allure-report && bunx allure generate allure-results -o allure-report $HISTORY_OPT
+        working-directory: apps/web
+
+      # reg-cli: .reg/expected/（ベースライン）と .reg/actual/（現在）を比較し、
+      # 差分レポートを .reg/ に生成する。結果サマリーは PR コメント用に GITHUB_OUTPUT に出力。
+      - name: Run reg-cli comparison
+        if: always()
+        id: reg-result
+        run: |
+          bun run e2e:report:reg || true
+
+          # .reg/out.json から各カテゴリの件数を取得
+          CHANGED=$(jq '.diffItems | length' .reg/out.json)
+          PASSED=$(jq '.passedItems | length' .reg/out.json)
+          NEW=$(jq '.newItems | length' .reg/out.json)
+          DELETED=$(jq '.deletedItems | length' .reg/out.json)
+
+          # PR コメント用のサマリーテーブルを組み立て（reg-cli レポートと同じ順序、件数 0 は省略）
+          VRT_TABLE="| Status | Count |
+          |--------|-------|"
+          [ "$CHANGED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
+          | ⚠️ Changed | $CHANGED |"
+          [ "$NEW" -gt 0 ] && VRT_TABLE="$VRT_TABLE
+          | 🆕 New | $NEW |"
+          [ "$DELETED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
+          | 🗑️ Deleted | $DELETED |"
+          [ "$PASSED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
+          | ✅ Passed | $PASSED |"
+
+          # GITHUB_OUTPUT にヒアドキュメントで出力（複数行対応）
+          echo "vrt-table<<EOF" >> $GITHUB_OUTPUT
+          echo "$VRT_TABLE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        working-directory: apps/web
+
+      # ────────────────────────────────────────
+      # アップロード＆デプロイ
+      # ────────────────────────────────────────
+
+      # テスト失敗時のみ: デバッグ用にテスト結果（スクリーンショット・トレース等）をアップロード
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: web-e2e-report
+          path: apps/web/test-results/
+          retention-days: 30
+
+      # Playwright 標準の HTML レポートをアーティファクトとしてアップロード
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: web-e2e-html-report
+          path: apps/web/playwright-report/
+          retention-days: 30
+
+      # Allure レポートをアーティファクトとしてアップロード
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: web-e2e-allure-report
+          path: apps/web/allure-report/
+          retention-days: 30
+
+      # 全レポートを1つのディレクトリにまとめ、1回の push でデプロイする。
+      # keep_files: true で既存のレポートを保持する（他の PR のレポートを消さない）
+      - name: Stage reports for GitHub Pages
+        if: always()
+        run: |
+          DEST="${{ env.REPORT_PREFIX }}/web-e2e"
+          mkdir -p _gh-pages-staging/${DEST}/html-report
+          mkdir -p _gh-pages-staging/${DEST}/allure-report
+          mkdir -p _gh-pages-staging/${DEST}/reg-report
+          cp -r playwright-report/* _gh-pages-staging/${DEST}/html-report/ || true
+          cp -r allure-report/* _gh-pages-staging/${DEST}/allure-report/ || true
+          cp -r .reg/* _gh-pages-staging/${DEST}/reg-report/ || true
+
+          # Allure 履歴ファイル（JSONL）を共有パスにコピー（全 PR で履歴を共有するため）
+          if [ -f allure-history.jsonl ]; then
+            mkdir -p _gh-pages-staging/latest/web-e2e
+            cp allure-history.jsonl _gh-pages-staging/latest/web-e2e/allure-history.jsonl
+          fi
+        working-directory: apps/web
+
+      # deploy ジョブに渡すためのアーティファクト（ステージング済みディレクトリ一式）
+      - name: Upload deploy payload
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: web-e2e-deploy-payload
+          path: apps/web/_gh-pages-staging/
+          retention-days: 1
+
+  # ────────────────────────────────────────
+  # デプロイ（gh-pages への push のみ直列化）
+  # ────────────────────────────────────────
+  deploy:
+    name: "Deploy \U0001F9EA E2E Test Report"
+    needs: test
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # gh-pages ブランチへの push が競合しないようにキューイング
+    concurrency:
+      group: gh-pages-deploy
+      cancel-in-progress: false
+    steps:
+      - name: Download deploy payload
+        uses: actions/download-artifact@v6
+        with:
+          name: web-e2e-deploy-payload
+          path: _gh-pages-staging/
+
+      - name: Deploy reports to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _gh-pages-staging
+          keep_files: true
+
+      # ────────────────────────────────────────
+      # PR コメント
+      # ────────────────────────────────────────
+
+      # sticky-pull-request-comment: 同じ header のコメントがあれば更新、なければ新規作成
+      # 各レポートの GitHub Pages URL と reg-cli の差分サマリーを表示する
+      - name: Comment PR with report links
+        if: always()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: web-e2e-report
+          message: |
+            ## 🧪 E2E Test Report
+
+            ${{ needs.test.outputs.vrt-table }}
+
+            | Report | Link |
+            |--------|------|
+            | reg-cli | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/web-e2e/reg-report/report/ |
+            | Playwright HTML | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/web-e2e/html-report/ |
+            | Allure | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/web-e2e/allure-report/ |
+
+  # ────────────────────────────────────────
+  # ワークフロー実行タイムライン可視化
+  # ────────────────────────────────────────
+  actions-timeline:
+    name: Actions Timeline
+    needs: [test, deploy]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: Kesin11/actions-timeline@v3

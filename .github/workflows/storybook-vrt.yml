@@ -1,8 +1,8 @@
 # Storybook VRT（ビジュアルリグレッションテスト）ワークフロー
 #
 # packages/ui/ 配下のファイルが変更された PR で自動実行される。
-# Storybook をビルドし、各コンポーネントのスクリーンショットを撮影。
-# PR 時はベースブランチからベースラインを動的生成し、reg-cli で差分レポートを生成する。
+# storybook-addon-vis + vitest browser mode でスクリーンショットを撮影し、
+# reg-cli で差分レポートを生成する。Storybook ビルド不要。
 name: Storybook VRT
 
 on:
@@ -13,19 +13,200 @@ on:
       - "packages/ui/**"
   workflow_dispatch:
 
+permissions:
+  actions: read
+  contents: write
+  pull-requests: write
+
+# レポートの出力先プレフィックス
+# PR 時: pr/{PR番号}  （例: pr/42）
+# 手動実行時: manual/{実行ID}  （例: manual/12345）
+env:
+  REPORT_PREFIX: ${{ github.event.pull_request.number && format('pr/{0}', github.event.pull_request.number) || format('manual/{0}', github.run_id) }}
+
 jobs:
-  vrt:
-    # NOTE: VS Code の GitHub Actions 拡張が "Unable to find reusable workflow" と表示するが、
-    # ローカルの workflow_call を解決できない拡張の既知の制限であり、実際の実行には影響しない。
-    uses: ./.github/workflows/_playwright-test.yml
-    with:
-      test-type: storybook-vrt
-      working-directory: packages/ui
-      build-command: bun run build-storybook
-      report-script: vrt:report:reg
-      report-title: 📸 Storybook VRT Report
-    permissions:
-      actions: read
-      contents: write
-      pull-requests: write
-    secrets: inherit
+  test:
+    name: "\U0001F4F8 Storybook VRT"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      vrt-table: ${{ steps.reg-result.outputs.vrt-table }}
+    steps:
+      # ────────────────────────────────────────
+      # セットアップ
+      # ────────────────────────────────────────
+
+      - uses: actions/checkout@v6
+        with:
+          # ベースライン生成で base branch を参照するため全履歴が必要
+          fetch-depth: 0
+
+      # bun をセットアップ（パッケージマネージャー）
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # Playwright ブラウザバイナリのキャッシュ（Chromium のみ）
+      # vitest browser mode が内部で Playwright を使用
+      - name: Get Playwright version
+        id: pw-version
+        run: echo "version=$(bunx playwright --version | awk '{print $2}')" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: bunx playwright install --with-deps chromium
+
+      # キャッシュヒット時もシステム依存（libgbm 等）のインストールは必要
+      - name: Install Playwright system dependencies
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: bunx playwright install-deps chromium
+
+      # モノレポ全体の依存関係をインストール（lockfile を厳密に使用）
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # ────────────────────────────────────────
+      # ベースライン生成 → テスト実行
+      # ────────────────────────────────────────
+
+      # PR 時のみ: ベースブランチのコードからベースラインのスクリーンショットを生成し、
+      # .reg/expected/ にコピーする。これにより reg-cli で差分比較が可能になる。
+      - name: Generate baselines from base branch
+        if: github.event_name == 'pull_request'
+        run: |
+          BASE_REF="${{ github.event.pull_request.base.ref }}"
+          git worktree add /tmp/baseline "origin/${BASE_REF}" --detach
+          cd /tmp/baseline
+          bun install --frozen-lockfile
+          cd packages/ui
+          bun run vrt:snapshot || true
+          mkdir -p $GITHUB_WORKSPACE/packages/ui/.reg/expected/
+          cp -r .reg/actual/* $GITHUB_WORKSPACE/packages/ui/.reg/expected/ || true
+          cd $GITHUB_WORKSPACE
+          git worktree remove /tmp/baseline --force
+
+      # vitest browser mode でスクリーンショット撮影（Storybook ビルド不要）
+      - name: Run VRT snapshots
+        run: bun run vrt:snapshot
+        working-directory: packages/ui
+        env:
+          CI: true
+
+      # ────────────────────────────────────────
+      # レポート生成
+      # ────────────────────────────────────────
+
+      # reg-cli: .reg/expected/（ベースライン）と .reg/actual/（現在）を比較し、
+      # 差分レポートを .reg/ に生成する。結果サマリーは PR コメント用に GITHUB_OUTPUT に出力。
+      - name: Run reg-cli comparison
+        if: always()
+        id: reg-result
+        run: |
+          bun run vrt:report:reg || true
+
+          # .reg/out.json から各カテゴリの件数を取得
+          CHANGED=$(jq '.diffItems | length' .reg/out.json)
+          PASSED=$(jq '.passedItems | length' .reg/out.json)
+          NEW=$(jq '.newItems | length' .reg/out.json)
+          DELETED=$(jq '.deletedItems | length' .reg/out.json)
+
+          # PR コメント用のサマリーテーブルを組み立て（reg-cli レポートと同じ順序、件数 0 は省略）
+          VRT_TABLE="| Status | Count |
+          |--------|-------|"
+          [ "$CHANGED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
+          | ⚠️ Changed | $CHANGED |"
+          [ "$NEW" -gt 0 ] && VRT_TABLE="$VRT_TABLE
+          | 🆕 New | $NEW |"
+          [ "$DELETED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
+          | 🗑️ Deleted | $DELETED |"
+          [ "$PASSED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
+          | ✅ Passed | $PASSED |"
+
+          # GITHUB_OUTPUT にヒアドキュメントで出力（複数行対応）
+          echo "vrt-table<<EOF" >> $GITHUB_OUTPUT
+          echo "$VRT_TABLE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        working-directory: packages/ui
+
+      # ────────────────────────────────────────
+      # アップロード＆デプロイ
+      # ────────────────────────────────────────
+
+      # reg-cli レポートをステージング
+      - name: Stage reports for GitHub Pages
+        if: always()
+        run: |
+          DEST="${{ env.REPORT_PREFIX }}/storybook-vrt"
+          mkdir -p _gh-pages-staging/${DEST}/reg-report
+          cp -r .reg/* _gh-pages-staging/${DEST}/reg-report/ || true
+        working-directory: packages/ui
+
+      # deploy ジョブに渡すためのアーティファクト（ステージング済みディレクトリ一式）
+      - name: Upload deploy payload
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: storybook-vrt-deploy-payload
+          path: packages/ui/_gh-pages-staging/
+          retention-days: 1
+
+  # ────────────────────────────────────────
+  # デプロイ（gh-pages への push のみ直列化）
+  # ────────────────────────────────────────
+  deploy:
+    name: "Deploy \U0001F4F8 Storybook VRT Report"
+    needs: test
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # gh-pages ブランチへの push が競合しないようにキューイング
+    concurrency:
+      group: gh-pages-deploy
+      cancel-in-progress: false
+    steps:
+      - name: Download deploy payload
+        uses: actions/download-artifact@v6
+        with:
+          name: storybook-vrt-deploy-payload
+          path: _gh-pages-staging/
+
+      - name: Deploy reports to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _gh-pages-staging
+          keep_files: true
+
+      # sticky-pull-request-comment: 同じ header のコメントがあれば更新、なければ新規作成
+      - name: Comment PR with report links
+        if: always()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: storybook-vrt-report
+          message: |
+            ## 📸 Storybook VRT Report
+
+            ${{ needs.test.outputs.vrt-table }}
+
+            | Report | Link |
+            |--------|------|
+            | reg-cli | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/storybook-vrt/reg-report/report/ |
+
+  # ────────────────────────────────────────
+  # ワークフロー実行タイムライン可視化
+  # ────────────────────────────────────────
+  actions-timeline:
+    name: Actions Timeline
+    needs: [test, deploy]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: Kesin11/actions-timeline@v3
