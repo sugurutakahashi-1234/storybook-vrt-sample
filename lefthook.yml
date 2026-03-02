@@ -48,34 +48,41 @@ pre-commit:
 pre-push:
   parallel: true
   jobs:
+    # ── 静的解析 ──
     # Oxlint + Oxfmt によるリント + フォーマットチェック（修正なし、CI と同等）
     - name: lint-check
       timeout: 20s
-      run: bun run lint || (echo "" && echo "❌ リント/フォーマットエラーがあります" && echo "👉 bun run fix で自動修正" && exit 1)
+      run: bun run lint || (echo "" && echo "❌ リント/フォーマットエラーがあります" && echo "👉 bun run lint:fix で自動修正" && exit 1)
+    # 依存パッケージバージョン整合性チェック（モノレポ内で同一パッケージのバージョンが揃っているか）
+    - name: syncpack
+      timeout: 20s
+      run: bun run syncpack:lint || (echo "" && echo "❌ パッケージバージョンが不整合です" && echo "👉 bun syncpack fix で自動修正" && exit 1)
     # TypeScript 型チェック（tsgo --noEmit）
     - name: typecheck
       timeout: 20s
       run: bun run typecheck || (echo "" && echo "❌ 型エラーがあります" && echo "👉 bun run typecheck で詳細を確認" && exit 1)
-    # Next.js ビルド
-    - name: build
-      timeout: 20s
-      run: bun run build || (echo "" && echo "❌ ビルドに失敗しました" && echo "👉 bun run build で詳細を確認" && exit 1)
-    # bun バージョン整合性チェック（packageManager vs インストール済みバージョン）
-    - name: bun-version-check
-      timeout: 20s
-      run: bun run scripts/check-bun-version.ts || (echo "" && echo "❌ bun のバージョンが不一致です" && echo "👉 package.json の packageManager を確認" && exit 1)
-    # 依存パッケージバージョン整合性チェック（モノレポ内で同一パッケージのバージョンが揃っているか）
-    - name: syncpack
-      timeout: 20s
-      run: bun syncpack lint || (echo "" && echo "❌ パッケージバージョンが不整合です" && echo "👉 bun syncpack fix で自動修正" && exit 1)
     # 未使用ファイル・依存関係チェック
     - name: knip
       timeout: 20s
       run: bun run knip || (echo "" && echo "❌ 未使用のファイル・依存関係があります" && echo "👉 bun run knip で詳細を確認" && exit 1)
+
+    # ── ランタイム ──
+    # bun バージョン整合性チェック（packageManager vs インストール済みバージョン）
+    - name: bun-version-check
+      timeout: 20s
+      run: bun run bun-version-check || (echo "" && echo "❌ bun のバージョンが不一致です" && echo "👉 package.json の packageManager を確認" && exit 1)
     # ユニットテスト（bun test）
     - name: unit-test
       timeout: 20s
       run: bun run test || (echo "" && echo "❌ ユニットテストが失敗しました" && echo "👉 bun run test で詳細を確認" && exit 1)
+
+    # ── 統合 ──
+    # Next.js ビルド
+    - name: build
+      timeout: 20s
+      run: bun run build || (echo "" && echo "❌ ビルドに失敗しました" && echo "👉 bun run build で詳細を確認" && exit 1)
+
+    # ── ビジュアルテスト ──
     # Storybook テスト群（Vitest browser mode）
     # 並列実行のために 2 種類のキャッシュをプロジェクトごとに分離している。
     # 1. cacheDir: Vite の deps 事前バンドルキャッシュ（vitest.config.ts で設定）
