@@ -131,12 +131,7 @@ jobs:
       # appendHistory（デフォルト true）により現在の実行結果が履歴ファイルに追記される。
       - name: Generate Allure report
         if: always()
-        run: |
-          HISTORY_OPT=""
-          if [ -f allure-history.jsonl ]; then
-            HISTORY_OPT="--history-path allure-history.jsonl"
-          fi
-          rm -rf allure-report && bunx allure generate allure-results -o allure-report $HISTORY_OPT
+        run: rm -rf allure-report && bunx allure generate allure-results -o allure-report --history-path allure-history.jsonl
         working-directory: apps/web
 
       # reg-cli: .reg/expected/（ベースライン）と .reg/actual/（現在）を比較し、
@@ -216,10 +211,8 @@ jobs:
           cp -r .reg/* _gh-pages-staging/${DEST}/reg-report/ || true
 
           # Allure 履歴ファイル（JSONL）を共有パスにコピー（全 PR で履歴を共有するため）
-          if [ -f allure-history.jsonl ]; then
-            mkdir -p _gh-pages-staging/latest/web-e2e
-            cp allure-history.jsonl _gh-pages-staging/latest/web-e2e/allure-history.jsonl
-          fi
+          mkdir -p _gh-pages-staging/latest/web-e2e
+          cp allure-history.jsonl _gh-pages-staging/latest/web-e2e/allure-history.jsonl
         working-directory: apps/web
 
       # deploy ジョブに渡すためのアーティファクト（ステージング済みディレクトリ一式）
