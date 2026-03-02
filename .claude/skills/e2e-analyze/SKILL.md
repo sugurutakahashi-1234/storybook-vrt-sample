@@ -46,14 +46,14 @@ allowed-tools: Bash(bun run *), Bash(git diff *), Bash(git log *), Bash(git merg
 `apps/web` ディレクトリで以下を実行する:
 
 ```bash
-cd apps/web && bun run e2e:report:reg:local
+cd apps/web && bun run e2e:reg:local
 ```
 
 このコマンドは以下を一括実行する:
 
-- `e2e:baseline:local`: main ブランチの baseline スクリーンショットを `.reg/expected/` に取得
+- main ブランチの baseline スクリーンショットを `.reg/expected/` に取得
 - `e2e:playwright`: Playwright E2E テスト実行（`.reg/actual/` にスクリーンショット保存）
-- `e2e:report:reg`: reg-cli で expected vs actual を比較し `.reg/out.json` と `.reg/diff/` を生成
+- `e2e:reg`: reg-cli で expected vs actual を比較し `.reg/out.json` と `.reg/diff/` を生成
 
 差分検出時は reg-cli が exit code 1 を返すが、これは正常動作。
 

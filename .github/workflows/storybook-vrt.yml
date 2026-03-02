@@ -110,7 +110,7 @@ jobs:
         if: always()
         id: reg-result
         run: |
-          bun run storybook:report:reg || true
+          bun run storybook:reg || true
 
           # .reg/out.json から各カテゴリの件数を取得
           CHANGED=$(jq '.diffItems | length' .reg/out.json)

@@ -140,7 +140,7 @@ jobs:
         if: always()
         id: reg-result
         run: |
-          bun run e2e:report:reg || true
+          bun run e2e:reg || true
 
           # .reg/out.json から各カテゴリの件数を取得
           CHANGED=$(jq '.diffItems | length' .reg/out.json)

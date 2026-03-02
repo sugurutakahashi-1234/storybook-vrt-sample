@@ -46,14 +46,14 @@ allowed-tools: Bash(bun run *), Bash(git diff *), Bash(git log *), Bash(git merg
 `packages/ui` ディレクトリで以下を実行する:
 
 ```bash
-cd packages/ui && bun run storybook:report:reg:local
+cd packages/ui && bun run storybook:reg:local
 ```
 
 このコマンドは以下を一括実行する:
 
-- `storybook:baseline:local`: main ブランチの baseline スクリーンショットを `.reg/expected/` に取得
+- main ブランチの baseline スクリーンショットを `.reg/expected/` に取得
 - `storybook:snapshot`: vitest browser mode でスクリーンショット撮影（`.reg/actual/` にスクリーンショット保存）
-- `storybook:report:reg`: reg-cli で expected vs actual を比較し `.reg/out.json` と `.reg/diff/` を生成
+- `storybook:reg`: reg-cli で expected vs actual を比較し `.reg/out.json` と `.reg/diff/` を生成
 
 差分検出時は reg-cli が exit code 1 を返すが、これは正常動作。
 
