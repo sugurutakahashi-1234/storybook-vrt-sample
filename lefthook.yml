@@ -97,7 +97,7 @@ pre-push:
         # packages/ui/ または bun.lock に変更がなければスキップ
         - run: git diff origin/main...HEAD --quiet -- 'packages/ui/' 'bun.lock'
       timeout: 20s
-      run: CACHE_DIR=packages/ui/node_modules/.cache/sb-snapshot bun run storybook:vrt:snapshot && git diff --quiet packages/ui/vrt/screenshots/ && ! git ls-files --others --exclude-standard packages/ui/vrt/screenshots/ | grep -q . || (echo "" && echo "❌ VRT スクリーンショットに差分があります" && echo "👉 bun run storybook:vrt:snapshot && git add packages/ui/vrt/screenshots/ && git commit" && exit 1)
+      run: CACHE_DIR=packages/ui/node_modules/.cache/sb-snapshot bun run storybook:snapshot && git diff --quiet packages/ui/vrt/screenshots/ && ! git ls-files --others --exclude-standard packages/ui/vrt/screenshots/ | grep -q . || (echo "" && echo "❌ VRT スクリーンショットに差分があります" && echo "👉 bun run storybook:snapshot && git add packages/ui/vrt/screenshots/ && git commit" && exit 1)
     # E2E テスト（Playwright / Next.js dev サーバーを自動起動して実行）
     # スクリーンショットに差分があれば push を失敗させる（コミットし忘れ防止）
     - name: e2e-test

@@ -12,7 +12,7 @@
     "typecheck": "bun run --filter '*' typecheck",
     "storybook": "bun run --filter @storybook-vrt-sample/ui storybook",
     "storybook:test": "bun run --filter @storybook-vrt-sample/ui test:storybook",
-    "storybook:vrt:snapshot": "bun run --filter @storybook-vrt-sample/ui vrt:snapshot",
+    "storybook:snapshot": "bun run --filter @storybook-vrt-sample/ui storybook:snapshot",
     "e2e": "bun run --filter web e2e:playwright",
     "knip": "knip --config knip.config.mts",
     "lint": "oxlint . && oxfmt --check .",

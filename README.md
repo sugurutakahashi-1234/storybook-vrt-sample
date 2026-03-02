@@ -111,7 +111,7 @@ bun run storybook:test
 
 ```bash
 # VRT スクリーンショット撮影
-bun run storybook:vrt:snapshot
+bun run storybook:snapshot
 ```
 
 #### Playwright から storybook-addon-vis への移行

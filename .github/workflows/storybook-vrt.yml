@@ -87,7 +87,7 @@ jobs:
           cd /tmp/baseline
           bun install --frozen-lockfile
           cd packages/ui
-          bun run vrt:snapshot || true
+          bun run storybook:snapshot || true
           mkdir -p $GITHUB_WORKSPACE/packages/ui/.reg/expected/
           cp -r .reg/actual/* $GITHUB_WORKSPACE/packages/ui/.reg/expected/ || true
           cd $GITHUB_WORKSPACE
@@ -95,7 +95,7 @@ jobs:
 
       # vitest browser mode でスクリーンショット撮影（Storybook ビルド不要）
       - name: Run VRT snapshots
-        run: bun run vrt:snapshot
+        run: bun run storybook:snapshot
         working-directory: packages/ui
         env:
           CI: true
@@ -110,7 +110,7 @@ jobs:
         if: always()
         id: reg-result
         run: |
-          bun run vrt:report:reg || true
+          bun run storybook:report:reg || true
 
           # .reg/out.json から各カテゴリの件数を取得
           CHANGED=$(jq '.diffItems | length' .reg/out.json)
