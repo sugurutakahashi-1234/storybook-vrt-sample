@@ -25,7 +25,8 @@ const config: StorybookConfig = {
     // storybook-addon-vis: VRT 用の画像スナップショット比較機能を提供
     "storybook-addon-vis",
     // addon-mcp: AI エージェントが MCP 経由で Storybook のコンポーネント情報にアクセス可能にする
-    // test: false は addon-vitest が同一 configDir の複数プロジェクト名上書きを行うため無効化（#32427）
+    // test: false は addon-vitest が同一 configDir の複数プロジェクト名上書きを行うため無効化
+    // https://github.com/storybookjs/storybook/issues/32427
     {
       name: "@storybook/addon-mcp",
       options: {
