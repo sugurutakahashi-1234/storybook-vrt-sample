@@ -20,13 +20,14 @@ const config: StorybookConfig = {
     "@storybook/addon-docs",
     // addon-a11y: アクセシビリティチェック（axe-core ベース）を Storybook UI に統合
     "@storybook/addon-a11y",
-    // addon-vitest: Storybook ストーリーを Vitest テストとして実行
-    "@storybook/addon-vitest",
+    // addon-vitest: Storybook UI にテスト実行パネルを提供（vitest plugin としては vitest.config.ts で使用）
+    // 同一 configDir で複数プロジェクトを定義するとプロジェクト名が衝突しクラッシュするため無効化
+    // https://github.com/storybookjs/storybook/issues/32427
+    // "@storybook/addon-vitest",
     // storybook-addon-vis: VRT 用の画像スナップショット比較機能を提供
     "storybook-addon-vis",
     // addon-mcp: AI エージェントが MCP 経由で Storybook のコンポーネント情報にアクセス可能にする
-    // test: false は addon-vitest が同一 configDir の複数プロジェクト名上書きを行うため無効化
-    // https://github.com/storybookjs/storybook/issues/32427
+    // test: false は addon-vitest の UI 連携が無効のため不要
     {
       name: "@storybook/addon-mcp",
       options: {
