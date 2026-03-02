@@ -76,15 +76,20 @@ pre-push:
     - name: unit-test
       timeout: 20s
       run: bun run test || (echo "" && echo "❌ ユニットテストが失敗しました" && echo "👉 bun run test で詳細を確認" && exit 1)
-    # Storybook コンポーネントテスト（Vitest: Interactions + a11y）
-    # storybook-test と storybook-vrt-snapshot は異なるポート（63315 / 63316）で並列実行可能
-    - name: storybook-test
-      timeout: 20s
-      run: bun run --filter @storybook-vrt-sample/ui test:storybook || (echo "" && echo "❌ Storybook テストが失敗しました" && echo "👉 bun run --filter @storybook-vrt-sample/ui test:storybook で詳細を確認" && exit 1)
-    # Storybook VRT スクリーンショット撮影 + 差分チェック（コミットし忘れ防止）
-    - name: storybook-vrt-snapshot
-      timeout: 20s
-      run: bun run storybook:vrt:snapshot && git diff --quiet packages/ui/vrt/screenshots/ && ! git ls-files --others --exclude-standard packages/ui/vrt/screenshots/ | grep -q . || (echo "" && echo "❌ VRT スクリーンショットに差分があります" && echo "👉 bun run storybook:vrt:snapshot && git add packages/ui/vrt/screenshots/ && git commit" && exit 1)
+    # Storybook テスト群（Vitest browser mode）
+    # 同一 Vite deps キャッシュを共有するため並列実行すると
+    # "Failed to fetch dynamically imported module" が発生する。
+    # piped group で順次実行し安定性を確保する。
+    - name: storybook-tests
+      group:
+        piped: true
+        jobs:
+          - name: storybook-test
+            timeout: 20s
+            run: bun run --filter @storybook-vrt-sample/ui test:storybook || (echo "" && echo "❌ Storybook テストが失敗しました" && echo "👉 bun run --filter @storybook-vrt-sample/ui test:storybook で詳細を確認" && exit 1)
+          - name: storybook-vrt-snapshot
+            timeout: 20s
+            run: bun run storybook:vrt:snapshot && git diff --quiet packages/ui/vrt/screenshots/ && ! git ls-files --others --exclude-standard packages/ui/vrt/screenshots/ | grep -q . || (echo "" && echo "❌ VRT スクリーンショットに差分があります" && echo "👉 bun run storybook:vrt:snapshot && git add packages/ui/vrt/screenshots/ && git commit" && exit 1)
     # E2E テスト（Playwright / Next.js dev サーバーを自動起動して実行）
     # スクリーンショットに差分があれば push を失敗させる（コミットし忘れ防止）
     - name: e2e-test
