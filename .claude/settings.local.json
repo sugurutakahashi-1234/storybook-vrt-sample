@@ -57,5 +57,7 @@
       "Bash(vitest run:*)",
       "mcp__storybook-mcp__*"
     ]
-  }
+  },
+  "enabledMcpjsonServers": ["storybook-mcp"],
+  "enableAllProjectMcpServers": true
 }
