@@ -127,8 +127,8 @@ jobs:
         working-directory: apps/web
 
       # allure-results/ から Allure レポートを生成（リッチなテスト結果ビューア）
-      # --history-path で JSONL 履歴ファイルを指定すると、トレンドグラフが表示される。
-      # appendHistory（デフォルト true）により現在の実行結果が履歴ファイルに追記される。
+      # --history-path: 履歴ファイルが存在すれば読み込んで追記、なければ新規作成する。
+      # これにより初回実行でも履歴ファイルが生成され、以降トレンドグラフが表示される。
       - name: Generate Allure report
         if: always()
         run: rm -rf allure-report && bunx allure generate allure-results -o allure-report --history-path allure-history.jsonl
