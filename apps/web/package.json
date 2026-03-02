@@ -24,10 +24,10 @@
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.2.1",
-    "@types/node": "^25.3.0",
+    "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "allure-playwright": "^3.4.5",
+    "allure-playwright": "^3.5.0",
     "postcss": "^8.5.6",
     "reg-cli": "^0.18.14",
     "tailwindcss": "^4.2.1",

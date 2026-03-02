@@ -1,7 +1,12 @@
+# ==============================================
 # CI ワークフロー
-#
+# ==============================================
 # 全 PR で自動実行される。
-# リント・フォーマット、型チェック、未使用コード検出、ユニットテスト、ビルドを検証する。
+# 静的解析、ユニットテスト、ビルドを検証する。
+#
+# セクション構成は ci スクリプト・lefthook pre-push と統一:
+#   静的解析 → ランタイム → 統合
+# ==============================================
 name: CI
 
 on:
@@ -11,10 +16,11 @@ on:
 
 jobs:
   ci:
-    name: Lint / Typecheck / Knip / Test / Build
+    name: Lint / Syncpack / Typecheck / Knip / Test / Build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      # ── セットアップ ──
       - uses: Kesin11/actions-timeline@v3
       - uses: actions/checkout@v6
       - uses: oven-sh/setup-bun@v2
@@ -22,8 +28,12 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
 
+      # ── 静的解析 ──
       - name: Lint & Format
         run: bun run lint
+
+      - name: Syncpack (version consistency)
+        run: bun run syncpack:lint
 
       - name: Type Check
         run: bun run typecheck
@@ -31,8 +41,10 @@ jobs:
       - name: Knip (unused code detection)
         run: bun run knip
 
+      # ── ランタイム ──
       - name: Unit Test
         run: bun run test
 
+      # ── 統合 ──
       - name: Build
         run: bun run build
