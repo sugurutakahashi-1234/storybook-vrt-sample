@@ -46,32 +46,32 @@ pre-push:
   jobs:
     # Oxlint + Oxfmt によるリント + フォーマットチェック（修正なし、CI と同等）
     - name: lint-check
-      run: bun run lint
+      run: bun run lint || (echo "" && echo "❌ リント/フォーマットエラーがあります" && echo "👉 bun run fix で自動修正" && exit 1)
     # TypeScript 型チェック（tsgo --noEmit）
     - name: typecheck
-      run: bun run typecheck
+      run: bun run typecheck || (echo "" && echo "❌ 型エラーがあります" && echo "👉 bun run typecheck で詳細を確認" && exit 1)
     # Next.js ビルド
     - name: build
-      run: bun run build
+      run: bun run build || (echo "" && echo "❌ ビルドに失敗しました" && echo "👉 bun run build で詳細を確認" && exit 1)
     # bun バージョン整合性チェック（packageManager vs インストール済みバージョン）
     - name: bun-version-check
-      run: bun run scripts/check-bun-version.ts
+      run: bun run scripts/check-bun-version.ts || (echo "" && echo "❌ bun のバージョンが不一致です" && echo "👉 package.json の packageManager を確認" && exit 1)
     # 依存パッケージバージョン整合性チェック（モノレポ内で同一パッケージのバージョンが揃っているか）
     - name: syncpack
-      run: bun syncpack lint
+      run: bun syncpack lint || (echo "" && echo "❌ パッケージバージョンが不整合です" && echo "👉 bun syncpack fix で自動修正" && exit 1)
     # 未使用ファイル・依存関係チェック
     - name: knip
-      run: bun run knip
+      run: bun run knip || (echo "" && echo "❌ 未使用のファイル・依存関係があります" && echo "👉 bun run knip で詳細を確認" && exit 1)
     # ユニットテスト（bun test）
     - name: unit-test
-      run: bun run test
+      run: bun run test || (echo "" && echo "❌ ユニットテストが失敗しました" && echo "👉 bun run test で詳細を確認" && exit 1)
     # Storybook コンポーネントテスト（Vitest: Interactions + a11y）
     - name: storybook-test
-      run: bun run --filter @storybook-vrt-sample/ui test:storybook
+      run: bun run --filter @storybook-vrt-sample/ui test:storybook || (echo "" && echo "❌ Storybook テストが失敗しました" && echo "👉 bun run --filter @storybook-vrt-sample/ui test:storybook で詳細を確認" && exit 1)
     # Storybook VRT スクリーンショット撮影 + 差分チェック（コミットし忘れ防止）
     - name: storybook-vrt-snapshot
-      run: bun run storybook:vrt:snapshot && git diff --quiet packages/ui/vrt/screenshots/ && ! git ls-files --others --exclude-standard packages/ui/vrt/screenshots/ | grep -q . || (echo "VRT スクリーンショットに差分があります。コミットしてから再度 push してください。" && exit 1)
+      run: bun run storybook:vrt:snapshot && git diff --quiet packages/ui/vrt/screenshots/ && ! git ls-files --others --exclude-standard packages/ui/vrt/screenshots/ | grep -q . || (echo "" && echo "❌ VRT スクリーンショットに差分があります" && echo "👉 bun run storybook:vrt:snapshot && git add packages/ui/vrt/screenshots/ && git commit" && exit 1)
     # E2E テスト（Playwright / Next.js dev サーバーを自動起動して実行）
     # スクリーンショットに差分があれば push を失敗させる（コミットし忘れ防止）
     - name: e2e-test
-      run: bun run e2e && git diff --quiet apps/web/e2e/screenshots/ && ! git ls-files --others --exclude-standard apps/web/e2e/screenshots/ | grep -q . || (echo "E2E スクリーンショットに差分があります。コミットしてから再度 push してください。" && exit 1)
+      run: bun run e2e && git diff --quiet apps/web/e2e/screenshots/ && ! git ls-files --others --exclude-standard apps/web/e2e/screenshots/ | grep -q . || (echo "" && echo "❌ E2E スクリーンショットに差分があります" && echo "👉 bun run e2e && git add apps/web/e2e/screenshots/ && git commit" && exit 1)
