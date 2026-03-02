@@ -24,7 +24,7 @@ const config: StorybookConfig = {
     {
       name: "@storybook/addon-mcp",
       options: {
-        toolsets: { dev: true, docs: true },
+        toolsets: { dev: true, docs: true, test: false },
       },
     },
   ],
