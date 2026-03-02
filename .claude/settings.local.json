@@ -54,7 +54,8 @@
       "WebFetch(domain:main.vitest.dev)",
       "WebFetch(domain:lefthook.com)",
       "WebFetch(domain:docs.lefthook.com)",
-      "Bash(vitest run:*)"
+      "Bash(vitest run:*)",
+      "mcp__storybook-mcp__*"
     ]
   }
 }

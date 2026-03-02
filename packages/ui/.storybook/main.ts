@@ -21,7 +21,18 @@ const config: StorybookConfig = {
     "@storybook/addon-a11y",
     "@storybook/addon-vitest",
     "storybook-addon-vis",
+    {
+      name: "@storybook/addon-mcp",
+      options: {
+        toolsets: { dev: true, docs: true },
+      },
+    },
   ],
+
+  // Docs ツール有効化のためコンポーネントマニフェストを生成
+  features: {
+    experimentalComponentsManifest: true,
+  },
 
   // React + Vite をビルドフレームワークとして使用
   framework: "@storybook/react-vite",

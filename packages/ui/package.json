@@ -30,6 +30,7 @@
   "devDependencies": {
     "@storybook/addon-a11y": "^10.2.14",
     "@storybook/addon-docs": "^10.2.14",
+    "@storybook/addon-mcp": "0.3.3",
     "@storybook/addon-vitest": "^10.2.14",
     "@storybook/react": "^10.2.14",
     "@storybook/react-vite": "^10.2.14",
