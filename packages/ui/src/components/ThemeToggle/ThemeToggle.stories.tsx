@@ -12,7 +12,6 @@ import { ThemeToggle } from "./ThemeToggle";
 const meta = {
   title: "Components/ThemeToggle",
   component: ThemeToggle,
-  tags: ["autodocs"],
   decorators: [
     (Story) => (
       <div className="flex items-center gap-4 p-4">

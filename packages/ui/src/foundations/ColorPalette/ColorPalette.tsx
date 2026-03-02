@@ -245,26 +245,41 @@ const ColorSwatch = ({ token }: { token: ColorToken }) => (
  * セマンティックカラートークンの一覧をグループごとに表示する。
  * Storybook の addon-themes でテーマを切り替えると dark 値がリアルタイムで反映される。
  */
-export const ColorPalette = () => (
-  <div className="space-y-8 p-6">
-    <div>
-      <h1 className="font-bold text-2xl text-on-background">Color Palette</h1>
-      <p className="mt-1 text-on-surface-muted">
-        セマンティックカラートークンの一覧です。テーマを切り替えると値が変化します。
-      </p>
-    </div>
+export const ColorPalette = ({
+  groupFilter,
+}: {
+  /** 表示するグループ名。未指定で全グループ表示 */
+  groupFilter?: string[];
+}) => {
+  const displayGroups = groupFilter
+    ? colorGroups.filter((g) => groupFilter.includes(g.title))
+    : colorGroups;
 
-    {colorGroups.map((group) => (
-      <section key={group.title}>
-        <h2 className="mb-3 border-border-subtle border-b pb-2 font-semibold text-lg text-on-background">
-          {group.title}
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {group.tokens.map((token) => (
-            <ColorSwatch key={token.variable} token={token} />
-          ))}
+  return (
+    <div className="space-y-8 p-6">
+      {!groupFilter && (
+        <div>
+          <h1 className="font-bold text-2xl text-on-background">
+            Color Palette
+          </h1>
+          <p className="mt-1 text-on-surface-muted">
+            セマンティックカラートークンの一覧です。テーマを切り替えると値が変化します。
+          </p>
         </div>
-      </section>
-    ))}
-  </div>
-);
+      )}
+
+      {displayGroups.map((group) => (
+        <section key={group.title}>
+          <h2 className="mb-3 border-border-subtle border-b pb-2 font-semibold text-lg text-on-background">
+            {group.title}
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {group.tokens.map((token) => (
+              <ColorSwatch key={token.variable} token={token} />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+};

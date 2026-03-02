@@ -266,31 +266,44 @@ const TypographyRow = ({
  * 利用可能なフォントファミリー・サイズ・ウェイト・字間・行間のユーティリティ一覧を表示する。
  * Storybook の addon-themes でテーマを切り替えると反映される。
  */
-export const Typography = () => (
-  <div className="space-y-8 p-6">
-    <div>
-      <h1 className="font-bold text-2xl text-on-background">Typography</h1>
-      <p className="mt-1 text-on-surface-muted">
-        利用可能なタイポグラフィユーティリティと推奨用途の一覧です。Tailwind CSS
-        v4 デフォルトスケールを使用しています。
-      </p>
-    </div>
+export const Typography = ({
+  sectionFilter,
+}: {
+  /** 表示するセクション名。未指定で全セクション表示 */
+  sectionFilter?: string[];
+}) => {
+  const displaySections = sectionFilter
+    ? sections.filter((s) => sectionFilter.includes(s.title))
+    : sections;
 
-    {sections.map((section) => (
-      <section key={section.title}>
-        <h2 className="mb-3 border-border-subtle border-b pb-2 font-semibold text-lg text-on-background">
-          {section.title}
-        </h2>
-        <div className="space-y-4">
-          {section.items.map((item) => (
-            <TypographyRow
-              key={item.className}
-              item={item}
-              sizeClass={section.sizeClass}
-            />
-          ))}
+  return (
+    <div className="space-y-8 p-6">
+      {!sectionFilter && (
+        <div>
+          <h1 className="font-bold text-2xl text-on-background">Typography</h1>
+          <p className="mt-1 text-on-surface-muted">
+            利用可能なタイポグラフィユーティリティと推奨用途の一覧です。Tailwind
+            CSS v4 デフォルトスケールを使用しています。
+          </p>
         </div>
-      </section>
-    ))}
-  </div>
-);
+      )}
+
+      {displaySections.map((section) => (
+        <section key={section.title}>
+          <h2 className="mb-3 border-border-subtle border-b pb-2 font-semibold text-lg text-on-background">
+            {section.title}
+          </h2>
+          <div className="space-y-4">
+            {section.items.map((item) => (
+              <TypographyRow
+                key={item.className}
+                item={item}
+                sizeClass={section.sizeClass}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+};

@@ -13,7 +13,6 @@ const meta = {
   // Storybook のサイドバーでの表示パス
   title: "Components/Badge",
   component: Badge,
-  tags: ["autodocs"],
   argTypes: {
     variant: {
       control: "select",

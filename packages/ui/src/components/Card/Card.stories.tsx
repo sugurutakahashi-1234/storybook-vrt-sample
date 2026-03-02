@@ -12,7 +12,6 @@ const meta = {
   // Storybook のサイドバーでの表示パス
   title: "Components/Card",
   component: Card,
-  tags: ["autodocs"],
   argTypes: {
     variant: {
       control: "select",

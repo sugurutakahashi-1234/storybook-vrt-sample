@@ -5,7 +5,6 @@
  * addon-themes でテーマを切り替えると Light / Dark の値がリアルタイムで確認できる。
  */
 import type { Meta, StoryObj } from "@storybook/react";
-import { expect, within } from "storybook/test";
 
 import { ColorPalette } from "./ColorPalette";
 
@@ -20,15 +19,32 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** カラーパレット一覧 */
-export const Default: Story = {
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
+/** 全グループ一覧 */
+export const All: Story = {
+  tags: ["!snapshot"],
+};
 
-    // 主要セクションが表示されていることを検証
-    await expect(canvas.getByText("Color Palette")).toBeVisible();
-    await expect(canvas.getByText("Surface")).toBeVisible();
-    await expect(canvas.getByText("Primary")).toBeVisible();
-    await expect(canvas.getByText("Badge")).toBeVisible();
-  },
+/** Surface & Border */
+export const SurfaceAndBorder: Story = {
+  args: { groupFilter: ["Surface", "Border"] },
+};
+
+/** Primary & Secondary & Danger */
+export const Buttons: Story = {
+  args: { groupFilter: ["Primary", "Secondary", "Danger"] },
+};
+
+/** Error & Ring */
+export const ErrorAndRing: Story = {
+  args: { groupFilter: ["Error", "Ring"] },
+};
+
+/** Badge */
+export const BadgeColors: Story = {
+  args: { groupFilter: ["Badge"] },
+};
+
+/** Interactive */
+export const Interactive: Story = {
+  args: { groupFilter: ["Interactive"] },
 };

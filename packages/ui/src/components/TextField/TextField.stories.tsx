@@ -12,7 +12,6 @@ import { TextField } from "./TextField";
 const meta = {
   title: "Components/TextField",
   component: TextField,
-  tags: ["autodocs"],
   argTypes: {
     variant: {
       control: "select",
