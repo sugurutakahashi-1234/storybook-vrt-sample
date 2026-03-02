@@ -1,0 +1,89 @@
+{
+  // Renovate 設定ファイル
+  // https://docs.renovatebot.com/configuration-options/
+  // https://github.com/marketplace/renovate
+  // https://github.com/settings/installations
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+
+  // 設定の自動マイグレーションを無効化
+  configMigration: false,
+
+  // "config:best-practices" に含まれる設定:
+  //   - rangeStrategy: "pin" (バージョンを完全固定)
+  //   - separateMajorMinor: true (メジャー/マイナーを分離)
+  //   - separateMinorPatch: true (マイナー/パッチを分離)
+  //   - :pinAllExceptPeerDependencies (peerDependencies 以外をピン留め)
+  //   - :pinDevDependencies (devDependencies をピン留め)
+  //   - helpers:pinGitHubActionDigests (GitHub Actions をダイジェストでピン留め)
+  extends: ["config:best-practices"],
+
+  // 既存のキャレット (^) レンジを維持しつつバージョンを更新
+  rangeStrategy: "bump",
+
+  timezone: "Asia/Tokyo",
+  enabled: true,
+
+  packageRules: [
+    // automerge を無効化（すべての更新を手動レビュー）
+    {
+      automerge: false,
+      matchPackageNames: ["*"],
+    },
+
+    // GitHub Actions のダイジェストピン留めを無効化
+    // ※ タグはリポジトリオーナーが上書き可能なため、サプライチェーン攻撃のリスクあり
+    //    ダイジェストピン留め（例: actions/checkout@abcdef...）の方が安全だが、
+    //    可読性・メンテナンス性とのトレードオフで無効化している
+    {
+      matchManagers: ["github-actions"],
+      pinDigests: false,
+    },
+
+    // pin タイプの更新を無効化（既存のキャレットレンジを維持）
+    // ※ pin されるとレンジが固定値になり、マイナー/パッチの更新 PR が
+    //    作られなくなるため、アップデートの存在を見逃すリスクがある
+    {
+      matchUpdateTypes: ["pin"],
+      enabled: false,
+    },
+  ],
+
+  // スケジュール: 平日 10:00-17:59 JST
+  // cron 形式 — 分(*) 時(10-17) 日(*) 月(*) 曜日(1-5=月-金)
+  // ※ @breejs/later テキスト構文は非推奨、cron 形式が推奨
+  //    https://docs.renovatebot.com/key-concepts/scheduling/#deprecated-breejslater-syntax
+  schedule: ["* 10-17 * * 1-5"],
+
+  // PR 設定（時間あたり制限なし、同時最大10件）
+  prHourlyLimit: 0,
+  prConcurrentLimit: 10,
+  labels: [],
+  draftPR: true,
+
+  // コミットメッセージ: "chore: [Renovate] update {{depName}}"
+  commitMessagePrefix: "chore:",
+  commitMessageAction: "[Renovate] update",
+  commitMessageTopic: "{{depName}}",
+
+  // ブランチ設定
+  branchPrefix: "feature/renovate-",
+  baseBranches: ["$default"],
+  branchNameStrict: true,
+  prTitleStrict: true,
+
+  // 脆弱性アラート
+  vulnerabilityAlerts: {
+    enabled: true,
+    labels: [],
+  },
+
+  // 依存関係ダッシュボード
+  dependencyDashboard: true,
+  dependencyDashboardTitle: "[Renovate] Dependency Update Dashboard",
+  dependencyDashboardHeader: "This issue is automatically created by Renovate to track the status of all dependency updates. Check the status of each PR and merge as needed.",
+  dependencyDashboardFooter: "For more details, see the renovate.json5 file in this repository.",
+  dependencyDashboardLabels: [],
+
+  // 更新を無視する依存関係
+  ignoreDeps: [],
+}
