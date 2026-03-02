@@ -26,22 +26,11 @@ export default defineConfig({
             enabled: true,
             provider: playwright({}),
             headless: true,
-            instances: [
-              {
-                browser: "chromium",
-                name: "light",
-                provider: playwright({
-                  contextOptions: { colorScheme: "light" },
-                }),
-              },
-              {
-                browser: "chromium",
-                name: "dark",
-                provider: playwright({
-                  contextOptions: { colorScheme: "dark" },
-                }),
-              },
-            ],
+            instances: (["light", "dark"] as const).map((colorScheme) => ({
+              browser: "chromium" as const,
+              name: colorScheme,
+              provider: playwright({ contextOptions: { colorScheme } }),
+            })),
           },
           setupFiles: ["./.storybook/vitest.setup.ts"],
         },
