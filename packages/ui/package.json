@@ -11,11 +11,11 @@
   },
   "scripts": {
     "test": "bun test src/",
-    "test:storybook": "vitest run --project=storybook",
+    "test:storybook": "vitest run --project=storybook-test",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "typecheck": "tsgo --noEmit",
-    "vrt:snapshot": "vitest run --project=storybook-vrt --update",
+    "vrt:snapshot": "vitest run --project=storybook-snapshot --update",
     "vrt:report:reg": "mkdir -p .reg/report .reg/expected && reg-cli .reg/actual .reg/expected .reg/diff -R .reg/report/index.html -J .reg/out.json -M 0.01",
     "vrt:baseline:local": "rm -rf .reg/expected && mkdir -p .reg/expected && (git -C $(git rev-parse --show-toplevel) archive $(git merge-base HEAD main):packages/ui/vrt/screenshots/ 2>/dev/null | tar -x -C .reg/expected/ || true)",
     "vrt:report:reg:local": "bun run vrt:baseline:local && bun run vrt:snapshot && bun run vrt:report:reg",

@@ -21,27 +21,44 @@ export default defineConfig({
         extends: true,
         plugins: [storybookTest({ configDir })],
         test: {
-          name: "storybook",
+          name: "storybook-test",
           browser: {
             enabled: true,
             provider: playwright({}),
             headless: true,
-            api: { port: 63_315 },
-            instances: [{ browser: "chromium" }],
+            instances: [
+              {
+                browser: "chromium",
+                name: "light",
+                provider: playwright({
+                  contextOptions: { colorScheme: "light" },
+                }),
+              },
+              {
+                browser: "chromium",
+                name: "dark",
+                provider: playwright({
+                  contextOptions: { colorScheme: "dark" },
+                }),
+              },
+            ],
           },
           setupFiles: ["./.storybook/vitest.setup.ts"],
         },
       },
       {
         extends: true,
+        // storybookTest: .stories ファイルを Vitest テストに変換し Storybook レンダリング環境を構築
+        //   play 関数・a11y チェックも含む一体のテストを生成するため分離不可
+        // storybookVis: vitest-plugin-vis をラップし画像スナップショット比較機能を追加
+        // 両方必須（storybookTest がないとストーリーの変換・レンダリングが行われない）
         plugins: [storybookTest({ configDir }), storybookVis()],
         test: {
-          name: "storybook-vrt",
+          name: "storybook-snapshot",
           browser: {
             enabled: true,
             provider: playwright({}),
             headless: true,
-            api: { port: 63_316 },
             instances: [{ browser: "chromium" }],
           },
           globalSetup: ["./.storybook/vitest.global-setup.vrt.ts"],

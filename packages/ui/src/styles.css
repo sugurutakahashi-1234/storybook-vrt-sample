@@ -62,14 +62,14 @@
   --color-border-input-strong: light-dark(#9ca3af, #6b7280);
 
   /* Primary / Secondary / Danger 系 */
-  --color-primary: light-dark(#2563eb, #3b82f6);
-  --color-primary-hover: light-dark(#1d4ed8, #60a5fa);
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
   --color-on-primary: #ffffff;
   --color-secondary: light-dark(#e5e7eb, #374151);
   --color-secondary-hover: light-dark(#d1d5db, #4b5563);
   --color-on-secondary: light-dark(#1f2937, #f3f4f6);
-  --color-danger: light-dark(#dc2626, #ef4444);
-  --color-danger-hover: light-dark(#b91c1c, #f87171);
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
   --color-on-danger: #ffffff;
 
   /* Error 系 */

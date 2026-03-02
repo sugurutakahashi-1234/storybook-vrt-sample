@@ -80,14 +80,18 @@ pre-push:
     # 同一 Vite deps キャッシュを共有するため並列実行すると
     # "Failed to fetch dynamically imported module" が発生する。
     # piped group で順次実行し安定性を確保する。
+    #
+    # storybook-snapshot も storybookTest プラグインを含むため
+    # play 関数・a11y チェックは light で重複実行される。
+    # storybook:test は dark モードの a11y チェックを担うため残している。
     - name: storybook-tests
       group:
         piped: true
         jobs:
-          - name: storybook-test
+          - name: storybook:test
             timeout: 20s
-            run: bun run --filter @storybook-vrt-sample/ui test:storybook || (echo "" && echo "❌ Storybook テストが失敗しました" && echo "👉 bun run --filter @storybook-vrt-sample/ui test:storybook で詳細を確認" && exit 1)
-          - name: storybook-vrt-snapshot
+            run: bun run storybook:test || (echo "" && echo "❌ Storybook テストが失敗しました" && echo "👉 bun run storybook:test で詳細を確認" && exit 1)
+          - name: storybook-snapshot
             timeout: 20s
             run: bun run storybook:vrt:snapshot && git diff --quiet packages/ui/vrt/screenshots/ && ! git ls-files --others --exclude-standard packages/ui/vrt/screenshots/ | grep -q . || (echo "" && echo "❌ VRT スクリーンショットに差分があります" && echo "👉 bun run storybook:vrt:snapshot && git add packages/ui/vrt/screenshots/ && git commit" && exit 1)
     # E2E テスト（Playwright / Next.js dev サーバーを自動起動して実行）

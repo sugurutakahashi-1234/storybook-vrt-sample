@@ -92,6 +92,7 @@ const preview: Preview = {
       config: {
         rules: [{ id: "region", enabled: false }],
       },
+      test: "error",
     },
   },
 };
