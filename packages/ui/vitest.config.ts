@@ -19,6 +19,7 @@ export default defineConfig({
     projects: [
       {
         extends: true,
+        cacheDir: "node_modules/.vite-storybook-test",
         plugins: [storybookTest({ configDir })],
         test: {
           name: "storybook-test",
@@ -37,6 +38,7 @@ export default defineConfig({
       },
       {
         extends: true,
+        cacheDir: "node_modules/.vite-storybook-snapshot",
         // storybookTest: .stories ファイルを Vitest テストに変換し Storybook レンダリング環境を構築
         //   play 関数・a11y チェックも含む一体のテストを生成するため分離不可
         // storybookVis: vitest-plugin-vis をラップし画像スナップショット比較機能を追加
