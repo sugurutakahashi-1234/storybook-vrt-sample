@@ -31,7 +31,8 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const button = canvas.getByRole("button");
+    // Side by side モードでは Light/Dark 両方にボタンが存在するため getAllByRole を使用
+    const [button] = canvas.getAllByRole("button");
 
     // ボタンが表示されていることを検証
     await expect(button).toBeVisible();
@@ -44,7 +45,7 @@ export const Default: Story = {
 export const CycleThemes: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const button = canvas.getByRole("button");
+    const [button] = canvas.getAllByRole("button");
     const initialLabel = button.getAttribute("aria-label") || "";
     const startsLight = /ライト/.test(initialLabel);
 

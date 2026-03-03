@@ -34,7 +34,8 @@ export const Info: Story = {
     const canvas = within(canvasElement);
 
     // テキスト "Info" が表示されていることを検証
-    await expect(canvas.getByText("Info")).toBeVisible();
+    // Side by side モードでは Light/Dark 両方に同じテキストが存在するため getAllByText を使用
+    await expect(canvas.getAllByText("Info")[0]).toBeVisible();
   },
 };
 
@@ -71,7 +72,7 @@ export const WithCount: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText("5")).toBeVisible();
+    await expect(canvas.getAllByText("5")[0]).toBeVisible();
   },
 };
 
@@ -83,7 +84,7 @@ export const WithCountOverflow: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText("99+")).toBeVisible();
+    await expect(canvas.getAllByText("99+")[0]).toBeVisible();
   },
 };
 
@@ -97,6 +98,6 @@ export const WithNegativeCount: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     // 負数の場合は formatCount が空文字を返すため、children の "Fallback" が表示される
-    await expect(canvas.getByText("Fallback")).toBeVisible();
+    await expect(canvas.getAllByText("Fallback")[0]).toBeVisible();
   },
 };
