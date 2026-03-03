@@ -2,3 +2,12 @@
 node = "lts"
 bun = "latest"
 gh = "latest"
+
+[tasks.setup]
+description = "プロジェクトの初回セットアップ（依存関係 + Playwright + 全チェック）"
+run = """
+bun install
+cd packages/ui && bunx playwright install --with-deps && cd ../..
+cd apps/web && bunx playwright install --with-deps && cd ../..
+bun run ci:full
+"""

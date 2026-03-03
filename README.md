@@ -42,15 +42,8 @@ curl https://mise.run | sh
 ### プロジェクトセットアップ
 
 ```bash
-# 依存関係インストール
-bun install
-
-# Playwright ブラウザインストール（VRT の vitest browser mode + E2E の両方で使用）
-cd packages/ui && bunx playwright install --with-deps && cd ../..
-cd apps/web && bunx playwright install --with-deps && cd ../..
-
-# 全チェック実行（リント・型チェック・テスト・ビルド・VRT・E2E）
-bun run ci:full
+# 依存関係インストール + Playwright ブラウザ + 全チェック実行
+mise run setup
 ```
 
 ## 開発ワークフロー
