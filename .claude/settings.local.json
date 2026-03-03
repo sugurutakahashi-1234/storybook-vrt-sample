@@ -56,7 +56,9 @@
       "WebFetch(domain:docs.lefthook.com)",
       "Bash(vitest run:*)",
       "mcp__storybook-mcp__*",
-      "WebFetch(domain:qiita.com)"
+      "WebFetch(domain:qiita.com)",
+      "Bash(do echo:*)",
+      "WebFetch(domain:docs.codecov.com)"
     ]
   },
   "enableAllProjectMcpServers": true,
