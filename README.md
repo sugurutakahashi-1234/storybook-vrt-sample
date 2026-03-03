@@ -45,8 +45,8 @@ curl https://mise.run | sh
 # ツールインストール（postinstall フックで bun install も自動実行）
 mise install
 
-# 全チェック実行（リント・型チェック・テスト・ビルド・VRT・E2E）
-bun run ci:full
+# クリーンインストール + 全チェック実行（リント・型チェック・テスト・ビルド・VRT・E2E）
+bun run clean:setup
 ```
 
 ## 開発ワークフロー
