@@ -42,8 +42,11 @@ curl https://mise.run | sh
 ### プロジェクトセットアップ
 
 ```bash
-# 依存関係インストール + Playwright ブラウザ + 全チェック実行
-mise run setup
+# 依存関係インストール（prepare で lefthook + Playwright ブラウザも自動セットアップ）
+bun install
+
+# 全チェック実行（リント・型チェック・テスト・ビルド・VRT・E2E）
+bun run ci:full
 ```
 
 ## 開発ワークフロー
