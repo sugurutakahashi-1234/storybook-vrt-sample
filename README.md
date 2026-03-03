@@ -86,10 +86,14 @@ bunx ultracite init
 
 **選択肢の推奨設定:**
 
-| 項目       | 選択           |
-| ---------- | -------------- |
-| Linter     | Oxlint + Oxfmt |
-| Frameworks | React, Next.js |
+| 項目         | 選択                       |
+| ------------ | -------------------------- |
+| Linter       | Oxlint + Oxfmt             |
+| Frameworks   | React, Next.js             |
+| Editors      | VSCode / Cursor / Windsurf |
+| Agents       | 設定不要                   |
+| Agent hooks  | 設定不要                   |
+| Integrations | 設定不要                   |
 
 ## テスト
 
