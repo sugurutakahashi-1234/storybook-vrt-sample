@@ -1,0 +1,72 @@
+# ==============================================
+# Chromatic パブリッシュワークフロー
+# ==============================================
+# main ブランチへの push 時に Storybook を Chromatic へパブリッシュする。
+# ビジュアルテストは storybook-addon-vis + reg-cli で構築済みのため、
+# Chromatic は Storybook ホスティング専用として使用する。
+#
+# 公式ドキュメント:
+#   https://www.chromatic.com/docs/github-actions/
+# ==============================================
+name: Chromatic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/ui/**"
+      - "bun.lock"
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish to Chromatic
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # ── セットアップ ──
+      - uses: Kesin11/actions-timeline@v3
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+
+      # ── ビルド ──
+      # chromaui/action 内部は node20 で動くため、
+      # bun で事前ビルドして storybookBuildDir で渡す
+      - name: Build Storybook
+        run: bun run build-storybook
+        working-directory: packages/ui
+
+      # ── パブリッシュ ──
+      - name: Publish to Chromatic
+        id: chromatic
+        uses: chromaui/action@c93e0bc3a63aa176e14a75b61a31847cbfdd341c # v1
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          storybookBuildDir: packages/ui/storybook-static
+          # アップロード完了後に即終了（ビジュアルテストの完了を待たない）
+          exitOnceUploaded: true
+          # すべてのスナップショット差分を自動承認（VRT は別ツールで実施済みのため）
+          autoAcceptChanges: true
+
+      - name: Add summary
+        run: |
+          echo "## Chromatic" >> $GITHUB_STEP_SUMMARY
+          echo "| Key | URL |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|-----|" >> $GITHUB_STEP_SUMMARY
+          echo "| Storybook | ${{ steps.chromatic.outputs.storybookUrl }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ steps.chromatic.outputs.buildUrl }} |" >> $GITHUB_STEP_SUMMARY
+
+  # ── ワークフロー実行タイムライン可視化 ──
+  actions-timeline:
+    name: Actions Timeline
+    needs: [publish]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: Kesin11/actions-timeline@v3

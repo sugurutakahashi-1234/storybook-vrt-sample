@@ -12,6 +12,8 @@ dist/
 *.tsbuildinfo
 # Storybook ビルド出力
 storybook-static/
+# Storybook ビルドログ（Chromatic ローカル実行時に生成）
+build-storybook.log
 
 # Playwright テスト結果
 # テスト実行時の差分画像・スクリーンショット
