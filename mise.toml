@@ -1,4 +1,12 @@
+[settings]
+experimental = true
+
 [tools]
 node = "lts"
 bun = "latest"
 gh = "latest"
+
+# mise install 完了後に依存関係を自動インストール
+# ツールが既にインストール済みの場合はスキップされるため、cd 時の auto_install では発火しない
+[hooks]
+postinstall = "bun install"
