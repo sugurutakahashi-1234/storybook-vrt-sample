@@ -64,3 +64,6 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Claude Code（ローカル設定はユーザー固有のため共有しない）
+.claude/settings.local.json
