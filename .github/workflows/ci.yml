@@ -29,6 +29,11 @@ jobs:
       - run: bun install --frozen-lockfile
 
       # ── 静的解析 ──
+      - name: Renovate Config Validator
+        uses: suzuki-shunsuke/github-action-renovate-config-validator@v2.1.0
+        with:
+          config_file_path: renovate.json5
+
       - name: Lint & Format
         run: bun run lint
 
