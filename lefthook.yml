@@ -1,8 +1,9 @@
 # ==============================================
 # Git Hooks 設定（Lefthook）
 # ==============================================
-# pre-commit: ステージされたファイルのみ対象（高速）
-# pre-push:   プロジェクト全体を対象（プッシュ前の最終チェック）
+# post-checkout: ブランチ切替時の自動処理
+# pre-commit:    ステージされたファイルのみ対象（高速）
+# pre-push:      プロジェクト全体を対象（プッシュ前の最終チェック）
 #
 # ==============================================
 
@@ -10,6 +11,16 @@
 output:
   - summary
   - failure
+
+# ブランチ切替時: bun.lock に変更があれば依存関係を自動同期
+# post-checkout は 3 引数（前 HEAD, 後 HEAD, ブランチフラグ）を受け取る
+# {1} = ブランチ切替フラグ（1: ブランチ切替、0: ファイルチェックアウト）
+post-checkout:
+  jobs:
+    - name: bun-install
+      run: |
+        [ "{1}" != "1" ] && exit 0
+        git diff HEAD@{1} HEAD --quiet -- bun.lock 2>/dev/null || bun install --frozen-lockfile
 
 # コミット時: ステージされたファイルに対して実行
 # 手動実行: bunx lefthook run pre-commit --force
