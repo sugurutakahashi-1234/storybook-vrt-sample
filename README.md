@@ -3,7 +3,8 @@
 [![CI](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/ci.yml)
 [![Storybook VRT](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-vrt.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-vrt.yml)
 [![E2E Tests](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/web-e2e.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/web-e2e.yml)
-[![Chromatic](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/chromatic.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/chromatic.yml)
+[![Chromatic](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-publish.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-publish.yml)
+[![Cleanup GitHub Pages](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/github-pages-cleanup.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/github-pages-cleanup.yml)
 [![Storybook](https://img.shields.io/badge/Storybook-Chromatic-ff4785)](https://main--69a67d8928ff3a182e0b5dfa.chromatic.com)
 
 Storybook コンポーネントのビジュアルリグレッションテスト（VRT）と E2E テストのサンプルプロジェクトです。
@@ -225,7 +226,8 @@ PR 作成時に GitHub Actions が自動実行されます。
 - **CI** (`ci.yml`): 全 PR で Lint / Typecheck / Knip / Test / Build を実行
 - **Storybook VRT** (`storybook-vrt.yml`): `packages/ui/` の変更時に実行
 - **E2E テスト** (`web-e2e.yml`): `apps/web/` または `packages/ui/` の変更時に実行
-- **Chromatic** (`chromatic.yml`): main マージ時に Storybook を Chromatic へパブリッシュ
+- **Chromatic** (`storybook-publish.yml`): main マージ時・PR 時に Storybook を Chromatic へパブリッシュ
+- **Cleanup GitHub Pages** (`github-pages-cleanup.yml`): PR クローズ時に gh-pages の容量をチェックし、800MB 超過時に古いレポートを削除
 
 ### Storybook ホスティング
 
