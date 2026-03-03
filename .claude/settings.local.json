@@ -55,9 +55,10 @@
       "WebFetch(domain:lefthook.com)",
       "WebFetch(domain:docs.lefthook.com)",
       "Bash(vitest run:*)",
-      "mcp__storybook-mcp__*"
+      "mcp__storybook-mcp__*",
+      "WebFetch(domain:qiita.com)"
     ]
   },
-  "enabledMcpjsonServers": ["storybook-mcp"],
-  "enableAllProjectMcpServers": true
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": ["storybook-mcp"]
 }
