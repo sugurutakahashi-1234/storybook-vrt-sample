@@ -217,25 +217,25 @@ bun run web:e2e:allure
 
 ## Git Hooks（Lefthook）
 
-| フック     | ジョブ                      | 内容                                                    |
-| ---------- | --------------------------- | ------------------------------------------------------- |
-| pre-commit | protect-main                | main ブランチへの直接コミットを禁止                     |
-| pre-commit | oxlint-fix                  | Oxlint によるリント自動修正                             |
-| pre-commit | oxfmt-fix                   | Oxfmt によるフォーマット自動修正                        |
-| pre-commit | conflict-markers            | コンフリクトマーカーの残存チェック                      |
-| pre-commit | no-secrets                  | .env ファイルの誤コミット防止                           |
-| pre-push   | protect-main                | main ブランチへの直接プッシュを禁止                     |
-| pre-push   | prevent-push-merged-branch  | マージ済み PR ブランチへのプッシュを防止（gh CLI 必須） |
-| pre-push   | lint-check                  | Oxlint + Oxfmt リント + フォーマットチェック（CI 同等） |
-| pre-push   | syncpack                    | 依存パッケージバージョン整合性チェック                  |
-| pre-push   | typecheck                   | TypeScript 型チェック                                   |
-| pre-push   | knip                        | 未使用ファイル・依存関係チェック                        |
-| pre-push   | bun-version-check           | bun バージョン整合性チェック                            |
-| pre-push   | unit-test                   | ユニットテスト（bun test）                              |
-| pre-push   | build                       | Next.js ビルド                                          |
-| pre-push   | storybook:test              | Storybook テスト — play 関数 + a11y（light + dark）     |
-| pre-push   | storybook-snapshot          | VRT スクリーンショット撮影 + 差分チェック               |
-| pre-push   | e2e-test                    | E2E テスト + スクリーンショット差分チェック             |
+| フック     | ジョブ                     | 内容                                                    |
+| ---------- | -------------------------- | ------------------------------------------------------- |
+| pre-commit | protect-main               | main ブランチへの直接コミットを禁止                     |
+| pre-commit | oxlint-fix                 | Oxlint によるリント自動修正                             |
+| pre-commit | oxfmt-fix                  | Oxfmt によるフォーマット自動修正                        |
+| pre-commit | conflict-markers           | コンフリクトマーカーの残存チェック                      |
+| pre-commit | no-secrets                 | .env ファイルの誤コミット防止                           |
+| pre-push   | protect-main               | main ブランチへの直接プッシュを禁止                     |
+| pre-push   | prevent-push-merged-branch | マージ済み PR ブランチへのプッシュを防止（gh CLI 必須） |
+| pre-push   | lint-check                 | Oxlint + Oxfmt リント + フォーマットチェック（CI 同等） |
+| pre-push   | syncpack                   | 依存パッケージバージョン整合性チェック                  |
+| pre-push   | typecheck                  | TypeScript 型チェック                                   |
+| pre-push   | knip                       | 未使用ファイル・依存関係チェック                        |
+| pre-push   | bun-version-check          | bun バージョン整合性チェック                            |
+| pre-push   | unit-test                  | ユニットテスト（bun test）                              |
+| pre-push   | build                      | Next.js ビルド                                          |
+| pre-push   | storybook:test             | Storybook テスト — play 関数 + a11y（light + dark）     |
+| pre-push   | storybook-snapshot         | VRT スクリーンショット撮影 + 差分チェック               |
+| pre-push   | e2e-test                   | E2E テスト + スクリーンショット差分チェック             |
 
 ## CI/CD
 
