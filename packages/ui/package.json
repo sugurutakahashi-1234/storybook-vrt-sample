@@ -10,14 +10,18 @@
     "./styles.css": "./src/styles.css"
   },
   "scripts": {
-    "test": "bun test src/",
+    "📖": "========== Storybook ==========",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "🎨": "========== Code Quality ==========",
     "typecheck": "tsgo --noEmit",
+    "🧪": "========== Testing ==========",
+    "test": "bun test src/",
     "storybook:test": "vitest run --project=storybook-test",
     "storybook:snapshot": "vitest run --project=storybook-snapshot",
     "storybook:reg": "mkdir -p .reg/report .reg/expected && reg-cli .reg/actual .reg/expected .reg/diff -R .reg/report/index.html -J .reg/out.json -M 0.01",
     "storybook:reg:local": "rm -rf .reg/expected && mkdir -p .reg/expected && (git -C $(git rev-parse --show-toplevel) archive $(git merge-base HEAD main):packages/ui/vrt/screenshots/ 2>/dev/null | tar -x -C .reg/expected/ || true) && bun run storybook:snapshot && bun run storybook:reg",
+    "📦": "========== Dependency Management ==========",
     "deps:update": "bun update --latest"
   },
   "dependencies": {

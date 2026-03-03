@@ -67,7 +67,7 @@
 
   // ブランチ設定
   branchPrefix: "feature/renovate-",
-  baseBranches: ["$default"],
+  baseBranchPatterns: ["$default"],
   branchNameStrict: true,
   prTitleStrict: true,
 

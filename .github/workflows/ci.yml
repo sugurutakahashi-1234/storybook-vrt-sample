@@ -33,7 +33,7 @@ jobs:
         run: bun run lint
 
       - name: Syncpack (version consistency)
-        run: bun run syncpack:lint
+        run: bun run syncpack
 
       - name: Type Check
         run: bun run typecheck
