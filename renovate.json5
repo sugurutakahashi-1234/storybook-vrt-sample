@@ -30,14 +30,13 @@
       matchPackageNames: ["*"],
     },
 
-    // GitHub Actions のダイジェストピン留めを無効化
+    // GitHub Actions のダイジェストピン留めを有効化（config:best-practices のデフォルト）
     // ※ タグはリポジトリオーナーが上書き可能なため、サプライチェーン攻撃のリスクあり
-    //    ダイジェストピン留め（例: actions/checkout@abcdef...）の方が安全だが、
-    //    可読性・メンテナンス性とのトレードオフで無効化している
-    {
-      matchManagers: ["github-actions"],
-      pinDigests: false,
-    },
+    //    ダイジェストピン留め（例: actions/checkout@abcdef...）で改ざんを防止する
+    // {
+    //   matchManagers: ["github-actions"],
+    //   pinDigests: false,
+    // },
 
     // pin タイプの更新を無効化（既存のキャレットレンジを維持）
     // ※ pin されるとレンジが固定値になり、マイナー/パッチの更新 PR が
