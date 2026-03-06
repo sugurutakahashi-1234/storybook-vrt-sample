@@ -1,25 +1,29 @@
 # ==============================================
-# Chromatic パブリッシュワークフロー
+# Storybook Chromatic デプロイワークフロー
 # ==============================================
-# Storybook を Chromatic へパブリッシュする。
-# - main push 時: ベースラインの更新
-# - PR 時: プレビュービルド + PR コメントでリンク共有
+# Storybook を Chromatic へデプロイする。
+# - main push 時: プロダクションデプロイ
+# - PR 時: プレビューデプロイ + PR コメントでリンク共有
 # ビジュアルテストは storybook-addon-vis + reg-cli で構築済みのため、
 # Chromatic は Storybook ホスティング専用として使用する。
+#
+# 必要な設定:
+#   Secrets:
+#     CHROMATIC_PROJECT_TOKEN — Chromatic > Manage > Configure > Project Token
 #
 # 公式ドキュメント:
 #   https://www.chromatic.com/docs/github-actions/
 # ==============================================
-name: Chromatic
+name: Storybook Chromatic Deploy
 
 on:
-  # main push 時: Chromatic のベースラインを更新
+  # main push 時: Chromatic へプロダクションデプロイ
   push:
     branches: [main]
     paths:
       - "packages/ui/**"
       - "bun.lock"
-  # PR 時: プレビュービルドを作成し、PR コメントでリンクを共有
+  # PR 時: プレビューデプロイを作成し、PR コメントでリンクを共有
   pull_request:
     paths:
       - "packages/ui/**"
@@ -31,8 +35,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  publish:
-    name: Publish to Chromatic
+  deploy:
+    name: Deploy to Chromatic
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -60,10 +64,10 @@ jobs:
         working-directory: packages/ui
 
       # ────────────────────────────────────────
-      # パブリッシュ
+      # デプロイ
       # ────────────────────────────────────────
 
-      - name: Publish to Chromatic
+      - name: Deploy to Chromatic
         id: chromatic
         uses: chromaui/action@c93e0bc3a63aa176e14a75b61a31847cbfdd341c # v1
         with:
@@ -81,7 +85,7 @@ jobs:
       # Job Summary にビルド結果の URL を表示
       - name: Add summary
         run: |
-          echo "## Chromatic" >> $GITHUB_STEP_SUMMARY
+          echo "## 🟣 Chromatic" >> $GITHUB_STEP_SUMMARY
           echo "| Key | URL |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|-----|" >> $GITHUB_STEP_SUMMARY
           echo "| Storybook | ${{ steps.chromatic.outputs.storybookUrl }} |" >> $GITHUB_STEP_SUMMARY
@@ -95,7 +99,7 @@ jobs:
         with:
           header: chromatic-storybook
           message: |
-            ## 🚀 Chromatic Storybook Preview
+            ## 🟣 Chromatic Storybook Preview
 
             | Key | URL |
             |-----|-----|

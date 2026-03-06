@@ -3,8 +3,9 @@
 [![CI](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/ci.yml)
 [![Storybook VRT](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-vrt.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-vrt.yml)
 [![E2E Tests](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/web-e2e.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/web-e2e.yml)
-[![Chromatic](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-publish.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-publish.yml)
+[![Storybook Chromatic Deploy](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-chromatic-deploy.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-chromatic-deploy.yml)
 [![Cleanup GitHub Pages](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/github-pages-cleanup.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/github-pages-cleanup.yml)
+[![Storybook Cloudflare Deploy](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-cloudflare-deploy.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-cloudflare-deploy.yml)
 [![Storybook](https://img.shields.io/badge/Storybook-Chromatic-ff4785)](https://main--69a67d8928ff3a182e0b5dfa.chromatic.com)
 
 Storybook コンポーネントのビジュアルリグレッションテスト（VRT）と E2E テストのサンプルプロジェクトです。
@@ -226,14 +227,18 @@ PR 作成時に GitHub Actions が自動実行されます。
 - **CI** (`ci.yml`): 全 PR で Lint / Typecheck / Knip / Test / Build を実行
 - **Storybook VRT** (`storybook-vrt.yml`): `packages/ui/` の変更時に実行
 - **E2E テスト** (`web-e2e.yml`): `apps/web/` または `packages/ui/` の変更時に実行
-- **Chromatic** (`storybook-publish.yml`): main マージ時・PR 時に Storybook を Chromatic へパブリッシュ
+- **Storybook Chromatic Deploy** (`storybook-chromatic-deploy.yml`): main マージ時・PR 時に Storybook を Chromatic へデプロイ
+- **Storybook Cloudflare Deploy** (`storybook-cloudflare-deploy.yml`): main マージ時・PR 時に Storybook を Cloudflare Pages へデプロイ（Cloudflare Access による認証付き）
 - **Cleanup GitHub Pages** (`github-pages-cleanup.yml`): PR クローズ時に gh-pages の容量をチェックし、800MB 超過時に古いレポートを削除
 
 ### Storybook ホスティング
 
-main ブランチの Storybook は Chromatic でホスティングされています。
+main ブランチの Storybook は 2 つのプラットフォームでホスティングされています。
 
-https://main--69a67d8928ff3a182e0b5dfa.chromatic.com
+| プラットフォーム | URL | アクセス制御 | 用途 |
+| --- | --- | --- | --- |
+| Chromatic | https://main--69a67d8928ff3a182e0b5dfa.chromatic.com | 公開 | 外部共有・レビュー用 |
+| Cloudflare Pages | `https://<project-name>.pages.dev` | Cloudflare Access（Zero Trust） | チーム内限定共有 |
 
 PR 時はベースブランチからベースラインを動的生成し、reg-cli で差分レポートを生成します。
 VRT・E2E ともにスクリーンショット撮影が目的であり、ビジュアル変更があってもテストは失敗しません。差分は reg-cli レポートで確認します。
