@@ -32,7 +32,15 @@ jobs:
 
       # ── 静的解析 ──
       # ローカルでは renovate パッケージの WASM エラーにより実行不可のため CI でのみ検証
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            renovate:
+              - 'renovate.json5'
+
       - name: Renovate Config Validator
+        if: steps.changes.outputs.renovate == 'true'
         uses: suzuki-shunsuke/github-action-renovate-config-validator@v2.1.0
         with:
           config_file_path: renovate.json5

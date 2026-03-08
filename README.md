@@ -65,12 +65,14 @@ curl https://mise.run | sh
 # ツールインストール
 mise install
 
-# パッケージインストール
+# パッケージインストール（lefthook + Playwright ブラウザも自動セットアップ）
 bun install
 
 # クリーンインストール + 全チェック実行（リント・型チェック・テスト・ビルド・VRT・E2E）
 bun run clean:setup
 ```
+
+> **Note:** `bun install` 時に `prepare` スクリプトで lefthook の Git hooks 登録と Playwright ブラウザのインストールが自動実行されます。CI 環境（`CI=true`）ではこれらをスキップし、必要なワークフローで個別にインストールしています。
 
 ## オンボーディング（新メンバー向け）
 
