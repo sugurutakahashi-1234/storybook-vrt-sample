@@ -1,6 +1,6 @@
 ---
 name: storybook-story-gen
-description: Storybook MCP を活用してコンポーネントのストーリーファイルを CSF3 形式で作成する
+description: コンポーネントの Storybook ストーリーファイルを CSF3 形式で作成する。ユーザーが「ストーリー作って」「stories ファイル書いて」「Storybook に追加して」「このコンポーネントのバリエーション見たい」と言ったとき、または新しい UI コンポーネントを作成・変更したときに使う。
 allowed-tools: mcp__storybook-mcp__*, Read, Edit, Write, Bash(bun run storybook), Bash(bun run storybook:*), Glob, Grep
 ---
 
@@ -12,6 +12,8 @@ Storybook MCP を活用して、指定されたコンポーネントのストー
 
 - Storybook dev サーバーが起動していること（`cd packages/ui && bun run storybook`）
 - Storybook MCP サーバーが利用可能であること
+
+サーバーが起動していない場合はユーザーに起動を案内する。
 
 ## 手順
 
