@@ -22,12 +22,19 @@ post-checkout:
       run: |
         [ "{1}" != "1" ] && exit 0
         git diff HEAD@{1} HEAD --quiet -- bun.lock 2>/dev/null || bun install --frozen-lockfile
+    # mise.toml に変更があればツールを自動インストール
+    - name: mise-install
+      run: |
+        [ "{1}" != "1" ] && exit 0
+        git diff HEAD@{1} HEAD --quiet -- mise.toml 2>/dev/null || mise install
 
-# マージ・プル時: bun.lock に変更があれば依存関係を自動同期
+# マージ・プル時: bun.lock / mise.toml に変更があれば自動同期
 post-merge:
   jobs:
     - name: bun-install
       run: git diff HEAD@{1} HEAD --quiet -- bun.lock 2>/dev/null || bun install --frozen-lockfile
+    - name: mise-install
+      run: git diff HEAD@{1} HEAD --quiet -- mise.toml 2>/dev/null || mise install
 
 # コミット時: ステージされたファイルに対して実行
 # 手動実行: bunx lefthook run pre-commit --force
@@ -167,8 +174,9 @@ pre-push:
       run: bun run e2e && git diff --quiet apps/web/e2e/screenshots/ && ! git ls-files --others --exclude-standard apps/web/e2e/screenshots/ | grep -q . || (echo "" && echo "❌ E2E スクリーンショットに差分があります" && echo "👉 bun run e2e && git add apps/web/e2e/screenshots/ && git commit" && exit 1)
 
     # ── Terraform ──
-    # terraform apply 漏れ検出（.env.keys がなければスキップ）
+    # terraform apply 漏れ検出
     # infra/ の .tf 変更後に apply し忘れた状態での push を防止する
+    # .env.keys がなければ plan 実行不可のためブロック（infra/ を変更するなら復号キーが必要）
     - name: terraform-plan-check
       skip:
         # infra/ に変更がなければスキップ
@@ -178,8 +186,9 @@ pre-push:
         for dir in infra/*/; do
           keys_file="${dir}.env.keys"
           if [ ! -f "$keys_file" ]; then
-            echo "⏭️  $dir: .env.keys がないためスキップ"
-            continue
+            echo "❌ $dir: .env.keys がないため apply 漏れを確認できません"
+            echo "👉 復号キーをパスワードマネージャー等から取得してください"
+            exit 1
           fi
           [ -d "$dir.terraform" ] || (cd "$dir" && dotenvx run -- terraform init -input=false > /dev/null 2>&1)
           cd "$dir" && dotenvx run -- terraform plan -detailed-exitcode -no-color > /dev/null 2>&1
