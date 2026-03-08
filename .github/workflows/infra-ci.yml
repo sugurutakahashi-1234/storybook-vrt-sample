@@ -97,7 +97,7 @@ jobs:
 
   # ── Plan + apply 漏れ検出（Secrets 必要） ──
   plan:
-    name: 🏗️ Terraform Plan
+    name: 📋 Terraform Plan
     needs: changes
     if: github.event_name == 'pull_request' && needs.changes.outputs.should-run == 'true'
     runs-on: ubuntu-latest

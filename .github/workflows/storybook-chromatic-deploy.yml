@@ -16,7 +16,7 @@
 # 公式ドキュメント:
 #   https://www.chromatic.com/docs/github-actions/
 # ==============================================
-name: 🟣 Storybook Chromatic Deploy
+name: 🎨 Storybook Chromatic Deploy
 
 on:
   # main push 時: Chromatic へプロダクションデプロイ
@@ -55,7 +55,7 @@ jobs:
               - '.github/workflows/storybook-chromatic-deploy.yml'
 
   deploy:
-    name: 🟣 Deploy to Chromatic
+    name: 🎨 Deploy to Chromatic
     needs: changes
     if: github.event_name != 'pull_request' || needs.changes.outputs.should-run == 'true'
     runs-on: ubuntu-latest
@@ -106,7 +106,7 @@ jobs:
       # Job Summary にビルド結果の URL を表示
       - name: Add summary
         run: |
-          echo "## 🟣 Chromatic" >> $GITHUB_STEP_SUMMARY
+          echo "## 🎨 Chromatic" >> $GITHUB_STEP_SUMMARY
           echo "| Key | URL |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|-----|" >> $GITHUB_STEP_SUMMARY
           echo "| Storybook | ${{ steps.chromatic.outputs.storybookUrl }} |" >> $GITHUB_STEP_SUMMARY
@@ -120,7 +120,7 @@ jobs:
         with:
           header: chromatic-storybook
           message: |
-            ## 🟣 Chromatic Storybook Preview
+            ## 🎨 Chromatic Storybook Preview
 
             | Key | URL |
             |-----|-----|
