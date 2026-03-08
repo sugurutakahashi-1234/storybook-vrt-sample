@@ -120,7 +120,7 @@ jobs:
             module=$(basename "$dir")
             echo "=== $module ==="
             terraform -chdir="$dir" init
-            tfcmt -var "target:$module" plan -- terraform -chdir="$dir" plan -no-color -detailed-exitcode
+            tfcmt -var "target:$module" plan --skip-no-changes --disable-label -- terraform -chdir="$dir" plan -no-color -detailed-exitcode
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

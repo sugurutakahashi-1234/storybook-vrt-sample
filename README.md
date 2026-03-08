@@ -275,11 +275,13 @@ PR 作成時に GitHub Actions が自動実行されます。
 ### Storybook ホスティング
 
 Storybook は 2 つのプラットフォームでホスティングされています。
+このリポジトリは検証用のパブリックリポジトリのため、Chromatic は公開状態でデプロイしています。
+実際のプロダクトでは Cloudflare Pages + Cloudflare Access のように認証付きでホスティングし、チーム外からのアクセスを制限する構成を想定しています。
 
-| プラットフォーム | アクセス制御                    | 用途                 |
-| ---------------- | ------------------------------- | -------------------- |
-| Chromatic        | 公開                            | 外部共有・レビュー用 |
-| Cloudflare Pages | Cloudflare Access（Zero Trust） | チーム内限定共有     |
+| プラットフォーム | アクセス制御                    | 用途                                              |
+| ---------------- | ------------------------------- | ------------------------------------------------- |
+| Chromatic        | 公開                            | セットアップが簡単なため採用。公開状態でデプロイ  |
+| Cloudflare Pages | Cloudflare Access（Zero Trust） | 認証付きホスティングの検証用。チーム内限定共有     |
 
 Cloudflare Pages は Cloudflare Access で保護されており、`allowed_emails` に登録されたメールアドレスのユーザーのみアクセスできます。
 認証方法は GitHub OAuth / Google OAuth / メール OTP（One-time PIN）で、プロダクション・プレビューデプロイの両方が保護対象です。
