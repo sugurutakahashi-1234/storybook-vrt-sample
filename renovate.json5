@@ -3,6 +3,7 @@
   // https://docs.renovatebot.com/configuration-options/
   // https://github.com/marketplace/renovate
   // https://github.com/settings/installations
+  // https://developer.mend.io/ (ダッシュボード・ジョブログ)
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
 
   // 設定の自動マイグレーションを無効化

@@ -1,0 +1,105 @@
+# ==============================================
+# インフラ CI ワークフロー
+# ==============================================
+# infra/ 配下の Terraform 設定に対して
+# フォーマット・バリデーション・リント・plan を実行する。
+#
+# terraform plan の結果を PR コメントに表示し、
+# 未適用の変更（apply 漏れ）があれば CI を失敗させる。
+# plan コメントは dflook/terraform-plan が自動投稿する。
+#
+# ローカルでは lefthook が同等のチェックを実行する:
+#   pre-commit: terraform fmt / validate / tflint
+#   pre-push:   terraform plan（apply 漏れ検出）
+#
+# 必要な設定:
+#   Secrets:
+#     DOTENV_PRIVATE_KEY_INFRA — infra/cloudflare-access/.env.keys の DOTENV_PRIVATE_KEY
+#       dotenvx で暗号化された .env を復号し、全環境変数（CLOUDFLARE_API_TOKEN, TF_VAR_* 等）を注入する
+#       ※ 個別の Secrets 登録は不要。.env に変数を追加すれば CI にも自動反映される
+# ==============================================
+name: Infra CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "infra/**"
+      - ".github/workflows/infra-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  pull-requests: write
+
+jobs:
+  # ── 静的解析（Secrets 不要） ──
+  lint:
+    name: Terraform Format / Validate / Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: Kesin11/actions-timeline@v3
+      - uses: actions/checkout@v6
+
+      # terraform fmt -check 相当。インデント・改行などのコードスタイルをチェック
+      - name: Terraform Format Check
+        uses: dflook/terraform-fmt-check@v2
+        with:
+          path: infra/cloudflare-access
+
+      # terraform validate 相当。HCL の構文・型の正しさをチェック（init も自動実行）
+      - name: Terraform Validate
+        uses: dflook/terraform-validate@v2
+        with:
+          path: infra/cloudflare-access
+
+      # tflint は dflook スイートに含まれないため別途実行
+      - uses: terraform-linters/setup-tflint@v6
+      - name: TFLint
+        run: |
+          for dir in infra/*/; do
+            echo "=== $dir ==="
+            tflint --chdir="$dir"
+          done
+
+  # ── Plan + apply 漏れ検出（Secrets 必要） ──
+  plan:
+    name: Terraform Plan
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: Kesin11/actions-timeline@v3
+      - uses: actions/checkout@v6
+
+      # dflook/terraform-plan は init + plan + PR コメント投稿を一括処理
+      # TERRAFORM_PRE_RUN: terraform init 前に実行されるカスタムコマンド（dflook 独自機能）
+      #   dotenvx をインストールし、.env を復号して環境変数を export する
+      #   これにより CLOUDFLARE_API_TOKEN や TF_VAR_* が Terraform に注入される
+      #   GITHUB_ENV への書き出しが不要で、プロセス内で完結するためよりセキュア
+      #   参考: https://github.com/dflook/terraform-github-actions/tree/main/terraform-plan#environment-variables
+      # label: PR コメントの識別名。複数モジュールの plan が同じ PR で上書きされないようにする
+      #   参考: https://github.com/dflook/terraform-github-actions/tree/main/terraform-plan#inputs
+      # dotenvx CI 設定: https://dotenvx.com/docs/cis/github-actions
+      - name: Terraform Plan (cloudflare-access)
+        uses: dflook/terraform-plan@v2
+        with:
+          path: infra/cloudflare-access
+          label: cloudflare-access
+        env:
+          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY_INFRA }}
+          TERRAFORM_PRE_RUN: |
+            curl -sfS https://dotenvx.sh/install.sh | sh
+            eval $(dotenvx get --format shell)
+
+      # dflook/terraform-check は plan に差分があれば CI を失敗させる（apply 漏れ検出）
+      - name: Terraform Check (cloudflare-access)
+        uses: dflook/terraform-check@v2
+        with:
+          path: infra/cloudflare-access
+        env:
+          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY_INFRA }}
+          TERRAFORM_PRE_RUN: |
+            curl -sfS https://dotenvx.sh/install.sh | sh
+            eval $(dotenvx get --format shell)

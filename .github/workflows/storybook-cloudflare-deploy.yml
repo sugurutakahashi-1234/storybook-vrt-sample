@@ -9,10 +9,14 @@
 #
 # 必要な設定:
 #   Secrets:
-#     CLOUDFLARE_API_TOKEN    — Cloudflare ダッシュボード > My Profile > API Tokens（Cloudflare Pages: Edit 権限）
+#     CLOUDFLARE_API_TOKEN    — Cloudflare API Token「GitHub Actions - Cloudflare Pages」
+#       権限: Cloudflare Pages: Edit
+#       ※ Terraform 用トークン（infra/cloudflare-access/.env で管理）とは別トークン
 #   Variables:
-#     CLOUDFLARE_ACCOUNT_ID   — Cloudflare ダッシュボード > Workers & Pages > Account ID
+#     CLOUDFLARE_ACCOUNT_ID   — Cloudflare ダッシュボード > Workers & Pages > Account ID（`bunx wrangler whoami` でも確認可）
 #     CF_PAGES_PROJECT_NAME   — Cloudflare Pages プロジェクト名（`<project-name>.pages.dev` のサブドメインになる）
+#   初回セットアップ:
+#     bunx wrangler pages project create <project-name> --production-branch main
 #   Cloudflare Access: Zero Trust > Access > Applications で認証ポリシーを設定
 # ==============================================
 name: Storybook Cloudflare Pages Deploy

@@ -60,9 +60,29 @@ pre-commit:
       glob:
         - "**/*.{js,jsx,ts,tsx,json,jsonc,css,md,yml,yaml}"
     # .env ファイルの誤コミット防止
+    # dotenvx で暗号化済み（DOTENV_PUBLIC_KEY を含む）なら許可、それ以外はブロック
+    # .env.keys は .gitignore で除外済み
     - name: no-secrets
-      timeout: 20s
-      run: git diff --cached --name-only | grep -E '\.env($|\.)' && echo ".env ファイルはコミットできません" && exit 1 || exit 0
+      run: |
+        for f in $(git diff --cached --name-only | grep -E '\.env($|\.)'); do
+          if ! grep -q 'DOTENV_PUBLIC_KEY' "$f" 2>/dev/null; then
+            echo "❌ $f は暗号化されていません（dotenvx encrypt で暗号化してください）" && exit 1
+          fi
+        done
+    # Terraform（infra/ にモジュールが増えたらパス追加 or for ループに変更）
+    # フォーマット自動修正（fmt -recursive は infra/ 全体を対象にするため変更不要）
+    - name: terraform-fmt
+      run: terraform fmt -recursive infra/
+      glob: "infra/**/*.tf"
+      stage_fixed: true
+    # Terraform バリデーション（init は .terraform がなければ自動実行）
+    - name: terraform-validate
+      run: "[ -d infra/cloudflare-access/.terraform ] || terraform -chdir=infra/cloudflare-access init -backend=false -input=false > /dev/null 2>&1 && terraform -chdir=infra/cloudflare-access validate"
+      glob: "infra/**/*.tf"
+    # Terraform リンター（ベストプラクティス・非推奨属性のチェック）
+    - name: tflint
+      run: tflint --chdir=infra/cloudflare-access
+      glob: "infra/**/*.tf"
 
 # プッシュ時: プロジェクト全体に対して実行
 # 手動実行: bunx lefthook run pre-push --force
@@ -145,3 +165,30 @@ pre-push:
         - run: git diff origin/main...HEAD --quiet -- 'packages/ui/' 'apps/web/' 'bun.lock'
       timeout: 20s
       run: bun run e2e && git diff --quiet apps/web/e2e/screenshots/ && ! git ls-files --others --exclude-standard apps/web/e2e/screenshots/ | grep -q . || (echo "" && echo "❌ E2E スクリーンショットに差分があります" && echo "👉 bun run e2e && git add apps/web/e2e/screenshots/ && git commit" && exit 1)
+
+    # ── Terraform ──
+    # terraform apply 漏れ検出（.env.keys がなければスキップ）
+    # infra/ の .tf 変更後に apply し忘れた状態での push を防止する
+    - name: terraform-plan-check
+      skip:
+        # infra/ に変更がなければスキップ
+        - run: git diff origin/main...HEAD --quiet -- 'infra/'
+      timeout: 30s
+      run: |
+        for dir in infra/*/; do
+          keys_file="${dir}.env.keys"
+          if [ ! -f "$keys_file" ]; then
+            echo "⏭️  $dir: .env.keys がないためスキップ"
+            continue
+          fi
+          [ -d "$dir.terraform" ] || (cd "$dir" && dotenvx run -- terraform init -input=false > /dev/null 2>&1)
+          cd "$dir" && dotenvx run -- terraform plan -detailed-exitcode -no-color > /dev/null 2>&1
+          exit_code=$?
+          cd - > /dev/null
+          if [ "$exit_code" = "2" ]; then
+            echo "" && echo "❌ $dir に未適用の変更があります" && echo "👉 cd $dir && dotenvx run -- terraform apply" && exit 1
+          elif [ "$exit_code" = "1" ]; then
+            echo "" && echo "❌ $dir の terraform plan でエラーが発生しました" && exit 1
+          fi
+          echo "✅ $dir: 適用済み"
+        done

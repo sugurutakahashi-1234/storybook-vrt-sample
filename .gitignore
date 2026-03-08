@@ -31,6 +31,7 @@ coverage/
 
 # 環境変数（機密情報を含むためコミットしない）
 .env
+!infra/**/.env
 .env.local
 .env.*.local
 
@@ -64,6 +65,15 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+
+# dotenvx（復号キーはコミットしない）
+.env.keys
 
 # Claude Code（ローカル設定はユーザー固有のため共有しない）
 .claude/settings.local.json

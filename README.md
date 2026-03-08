@@ -4,6 +4,7 @@
 [![Storybook VRT](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-vrt.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-vrt.yml)
 [![E2E Tests](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/web-e2e.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/web-e2e.yml)
 [![Storybook Chromatic Deploy](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-chromatic-deploy.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-chromatic-deploy.yml)
+[![Infra CI](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/infra-ci.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/infra-ci.yml)
 [![Cleanup GitHub Pages](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/github-pages-cleanup.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/github-pages-cleanup.yml)
 [![Storybook Cloudflare Deploy](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-cloudflare-deploy.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/storybook-cloudflare-deploy.yml)
 [![Storybook](https://img.shields.io/badge/Storybook-Chromatic-ff4785)](https://main--69a67d8928ff3a182e0b5dfa.chromatic.com)
@@ -32,7 +33,9 @@ storybook-vrt-sample/
 │   └── web/                  # Next.js アプリ + E2E テスト
 ├── packages/
 │   └── ui/                   # 共有 UI コンポーネント + Storybook + VRT
-└── .github/workflows/        # CI (VRT + E2E)
+├── infra/
+│   └── cloudflare-access/    # Cloudflare Access (Zero Trust) の Terraform 管理
+└── .github/workflows/        # CI (VRT + E2E + デプロイ)
 ```
 
 ## セットアップ
@@ -40,7 +43,16 @@ storybook-vrt-sample/
 ### 前提条件
 
 [mise](https://mise.jdx.dev/) でランタイムと CLI ツールを管理しています。
-`mise activate` 設定済みであればプロジェクトディレクトリに移動するだけでツール（node, bun, gh）が自動インストールされます。
+`mise activate` 設定済みであればプロジェクトディレクトリに移動するだけでツールが自動インストールされます。
+
+| ツール    | 用途                                  |
+| --------- | ------------------------------------- |
+| node      | ランタイム                            |
+| bun       | パッケージマネージャー + モノレポ管理 |
+| gh        | GitHub CLI                            |
+| terraform | Cloudflare Access の IaC 管理         |
+| dotenvx   | .env 暗号化管理                       |
+| gcloud    | Google Cloud CLI（OAuth 設定等）      |
 
 ```bash
 # mise 未インストールの場合
@@ -225,6 +237,7 @@ bun run web:e2e:allure
 PR 作成時に GitHub Actions が自動実行されます。
 
 - **CI** (`ci.yml`): 全 PR で Lint / Typecheck / Knip / Test / Build を実行
+- **Infra CI** (`infra-ci.yml`): `infra/` の変更時に Terraform Format / Validate / tflint を実行
 - **Storybook VRT** (`storybook-vrt.yml`): `packages/ui/` の変更時に実行
 - **E2E テスト** (`web-e2e.yml`): `apps/web/` または `packages/ui/` の変更時に実行
 - **Storybook Chromatic Deploy** (`storybook-chromatic-deploy.yml`): main マージ時・PR 時に Storybook を Chromatic へデプロイ
@@ -233,12 +246,23 @@ PR 作成時に GitHub Actions が自動実行されます。
 
 ### Storybook ホスティング
 
-main ブランチの Storybook は 2 つのプラットフォームでホスティングされています。
+Storybook は 2 つのプラットフォームでホスティングされています。
 
-| プラットフォーム | URL                                                  | アクセス制御                    | 用途                 |
-| ---------------- | ---------------------------------------------------- | ------------------------------- | -------------------- |
-| Chromatic        | https://main--69a67d8928ff3a182e0b5dfa.chromatic.com | 公開                            | 外部共有・レビュー用 |
-| Cloudflare Pages | `https://<project-name>.pages.dev`                   | Cloudflare Access（Zero Trust） | チーム内限定共有     |
+| プラットフォーム | アクセス制御                    | 用途                 |
+| ---------------- | ------------------------------- | -------------------- |
+| Chromatic        | 公開                            | 外部共有・レビュー用 |
+| Cloudflare Pages | Cloudflare Access（Zero Trust） | チーム内限定共有     |
+
+Cloudflare Pages は Cloudflare Access で保護されており、`allowed_emails` に登録されたメールアドレスのユーザーのみアクセスできます。
+認証方法は GitHub OAuth / Google OAuth / メール OTP（One-time PIN）で、プロダクション・プレビューデプロイの両方が保護対象です。
+アクセス制御の設定は `infra/cloudflare-access/` で Terraform により IaC 管理しています。
+
+| タイミング | Chromatic                                                | Cloudflare Pages                                          |
+| ---------- | -------------------------------------------------------- | --------------------------------------------------------- |
+| main push  | https://main--69a67d8928ff3a182e0b5dfa.chromatic.com     | https://storybook-vrt-sample.pages.dev                    |
+| PR         | `https://<branch>--69a67d8928ff3a182e0b5dfa.chromatic.com` | `https://<branch-hash>.storybook-vrt-sample.pages.dev` |
+
+PR 時は各プラットフォームがプレビューデプロイを自動作成し、PR コメントでリンクを共有します。
 
 PR 時はベースブランチからベースラインを動的生成し、reg-cli で差分レポートを生成します。
 VRT・E2E ともにスクリーンショット撮影が目的であり、ビジュアル変更があってもテストは失敗しません。差分は reg-cli レポートで確認します。
@@ -294,3 +318,88 @@ https://<owner>.github.io/<repo>/pr/<pr-number>/
 `workflow_dispatch` で手動実行した場合は `manual/<run-id>/` 配下にデプロイされます。
 
 PR にはレポートリンク付きのコメントが自動投稿されます。
+
+## インフラ管理
+
+### Cloudflare Access（`infra/cloudflare-access/`）
+
+Cloudflare Pages にホスティングした Storybook へのアクセスを [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/policies/access/)（Zero Trust）で制限しています。
+
+| 項目             | 内容                                                                       |
+| ---------------- | -------------------------------------------------------------------------- |
+| 認証方法         | GitHub OAuth / Google OAuth / メール OTP（One-time PIN）                   |
+| アクセス制御     | `allowed_emails` に登録されたメールアドレスのみ許可                        |
+| 保護対象         | プロダクション（`pages.dev`）+ プレビュー（`*.pages.dev`）                 |
+| セッション有効期限 | 30日間（期限切れ後に再認証）                                              |
+| IaC              | Terraform（Cloudflare provider v5）                                        |
+| シークレット管理 | [dotenvx](https://dotenvx.com/) による .env 暗号化（AES-256-GCM）         |
+
+#### 操作手順
+
+```bash
+cd infra/cloudflare-access
+
+# 初回のみ: provider をダウンロード
+terraform init
+
+# 変更内容をプレビュー（実際には適用しない）
+dotenvx run -- terraform plan
+
+# Cloudflare に変更を適用（メールアドレスの追加・削除など）
+dotenvx run -- terraform apply
+```
+
+#### シークレット管理（dotenvx）
+
+環境変数は `infra/cloudflare-access/.env` に dotenvx で暗号化して保存しています。
+復号には `.env.keys` ファイルが必要です（パスワードマネージャー等で共有）。
+
+```bash
+cd infra/cloudflare-access
+
+# 復号された全変数を確認
+dotenvx get | jq .
+
+# 新しい変数を追加する場合
+# 1. .env に平文で追加
+# 2. dotenvx encrypt で暗号化
+```
+
+#### 初回セットアップ
+
+GitHub OAuth App と Google OAuth クライアントは Terraform 未対応のため手動で作成が必要です。
+詳細な手順は `infra/cloudflare-access/main.tf` のヘッダーコメントを参照してください。
+
+## シークレット・環境変数一覧
+
+シークレットは用途に応じて複数の場所で管理しています。
+
+### GitHub Secrets（Settings > Secrets and variables > Actions）
+
+| Secret | 用途 | 使用ワークフロー | 取得先 |
+| --- | --- | --- | --- |
+| `CHROMATIC_PROJECT_TOKEN` | Chromatic デプロイ | `storybook-chromatic-deploy.yml` | [Chromatic](https://www.chromatic.com/) > Project > Configure |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare Pages デプロイ | `storybook-cloudflare-deploy.yml` | Cloudflare > My Profile > API Tokens（権限: Pages Edit） |
+| `DOTENV_PRIVATE_KEY_INFRA` | Terraform 用 .env 復号 | `infra-ci.yml` | `infra/cloudflare-access/.env.keys` の `DOTENV_PRIVATE_KEY` |
+
+### GitHub Variables（Settings > Secrets and variables > Actions）
+
+| Variable | 用途 | 使用ワークフロー |
+| --- | --- | --- |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare アカウント識別 | `storybook-cloudflare-deploy.yml` |
+| `CF_PAGES_PROJECT_NAME` | Cloudflare Pages プロジェクト名 | `storybook-cloudflare-deploy.yml` |
+
+### dotenvx 暗号化（`infra/cloudflare-access/.env`）
+
+Terraform で使用する環境変数を dotenvx で暗号化して管理しています。
+復号には `.env.keys` が必要です（パスワードマネージャー等で共有）。
+
+| 変数 | 用途 | 取得先 |
+| --- | --- | --- |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare Access 管理 | Cloudflare > My Profile > API Tokens（権限: Access Edit） |
+| `TF_VAR_github_oauth_client_id` | GitHub OAuth IdP | GitHub > Developer Settings > OAuth Apps |
+| `TF_VAR_github_oauth_client_secret` | GitHub OAuth IdP | 同上 |
+| `TF_VAR_google_oauth_client_id` | Google OAuth IdP | Google Cloud Console > Google Auth Platform > クライアント |
+| `TF_VAR_google_oauth_client_secret` | Google OAuth IdP | 同上 |
+
+各ワークフローのヘッダーコメントにも必要な Secrets/Variables の説明があります。

@@ -5,8 +5,22 @@ experimental = true
 node = "lts"
 bun = "latest"
 gh = "latest"
+terraform = "latest" # Cloudflare Access の IaC 管理
+tflint = "latest"    # Terraform リンター
+dotenvx = "latest"   # .env 暗号化管理
+gcloud = "latest"    # Google Cloud CLI（OAuth 設定等）
 
 # mise install 完了後に依存関係を自動インストール
 # ツールが既にインストール済みの場合はスキップされるため、cd 時の auto_install では発火しない
 [hooks]
-postinstall = "bun install"
+postinstall = """
+bun install
+for env_file in $(git ls-files '*.env' --ignored --exclude-standard 2>/dev/null; git ls-files '*.env'); do
+  keys_file="${env_file%.env}.env.keys"
+  if grep -q 'DOTENV_PUBLIC_KEY' "$env_file" 2>/dev/null && [ ! -f "$keys_file" ]; then
+    echo ""
+    echo "⚠️  $keys_file が見つかりません"
+    echo "   復号キーが必要です。詳細: $env_file"
+  fi
+done
+"""
