@@ -186,7 +186,7 @@ jobs:
   # デプロイ（gh-pages への push のみ直列化）
   # ────────────────────────────────────────
   deploy:
-    name: "Deploy \U0001F4F8 Storybook VRT Report"
+    name: "🚀 Deploy Storybook VRT Report"
     needs: [changes, test]
     if: (github.event_name != 'pull_request' || needs.changes.outputs.should-run == 'true') && !cancelled()
     runs-on: ubuntu-latest

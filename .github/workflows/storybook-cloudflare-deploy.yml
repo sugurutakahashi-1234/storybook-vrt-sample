@@ -21,7 +21,7 @@
 #     bunx wrangler pages project create <project-name> --production-branch main
 #   Cloudflare Access: Zero Trust > Access > Applications で認証ポリシーを設定
 # ==============================================
-name: 🔶 Storybook Cloudflare Pages Deploy
+name: ☁️ Storybook Cloudflare Pages Deploy
 
 on:
   # main push 時: プロダクションデプロイ
@@ -60,7 +60,7 @@ jobs:
               - '.github/workflows/storybook-cloudflare-deploy.yml'
 
   deploy:
-    name: 🔶 Deploy to Cloudflare Pages
+    name: ☁️ Deploy to Cloudflare Pages
     needs: changes
     if: github.event_name != 'pull_request' || needs.changes.outputs.should-run == 'true'
     runs-on: ubuntu-latest
@@ -104,7 +104,7 @@ jobs:
       # Job Summary にデプロイ結果の URL を表示
       - name: Add summary
         run: |
-          echo "## 🔶 Cloudflare Pages" >> $GITHUB_STEP_SUMMARY
+          echo "## ☁️ Cloudflare Pages" >> $GITHUB_STEP_SUMMARY
           echo "| Key | URL |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|-----|" >> $GITHUB_STEP_SUMMARY
           echo "| Storybook | ${{ steps.deploy.outputs.deployment-url }} |" >> $GITHUB_STEP_SUMMARY
@@ -116,7 +116,7 @@ jobs:
         with:
           header: cloudflare-storybook
           message: |
-            ## 🔶 Cloudflare Pages Storybook Preview
+            ## ☁️ Cloudflare Pages Storybook Preview
 
             | Key | URL |
             |-----|-----|
