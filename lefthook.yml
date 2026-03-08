@@ -18,12 +18,12 @@ output:
 # {1} = ブランチ切替フラグ（1: ブランチ切替、0: ファイルチェックアウト）
 post-checkout:
   jobs:
-    - name: bun-install
+    - name: sync-bun-deps
       run: |
         [ "{1}" != "1" ] && exit 0
         git diff HEAD@{1} HEAD --quiet -- bun.lock 2>/dev/null || bun install --frozen-lockfile
     # mise.toml に変更があればツールを自動インストール
-    - name: mise-install
+    - name: sync-mise-tools
       run: |
         [ "{1}" != "1" ] && exit 0
         git diff HEAD@{1} HEAD --quiet -- mise.toml 2>/dev/null || mise install
@@ -31,9 +31,9 @@ post-checkout:
 # マージ・プル時: bun.lock / mise.toml に変更があれば自動同期
 post-merge:
   jobs:
-    - name: bun-install
+    - name: sync-bun-deps
       run: git diff HEAD@{1} HEAD --quiet -- bun.lock 2>/dev/null || bun install --frozen-lockfile
-    - name: mise-install
+    - name: sync-mise-tools
       run: git diff HEAD@{1} HEAD --quiet -- mise.toml 2>/dev/null || mise install
 
 # コミット時: ステージされたファイルに対して実行

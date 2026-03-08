@@ -56,6 +56,8 @@ jobs:
       # セットアップ
       # ────────────────────────────────────────
 
+      - uses: Kesin11/actions-timeline@v3
+
       - uses: actions/checkout@v6
         with:
           # ベースライン生成で base branch を参照するため全履歴が必要
@@ -289,15 +291,3 @@ jobs:
             | reg-cli | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/web-e2e/reg-report/report/ |
             | Playwright HTML | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/web-e2e/html-report/ |
             | Allure | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/web-e2e/allure-report/ |
-
-  # ────────────────────────────────────────
-  # ワークフロー実行タイムライン可視化
-  # ────────────────────────────────────────
-  actions-timeline:
-    name: Actions Timeline
-    needs: [changes, test, deploy]
-    if: (github.event_name != 'pull_request' || needs.changes.outputs.should-run == 'true') && !cancelled()
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: Kesin11/actions-timeline@v3
