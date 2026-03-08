@@ -1,6 +1,8 @@
 # E2E テストワークフロー
 #
-# apps/web/ または packages/ui/ 配下のファイルが変更された PR で自動実行される。
+# 全 PR で起動し、paths-filter でジョブレベル skip する。
+# skip されたジョブは GitHub 上で pass 扱いになるため、
+# required status checks と paths フィルタを両立できる。
 # Next.js アプリをビルドし、Playwright でページ遷移やレスポンシブ表示などを検証する。
 # PR 時はベースブランチからベースラインを動的生成し、reg-cli で差分レポートを生成する。
 name: E2E Tests
@@ -8,13 +10,6 @@ name: E2E Tests
 on:
   pull_request:
     branches: [main]
-    # apps/web/、packages/ui/、または bun.lock の変更時に実行
-    # UI コンポーネントの変更が Web アプリに影響する可能性があるため両方を監視
-    paths:
-      - "apps/web/**"
-      - "packages/ui/**"
-      - "bun.lock"
-      - ".github/workflows/web-e2e.yml"
   workflow_dispatch:
 
 permissions:
@@ -29,8 +24,27 @@ env:
   REPORT_PREFIX: ${{ github.event.pull_request.number && format('pr/{0}', github.event.pull_request.number) || format('manual/{0}', github.run_id) }}
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      should-run: ${{ steps.filter.outputs.app }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        if: github.event_name == 'pull_request'
+        with:
+          filters: |
+            app:
+              - 'apps/web/**'
+              - 'packages/ui/**'
+              - 'bun.lock'
+              - '.github/workflows/web-e2e.yml'
+
   test:
     name: "\U0001F9EA E2E Test Report"
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
@@ -230,8 +244,8 @@ jobs:
   # ────────────────────────────────────────
   deploy:
     name: "Deploy \U0001F9EA E2E Test Report"
-    needs: test
-    if: ${{ !cancelled() }}
+    needs: [changes, test]
+    if: (github.event_name != 'pull_request' || needs.changes.outputs.should-run == 'true') && !cancelled()
     runs-on: ubuntu-latest
     timeout-minutes: 5
     # gh-pages ブランチへの push が競合しないようにキューイング
@@ -279,8 +293,8 @@ jobs:
   # ────────────────────────────────────────
   actions-timeline:
     name: Actions Timeline
-    needs: [test, deploy]
-    if: ${{ !cancelled() }}
+    needs: [changes, test, deploy]
+    if: (github.event_name != 'pull_request' || needs.changes.outputs.should-run == 'true') && !cancelled()
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

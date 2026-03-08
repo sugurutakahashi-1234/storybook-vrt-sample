@@ -1,6 +1,9 @@
 # ==============================================
 # インフラ CI ワークフロー
 # ==============================================
+# 全 PR で起動し、paths-filter でジョブレベル skip する。
+# skip されたジョブは GitHub 上で pass 扱いになるため、
+# required status checks と paths フィルタを両立できる。
 # infra/ 配下の Terraform モジュールに対して
 # フォーマット・バリデーション・リント・plan を実行する。
 #
@@ -34,9 +37,6 @@ name: Infra CI
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "infra/**"
-      - ".github/workflows/infra-ci.yml"
   workflow_dispatch:
 
 permissions:
@@ -44,9 +44,26 @@ permissions:
   pull-requests: write
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      should-run: ${{ steps.filter.outputs.infra }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        if: github.event_name == 'pull_request'
+        with:
+          filters: |
+            infra:
+              - 'infra/**'
+              - '.github/workflows/infra-ci.yml'
+
   # ── 静的解析（Secrets 不要） ──
   lint:
     name: Terraform Format / Validate / Lint
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -79,7 +96,8 @@ jobs:
   # ── Plan + apply 漏れ検出（Secrets 必要） ──
   plan:
     name: Terraform Plan
-    if: github.event_name == 'pull_request'
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:

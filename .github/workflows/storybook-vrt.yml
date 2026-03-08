@@ -1,6 +1,8 @@
 # Storybook VRT（ビジュアルリグレッションテスト）ワークフロー
 #
-# packages/ui/ 配下のファイルが変更された PR で自動実行される。
+# 全 PR で起動し、paths-filter でジョブレベル skip する。
+# skip されたジョブは GitHub 上で pass 扱いになるため、
+# required status checks と paths フィルタを両立できる。
 # storybook-addon-vis + vitest browser mode でスクリーンショットを撮影し、
 # reg-cli で差分レポートを生成する。Storybook ビルド不要。
 name: Storybook VRT
@@ -8,11 +10,6 @@ name: Storybook VRT
 on:
   pull_request:
     branches: [main]
-    # packages/ui/ または bun.lock の変更時のみ実行
-    paths:
-      - "packages/ui/**"
-      - "bun.lock"
-      - ".github/workflows/storybook-vrt.yml"
   workflow_dispatch:
 
 permissions:
@@ -27,8 +24,32 @@ env:
   REPORT_PREFIX: ${{ github.event.pull_request.number && format('pr/{0}', github.event.pull_request.number) || format('manual/{0}', github.run_id) }}
 
 jobs:
+  # ────────────────────────────────────────
+  # 変更検出（dorny/paths-filter）
+  # ────────────────────────────────────────
+  # paths フィルタをワークフローレベルではなくジョブレベルで適用する。
+  # ジョブの skip は GitHub 上で pass 扱いになるため、
+  # required status checks でマージがブロックされない。
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      should-run: ${{ steps.filter.outputs.ui }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        if: github.event_name == 'pull_request'
+        with:
+          filters: |
+            ui:
+              - 'packages/ui/**'
+              - 'bun.lock'
+              - '.github/workflows/storybook-vrt.yml'
+
   test:
     name: "\U0001F4F8 Storybook VRT"
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
@@ -164,8 +185,8 @@ jobs:
   # ────────────────────────────────────────
   deploy:
     name: "Deploy \U0001F4F8 Storybook VRT Report"
-    needs: test
-    if: ${{ !cancelled() }}
+    needs: [changes, test]
+    if: (github.event_name != 'pull_request' || needs.changes.outputs.should-run == 'true') && !cancelled()
     runs-on: ubuntu-latest
     timeout-minutes: 5
     # gh-pages ブランチへの push が競合しないようにキューイング
@@ -206,8 +227,8 @@ jobs:
   # ────────────────────────────────────────
   actions-timeline:
     name: Actions Timeline
-    needs: [test, deploy]
-    if: ${{ !cancelled() }}
+    needs: [changes, test, deploy]
+    if: (github.event_name != 'pull_request' || needs.changes.outputs.should-run == 'true') && !cancelled()
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

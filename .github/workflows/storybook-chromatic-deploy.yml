@@ -2,8 +2,10 @@
 # Storybook Chromatic デプロイワークフロー
 # ==============================================
 # Storybook を Chromatic へデプロイする。
-# - main push 時: プロダクションデプロイ
-# - PR 時: プレビューデプロイ + PR コメントでリンク共有
+# - main push 時: プロダクションデプロイ（paths フィルタで対象を限定）
+# - PR 時: 全 PR で起動し、paths-filter でジョブレベル skip する
+#   skip されたジョブは GitHub 上で pass 扱いになるため、
+#   required status checks と paths フィルタを両立できる。
 # ビジュアルテストは storybook-addon-vis + reg-cli で構築済みのため、
 # Chromatic は Storybook ホスティング専用として使用する。
 #
@@ -24,12 +26,9 @@ on:
       - "packages/ui/**"
       - "bun.lock"
       - ".github/workflows/storybook-chromatic-deploy.yml"
-  # PR 時: プレビューデプロイを作成し、PR コメントでリンクを共有
+  # PR 時: 全 PR で起動し、changes ジョブで paths をチェック
   pull_request:
-    paths:
-      - "packages/ui/**"
-      - "bun.lock"
-      - ".github/workflows/storybook-chromatic-deploy.yml"
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -37,8 +36,26 @@ permissions:
   pull-requests: write
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      should-run: ${{ steps.filter.outputs.ui }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        if: github.event_name == 'pull_request'
+        with:
+          filters: |
+            ui:
+              - 'packages/ui/**'
+              - 'bun.lock'
+              - '.github/workflows/storybook-chromatic-deploy.yml'
+
   deploy:
     name: Deploy to Chromatic
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

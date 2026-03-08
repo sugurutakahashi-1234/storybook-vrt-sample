@@ -265,12 +265,14 @@ bun run web:e2e:allure
 PR 作成時に GitHub Actions が自動実行されます。
 
 - **CI** (`ci.yml`): 全 PR で Lint / Typecheck / Knip / Test / Build を実行
-- **Infra CI** (`infra-ci.yml`): `infra/` の変更時に Terraform Format / Validate / tflint を実行
-- **Storybook VRT** (`storybook-vrt.yml`): `packages/ui/` の変更時に実行
-- **E2E テスト** (`web-e2e.yml`): `apps/web/` または `packages/ui/` の変更時に実行
-- **Storybook Chromatic Deploy** (`storybook-chromatic-deploy.yml`): main マージ時・PR 時に Storybook を Chromatic へデプロイ
-- **Storybook Cloudflare Deploy** (`storybook-cloudflare-deploy.yml`): main マージ時・PR 時に Storybook を Cloudflare Pages へデプロイ（Cloudflare Access による認証付き）
+- **Infra CI** (`infra-ci.yml`): 全 PR で起動し、`infra/` の変更時のみ Terraform Format / Validate / tflint を実行（変更なしの場合はジョブ skip = pass）
+- **Storybook VRT** (`storybook-vrt.yml`): 全 PR で起動し、`packages/ui/` の変更時のみ実行（変更なしの場合はジョブ skip = pass）
+- **E2E テスト** (`web-e2e.yml`): 全 PR で起動し、`apps/web/` または `packages/ui/` の変更時のみ実行（変更なしの場合はジョブ skip = pass）
+- **Storybook Chromatic Deploy** (`storybook-chromatic-deploy.yml`): main マージ時・PR 時に Storybook を Chromatic へデプロイ（PR 時は `packages/ui/` 変更時のみ）
+- **Storybook Cloudflare Deploy** (`storybook-cloudflare-deploy.yml`): main マージ時・PR 時に Storybook を Cloudflare Pages へデプロイ（PR 時は `packages/ui/` 変更時のみ、Cloudflare Access による認証付き）
 - **Cleanup GitHub Pages** (`github-pages-cleanup.yml`): PR クローズ時に gh-pages の容量をチェックし、800MB 超過時に古いレポートを削除
+
+> **Note:** paths フィルタ付きワークフロー（VRT, E2E, Chromatic, Cloudflare, Infra CI）は全 PR で起動し、[dorny/paths-filter](https://github.com/dorny/paths-filter) でジョブレベル skip する設計です。ワークフローレベルの `paths:` だとチェックが「存在しない」状態になり required status checks でマージがブロックされますが、ジョブレベル skip は GitHub 上で pass 扱いになるためこの問題を回避できます。
 
 ### Storybook ホスティング
 
