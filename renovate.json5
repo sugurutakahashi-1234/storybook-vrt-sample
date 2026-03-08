@@ -26,8 +26,20 @@
 
   packageRules: [
     // マイナー・パッチは CI 通過後に自動マージ
+    // ※ digest は自動マージ対象外にしている（下記参照）
+    //
+    // Renovate の update type:
+    //   minor/patch — 新バージョンのリリース（例: v6.1.0 → v6.2.0）
+    //                 → SHA も新バージョンのものに更新される → 自動マージ OK
+    //   digest     — バージョン変更なしで同じタグの SHA だけ変わった場合
+    //                 → タグ改ざん（サプライチェーン攻撃）の可能性があるため手動レビュー
+    //                 → 主に GitHub Actions で発生（npm パッケージは同じバージョンの中身が変わることはない）
+    //
+    // digest 更新 PR の CI 実行は安全:
+    //   pull_request トリガーはベースブランチ（main）のワークフローファイルで CI を実行するため、
+    //   PR ブランチの改ざんされた SHA は CI では使われない。マージしない限り影響なし。
     {
-      matchUpdateTypes: ["minor", "patch", "digest"],
+      matchUpdateTypes: ["minor", "patch"],
       automerge: true,
     },
 
@@ -37,17 +49,19 @@
       automerge: false,
     },
 
-    // GitHub Actions のダイジェストピン留めを有効化（config:best-practices のデフォルト）
-    // ※ タグはリポジトリオーナーが上書き可能なため、サプライチェーン攻撃のリスクあり
-    //    ダイジェストピン留め（例: actions/checkout@abcdef...）で改ざんを防止する
-    // {
-    //   matchManagers: ["github-actions"],
-    //   pinDigests: false,
-    // },
+    // digest 更新は⚠️ラベル付きの draft PR にして目立たせる
+    // バージョン変更なしで SHA だけ変わった＝タグ改ざんの可能性があるため、
+    // 通常の更新 PR と区別して慎重にレビューする
+    {
+      matchUpdateTypes: ["digest"],
+      draftPR: true,
+      labels: ["⚠️ security-review"],
+    },
 
     // pin タイプの更新を無効化（既存のキャレットレンジを維持）
-    // ※ pin されるとレンジが固定値になり、マイナー/パッチの更新 PR が
-    //    作られなくなるため、アップデートの存在を見逃すリスクがある
+    // ※ config:best-practices が ^4.2.1 → 4.2.1 のように ^ を除去する PR（pin タイプ）を作るが、
+    //    npm パッケージは lockfile が SHA で固定しているため pin は不要。この PR をブロックしている。
+    //    バージョン更新 PR（例: ^4.2.1 → ^4.3.0）は minor/patch タイプなのでブロックされず作られる。
     {
       matchUpdateTypes: ["pin"],
       enabled: false,

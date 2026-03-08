@@ -174,7 +174,7 @@ jobs:
       # deploy ジョブに渡すためのアーティファクト（ステージング済みディレクトリ一式）
       - name: Upload deploy payload
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: storybook-vrt-deploy-payload
           path: packages/ui/_gh-pages-staging/
@@ -195,7 +195,7 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: Download deploy payload
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: storybook-vrt-deploy-payload
           path: _gh-pages-staging/
