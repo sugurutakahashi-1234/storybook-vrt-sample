@@ -17,6 +17,8 @@
 #     DOTENV_PRIVATE_KEY_INFRA — infra/cloudflare-access/.env.keys の DOTENV_PRIVATE_KEY
 #       dotenvx で暗号化された .env を復号し、全環境変数（CLOUDFLARE_API_TOKEN, TF_VAR_* 等）を注入する
 #       ※ 個別の Secrets 登録は不要。.env に変数を追加すれば CI にも自動反映される
+#     TF_API_TOKEN — HCP Terraform (Terraform Cloud) の API トークン
+#       state の読み書きに必要。Organization Settings > API Tokens で Team Token を作成
 # ==============================================
 name: Infra CI
 
@@ -89,6 +91,7 @@ jobs:
           label: cloudflare-access
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TERRAFORM_CLOUD_TOKENS: app.terraform.io=${{ secrets.TF_API_TOKEN }}
           DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY_INFRA }}
           TERRAFORM_PRE_RUN: |
             curl -sfS https://dotenvx.sh/install.sh | sh
@@ -100,6 +103,7 @@ jobs:
         with:
           path: infra/cloudflare-access
         env:
+          TERRAFORM_CLOUD_TOKENS: app.terraform.io=${{ secrets.TF_API_TOKEN }}
           DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY_INFRA }}
           TERRAFORM_PRE_RUN: |
             curl -sfS https://dotenvx.sh/install.sh | sh

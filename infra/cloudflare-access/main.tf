@@ -54,6 +54,13 @@
 terraform {
   required_version = ">= 1.0"
 
+  cloud {
+    organization = "sugurutakahashi-org"
+    workspaces {
+      name = "cloudflare-access"
+    }
+  }
+
   required_providers {
     cloudflare = {
       source  = "cloudflare/cloudflare"
