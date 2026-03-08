@@ -188,7 +188,7 @@ jobs:
       # テスト失敗時のみ: デバッグ用にテスト結果（スクリーンショット・トレース等）をアップロード
       - name: Upload test results
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: web-e2e-report
           path: apps/web/test-results/
@@ -197,7 +197,7 @@ jobs:
       # Playwright 標準の HTML レポートをアーティファクトとしてアップロード
       - name: Upload HTML report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: web-e2e-html-report
           path: apps/web/playwright-report/
@@ -206,7 +206,7 @@ jobs:
       # Allure レポートをアーティファクトとしてアップロード
       - name: Upload Allure report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: web-e2e-allure-report
           path: apps/web/allure-report/
@@ -233,7 +233,7 @@ jobs:
       # deploy ジョブに渡すためのアーティファクト（ステージング済みディレクトリ一式）
       - name: Upload deploy payload
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: web-e2e-deploy-payload
           path: apps/web/_gh-pages-staging/
@@ -254,7 +254,7 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: Download deploy payload
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: web-e2e-deploy-payload
           path: _gh-pages-staging/
