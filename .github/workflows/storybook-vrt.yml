@@ -32,6 +32,7 @@ jobs:
   # ジョブの skip は GitHub 上で pass 扱いになるため、
   # required status checks でマージがブロックされない。
   changes:
+    name: 📸 Storybook VRT / changes
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
     timeout-minutes: 5
