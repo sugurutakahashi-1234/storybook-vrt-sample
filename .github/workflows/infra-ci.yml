@@ -52,7 +52,7 @@ jobs:
     outputs:
       should-run: ${{ steps.filter.outputs.infra }}
     steps:
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
         id: filter
         if: github.event_name == 'pull_request'
         with:
@@ -69,10 +69,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: Kesin11/actions-timeline@v3
-      - uses: actions/checkout@v6
-      - uses: hashicorp/setup-terraform@v4
-      - uses: terraform-linters/setup-tflint@v6
+      - uses: Kesin11/actions-timeline@e018cfefea60b4f44266998551211a35a58b8097 # v3
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4
+      - uses: terraform-linters/setup-tflint@4cb9feea73331a35b422df102992a03a44a3bb33 # v6
 
       # infra/ 配下を一括チェック
       - name: Terraform Format Check
@@ -106,13 +106,13 @@ jobs:
       # HCP Terraform の認証トークン（cloud block の state 読み書きに必要）
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
     steps:
-      - uses: Kesin11/actions-timeline@v3
-      - uses: actions/checkout@v6
-      - uses: hashicorp/setup-terraform@v4
+      - uses: Kesin11/actions-timeline@e018cfefea60b4f44266998551211a35a58b8097 # v3
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4
         with:
           # tfcmt が terraform の stdout をパースするため wrapper は無効化
           terraform_wrapper: false
-      - uses: shmokmt/actions-setup-tfcmt@v2
+      - uses: shmokmt/actions-setup-tfcmt@04d5aa6dc61eaa69a4d00257224c9b97f4857819 # v2
 
       # dotenvx で暗号化された .env を復号し、環境変数として GITHUB_ENV に書き出す
       # これにより CLOUDFLARE_API_TOKEN や TF_VAR_* が後続ステップで利用可能になる
