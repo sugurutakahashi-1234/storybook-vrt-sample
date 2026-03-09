@@ -108,6 +108,7 @@ jobs:
           echo "| Key | URL |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|-----|" >> $GITHUB_STEP_SUMMARY
           echo "| Storybook | ${{ steps.deploy.outputs.deployment-url }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dashboard | https://dash.cloudflare.com/${{ vars.CLOUDFLARE_ACCOUNT_ID }}/pages/view/${{ vars.CF_PAGES_PROJECT_NAME }}/${{ steps.deploy.outputs.pages-deployment-id }} |" >> $GITHUB_STEP_SUMMARY
 
       # sticky-pull-request-comment: 同じ header のコメントがあれば更新、なければ新規作成
       - name: Comment PR with Storybook link
@@ -121,3 +122,4 @@ jobs:
             | Key | URL |
             |-----|-----|
             | Storybook | ${{ steps.deploy.outputs.deployment-url }} |
+            | Dashboard | https://dash.cloudflare.com/${{ vars.CLOUDFLARE_ACCOUNT_ID }}/pages/view/${{ vars.CF_PAGES_PROJECT_NAME }}/${{ steps.deploy.outputs.pages-deployment-id }} |
