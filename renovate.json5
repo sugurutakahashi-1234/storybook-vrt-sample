@@ -72,12 +72,6 @@
     },
   ],
 
-  // スケジュール: 平日 10:00-17:59 JST
-  // cron 形式 — 分(*) 時(10-17) 日(*) 月(*) 曜日(1-5=月-金)
-  // ※ @breejs/later テキスト構文は非推奨、cron 形式が推奨
-  //    https://docs.renovatebot.com/key-concepts/scheduling/#deprecated-breejslater-syntax
-  schedule: ["* 10-17 * * 1-5"],
-
   // PR 設定（時間あたり制限なし、同時最大10件）
   prHourlyLimit: 0,
   prConcurrentLimit: 10,
