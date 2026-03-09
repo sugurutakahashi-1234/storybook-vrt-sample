@@ -51,22 +51,8 @@ jobs:
         with:
           config_file_path: renovate.json5
 
-      - name: Lint & Format
-        run: bun run lint
-
-      - name: Syncpack (version consistency)
-        run: bun run syncpack
-
-      - name: Type Check
-        run: bun run typecheck
-
-      - name: Knip (unused code detection)
-        run: bun run knip
-
-      # ── ランタイム ──
-      - name: Unit Test
-        run: bun run test
-
-      # ── 統合 ──
-      - name: Build
-        run: bun run build
+      # ── 全チェック並列実行 ──
+      # bun run --parallel: Foreman スタイルの出力で各タスクにプレフィックスが付く
+      # --no-exit-on-error: 1つ失敗しても残りを最後まで実行し、全結果をまとめて確認できる
+      - name: Lint / Syncpack / Typecheck / Knip / Test / Build
+        run: bun run --parallel --no-exit-on-error lint syncpack typecheck knip test build
