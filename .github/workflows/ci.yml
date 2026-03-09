@@ -39,6 +39,12 @@ jobs:
             renovate:
               - 'renovate.json5'
 
+      - name: Setup Node.js for Renovate Validator
+        if: steps.changes.outputs.renovate == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
       - name: Renovate Config Validator
         if: steps.changes.outputs.renovate == 'true'
         uses: suzuki-shunsuke/github-action-renovate-config-validator@v2.1.0

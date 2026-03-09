@@ -25,21 +25,25 @@
   enabled: true,
 
   packageRules: [
-    // マイナー・パッチは CI 通過後に自動マージ
+    // マイナー・パッチ・lockFileMaintenance・pinDigest は CI 通過後に自動マージ
     // ※ digest は自動マージ対象外にしている（下記参照）
     //
     // Renovate の update type:
-    //   minor/patch — 新バージョンのリリース（例: v6.1.0 → v6.2.0）
-    //                 → SHA も新バージョンのものに更新される → 自動マージ OK
-    //   digest     — バージョン変更なしで同じタグの SHA だけ変わった場合
-    //                 → タグ改ざん（サプライチェーン攻撃）の可能性があるため手動レビュー
-    //                 → 主に GitHub Actions で発生（npm パッケージは同じバージョンの中身が変わることはない）
+    //   minor/patch         — 新バージョンのリリース（例: v6.1.0 → v6.2.0）
+    //                         → SHA も新バージョンのものに更新される → 自動マージ OK
+    //   lockFileMaintenance — lock ファイルの再生成（package.json は変更なし）
+    //                         → 範囲内の最新バージョンに更新するだけ → 自動マージ OK
+    //   pinDigest           — 初回のハッシュピン留め（config:best-practices が推奨）
+    //                         → タグ → SHA 固定への変換で、実行内容は同一 → 自動マージ OK
+    //   digest              — バージョン変更なしで同じタグの SHA だけ変わった場合
+    //                         → タグ改ざん（サプライチェーン攻撃）の可能性があるため手動レビュー
+    //                         → 主に GitHub Actions で発生（npm パッケージは同じバージョンの中身が変わることはない）
     //
     // digest 更新 PR の CI 実行は安全:
     //   pull_request トリガーはベースブランチ（main）のワークフローファイルで CI を実行するため、
     //   PR ブランチの改ざんされた SHA は CI では使われない。マージしない限り影響なし。
     {
-      matchUpdateTypes: ["minor", "patch"],
+      matchUpdateTypes: ["minor", "patch", "lockFileMaintenance", "pinDigest"],
       automerge: true,
     },
 
