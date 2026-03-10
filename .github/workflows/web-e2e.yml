@@ -124,7 +124,6 @@ jobs:
         working-directory: apps/web
 
       # Playwright テスト実行（ページ遷移・レスポンシブ検証）
-      # テスト結果は playwright-report/ と allure-results/ に出力される
       - name: Run Playwright tests
         run: bunx playwright test
         working-directory: apps/web
@@ -134,25 +133,6 @@ jobs:
       # ────────────────────────────────────────
       # レポート生成
       # ────────────────────────────────────────
-
-      # GitHub Pages から Allure 履歴ファイル（JSONL）をダウンロードする。
-      # Allure Report v3 では history/ ディレクトリではなく単一の JSONL ファイルで履歴を管理する。
-      # 初回実行時やページ未デプロイ時は 404 になるが、|| true で無視する。
-      - name: Download previous Allure history
-        if: always()
-        run: |
-          PAGES_BASE="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
-          HISTORY_URL="${PAGES_BASE}/latest/web-e2e/allure-history.jsonl"
-          curl -sSfL "${HISTORY_URL}" -o "allure-history.jsonl" || true
-        working-directory: apps/web
-
-      # allure-results/ から Allure レポートを生成（リッチなテスト結果ビューア）
-      # allurerc.json の historyPath で履歴ファイルのパスを指定している。
-      # 履歴ファイルが存在すれば読み込んで追記、なければ新規作成される。
-      - name: Generate Allure report
-        if: always()
-        run: rm -rf allure-report && bunx allure generate allure-results
-        working-directory: apps/web
 
       # reg-cli: .reg/expected/（ベースライン）と .reg/actual/（現在）を比較し、
       # 差分レポートを .reg/ に生成する。結果サマリーは PR コメント用に GITHUB_OUTPUT に出力。
@@ -208,15 +188,6 @@ jobs:
           path: apps/web/playwright-report/
           retention-days: 30
 
-      # Allure レポートをアーティファクトとしてアップロード
-      - name: Upload Allure report
-        if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
-        with:
-          name: web-e2e-allure-report
-          path: apps/web/allure-report/
-          retention-days: 30
-
       # 全レポートを1つのディレクトリにまとめ、1回の push でデプロイする。
       # keep_files: true で既存のレポートを保持する（他の PR のレポートを消さない）
       - name: Stage reports for GitHub Pages
@@ -224,15 +195,9 @@ jobs:
         run: |
           DEST="${{ env.REPORT_PREFIX }}/web-e2e"
           mkdir -p _gh-pages-staging/${DEST}/html-report
-          mkdir -p _gh-pages-staging/${DEST}/allure-report
           mkdir -p _gh-pages-staging/${DEST}/reg-report
           cp -r playwright-report/* _gh-pages-staging/${DEST}/html-report/ || true
-          cp -r allure-report/* _gh-pages-staging/${DEST}/allure-report/ || true
           cp -r .reg/* _gh-pages-staging/${DEST}/reg-report/ || true
-
-          # Allure 履歴ファイル（JSONL）を共有パスにコピー（全 PR で履歴を共有するため）
-          mkdir -p _gh-pages-staging/latest/web-e2e
-          cp allure-history.jsonl _gh-pages-staging/latest/web-e2e/allure-history.jsonl || true
         working-directory: apps/web
 
       # deploy ジョブに渡すためのアーティファクト（ステージング済みディレクトリ一式）
@@ -291,4 +256,3 @@ jobs:
             |--------|------|
             | reg-cli | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/web-e2e/reg-report/report/ |
             | Playwright HTML | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/web-e2e/html-report/ |
-            | Allure | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/web-e2e/allure-report/ |

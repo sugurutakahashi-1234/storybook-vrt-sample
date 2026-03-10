@@ -253,9 +253,10 @@ CI では git worktree でベースブランチをチェックアウトし、同
 **なぜ Docker を使わないか:**
 Docker を使えばローカルと CI の環境を統一できますが、セットアップの複雑化・ビルド速度の低下・ローカル開発でも Docker 必須になるなどデメリットが大きく、現在の「ローカルは Mac 同士、CI は CI 同士」で比較する方式を採用しています。
 
-### Allure レポート
+### Allure レポート（ローカル専用）
 
 E2E テスト実行後に Allure レポートでリッチな結果を確認できます（ブラウザが自動で開きます）。
+CI では使用せず、ローカルでの確認用です。
 
 ```bash
 # E2E テストの Allure レポートを表示
@@ -343,7 +344,6 @@ https://<owner>.github.io/<repo>/pr/<pr-number>/
 │       └── diff/          #   差分画像
 └── web-e2e/
     ├── html-report/       # E2E - Playwright HTML レポート
-    ├── allure-report/     # E2E - Allure レポート
     └── reg-report/        # E2E - reg-cli 差分レポート
         ├── report/        #   HTML レポート（index.html）
         ├── actual/        #   実際のスクリーンショット
