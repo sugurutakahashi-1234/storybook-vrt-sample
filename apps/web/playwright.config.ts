@@ -30,22 +30,8 @@ export default defineConfig({
   // CI 環境では安定性のため1ワーカーに制限、ローカルはCPUに合わせて自動
   ...(process.env.CI ? { workers: 1 } : {}),
 
-  // テスト結果レポーター
-  // - HTML: playwright-report/ に生成（標準レポート）
-  // - Allure: allure-results/ に生成（ローカルで `bun run e2e:allure` で確認）
-  reporter: [
-    ["html"],
-    [
-      "allure-playwright",
-      {
-        resultsDir: "allure-results",
-        environmentInfo: {
-          Framework: "Next.js",
-          TestType: "E2E",
-        },
-      },
-    ],
-  ],
+  // テスト結果レポーター（playwright-report/ に生成）
+  reporter: [["html"]],
 
   use: {
     // Next.js dev サーバーの URL

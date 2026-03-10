@@ -1,5 +1,0 @@
-{
-  "name": "E2E Test Report",
-  "output": "./allure-report",
-  "historyPath": "./allure-history.jsonl"
-}

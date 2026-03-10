@@ -22,10 +22,6 @@ test-results/
 playwright-report/
 # CI 用レポート
 blob-report/
-# Allure レポート
-allure-results/
-allure-report/
-allure-history.jsonl
 # Vitest カバレッジ出力
 coverage/
 

@@ -34,7 +34,7 @@
     "deps:update:within-range": "bun update && bun run --filter '*' deps:update && bun run clean:setup",
     "deps:update:latest": "bun update --latest && bun run --filter '*' deps:update && bun run clean:setup",
     "🧹": "========== Clean & Setup ==========",
-    "clean": "rm -rf bun.lock node_modules apps/*/node_modules packages/*/node_modules apps/*/.next packages/*/storybook-static dist coverage *.tsbuildinfo apps/*/.reg packages/*/.reg apps/*/allure-results apps/*/allure-report apps/*/allure-history.jsonl apps/*/playwright-report apps/*/test-results blob-report .oxc_cache **/__vis__/__diff_output__ **/__vis__/**/__diffs__ **/__vis__/**/__results__ **/__vis__/local .playwright-mcp",
+    "clean": "rm -rf bun.lock node_modules apps/*/node_modules packages/*/node_modules apps/*/.next packages/*/storybook-static dist coverage *.tsbuildinfo apps/*/.reg packages/*/.reg apps/*/playwright-report apps/*/test-results blob-report .oxc_cache **/__vis__/__diff_output__ **/__vis__/**/__diffs__ **/__vis__/**/__results__ **/__vis__/local .playwright-mcp",
     "clean:install": "bun run clean && bun install",
     "clean:setup": "bun run clean:install && bun run ci:full",
     "prepare": "[ -n \"$CI\" ] || (lefthook install && bunx playwright install --with-deps)",
