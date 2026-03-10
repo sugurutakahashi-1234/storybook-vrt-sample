@@ -32,7 +32,7 @@ jobs:
 
       # ── 静的解析 ──
       # ローカルでは renovate パッケージの WASM エラーにより実行不可のため CI でのみ検証
-      - uses: step-security/paths-filter@6eee183b0d2fd101d3f8ee2935c127bca14c5625 # v3
+      - uses: AurorNZ/paths-filter@c9dd42e99db87803313ff6f4b1150cc9f6c836af # v5
         id: changes
         with:
           filters: |

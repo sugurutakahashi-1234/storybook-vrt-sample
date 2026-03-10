@@ -274,7 +274,7 @@ PR 作成時（Ready for review）に GitHub Actions が自動実行されます
 - ☁️ **Storybook Cloudflare Deploy** (`storybook-cloudflare-deploy.yml`): main マージ時・PR 時に Storybook を Cloudflare Pages へデプロイ（PR 時は `packages/ui/` 変更時のみ、Cloudflare Access による認証付き）
 - 🧹 **Cleanup GitHub Pages** (`github-pages-cleanup.yml`): PR クローズ時に gh-pages の容量をチェックし、800MB 超過時に古いレポートを削除
 
-> **Note:** paths フィルタ付きワークフロー（VRT, E2E, Chromatic, Cloudflare, Infra CI）は全 PR で起動し、[step-security/paths-filter](https://github.com/step-security/paths-filter) でジョブレベル skip する設計です。ワークフローレベルの `paths:` だとチェックが「存在しない」状態になり required status checks でマージがブロックされますが、ジョブレベル skip は GitHub 上で pass 扱いになるためこの問題を回避できます。
+> **Note:** paths フィルタ付きワークフロー（VRT, E2E, Chromatic, Cloudflare, Infra CI）は全 PR で起動し、[AurorNZ/paths-filter](https://github.com/AurorNZ/paths-filter) でジョブレベル skip する設計です。ワークフローレベルの `paths:` だとチェックが「存在しない」状態になり required status checks でマージがブロックされますが、ジョブレベル skip は GitHub 上で pass 扱いになるためこの問題を回避できます。
 >
 > **Draft PR:** 全ワークフローは `types: [opened, synchronize, reopened, ready_for_review]` で Draft PR をスキップします。Draft から Ready に変更すると `ready_for_review` イベントで CI が起動します。
 
