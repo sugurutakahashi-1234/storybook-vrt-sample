@@ -70,6 +70,13 @@
       matchUpdateTypes: ["pin"],
       enabled: false,
     },
+
+    // clsx は機能的に完成しており、abandoned ではなくメンテナンス不要な状態
+    // Renovate の abandoned 警告を抑制する
+    {
+      matchPackageNames: ["clsx"],
+      abandonmentThreshold: null,
+    },
   ],
 
   // PR 設定（時間あたり制限なし、同時最大10件）
