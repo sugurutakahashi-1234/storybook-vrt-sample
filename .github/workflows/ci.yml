@@ -32,6 +32,10 @@ jobs:
 
       # ── 静的解析 ──
       # ローカルでは renovate パッケージの WASM エラーにより実行不可のため CI でのみ検証
+      #
+      # AurorNZ/paths-filter: dorny/paths-filter のフォーク。
+      # 本家は 2024-03 以降メンテナンス停滞し Node20 非推奨化（2026-04）への
+      # 対応が見込めないため、Node24 対応済み・API 完全互換の AurorNZ 版に移行。
       - uses: AurorNZ/paths-filter@c9dd42e99db87803313ff6f4b1150cc9f6c836af # v5
         id: changes
         with:

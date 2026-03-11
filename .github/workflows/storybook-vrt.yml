@@ -209,12 +209,15 @@ jobs:
           name: storybook-vrt-deploy-payload
           path: _gh-pages-staging/
 
+      # peaceiris/actions-gh-pages は 2024-04 以降メンテナンス停滞し
+      # Node24 対応が見込めないため、Node24 対応済みの JamesIves 版に移行。
+      # 同じ gh-pages ブランチ方式で API 互換性が高い。
       - name: Deploy reports to GitHub Pages
-        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4
+        uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: _gh-pages-staging
-          keep_files: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          folder: _gh-pages-staging
+          clean: false
 
       # sticky-pull-request-comment: 同じ header のコメントがあれば更新、なければ新規作成
       - name: Comment PR with report links
