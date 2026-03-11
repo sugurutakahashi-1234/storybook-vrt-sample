@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "🏗️": "========== Dev & Build ==========",
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
+    "dev": "dotenvx run -- next dev --turbopack",
+    "build": "dotenvx run -- next build",
+    "start": "dotenvx run -- next start",
     "🎨": "========== Code Quality ==========",
     "typecheck": "tsgo --noEmit",
     "🧪": "========== Testing ==========",
@@ -19,12 +19,14 @@
     "deps:update": "bun update --latest"
   },
   "dependencies": {
+    "@sentry/nextjs": "^10.43.0",
     "@storybook-vrt-sample/ui": "workspace:*",
     "next": "^16.1.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
+    "@dotenvx/dotenvx": "^1.54.1",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/node": "^25.3.5",

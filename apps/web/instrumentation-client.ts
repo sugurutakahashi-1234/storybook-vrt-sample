@@ -1,0 +1,23 @@
+/**
+ * Sentry クライアントサイド設定（instrumentation-client.ts）
+ *
+ * ブラウザ上で発生するエラーやパフォーマンスデータを Sentry に送信する。
+ * Next.js が自動的にこのファイルを読み込み、クライアントバンドルに含める。
+ *
+ * 環境変数の読み込み:
+ *   dotenvx が Next.js 起動前に .env を復号して process.env に注入する。
+ *   Next.js の .env 自動読み込みは既存の process.env を上書きしないため、
+ *   常に復号された正しい値が使われる。
+ *
+ * @see https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+ */
+import * as Sentry from "@sentry/nextjs";
+
+Sentry.init({
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+
+  // パフォーマンスモニタリングのサンプリング率
+  // 全リクエストを記録すると課金が膨らむため、本番では 10% に抑える
+  // 開発中は全件記録して動作確認しやすくする
+  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1,
+});

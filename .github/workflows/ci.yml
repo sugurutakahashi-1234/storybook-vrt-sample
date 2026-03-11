@@ -6,6 +6,12 @@
 #
 # セクション構成は ci スクリプト・lefthook pre-push と統一:
 #   静的解析 → ランタイム → 統合
+#
+# 必要な設定:
+#   Secrets:
+#     DOTENV_PRIVATE_KEY_WEB — apps/web/.env.keys の DOTENV_PRIVATE_KEY
+#       dotenvx で暗号化された .env を復号し、Next.js の環境変数（NEXT_PUBLIC_SENTRY_DSN 等）を注入する
+#       ※ 個別の Secrets 登録は不要。.env に変数を追加すれば CI にも自動反映される
 # ==============================================
 name: ✅ CI
 
@@ -60,3 +66,7 @@ jobs:
       # --no-exit-on-error: 1つ失敗しても残りを最後まで実行し、全結果をまとめて確認できる
       - name: Lint / Syncpack / Typecheck / Knip / Test / Build
         run: bun run --parallel --no-exit-on-error lint syncpack typecheck knip test build
+        env:
+          # dotenvx が apps/web/.env を復号するために必要（Sentry DSN 等）
+          # 値は apps/web/.env.keys の DOTENV_PRIVATE_KEY を GitHub Secrets に登録する
+          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY_WEB }}

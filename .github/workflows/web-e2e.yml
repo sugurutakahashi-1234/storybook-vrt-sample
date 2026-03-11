@@ -5,6 +5,11 @@
 # required status checks と paths フィルタを両立できる。
 # Next.js アプリをビルドし、Playwright でページ遷移やレスポンシブ表示などを検証する。
 # PR 時はベースブランチからベースラインを動的生成し、reg-cli で差分レポートを生成する。
+#
+# 必要な設定:
+#   Secrets:
+#     DOTENV_PRIVATE_KEY_WEB — apps/web/.env.keys の DOTENV_PRIVATE_KEY
+#       dotenvx で暗号化された .env を復号し、Next.js の環境変数（NEXT_PUBLIC_SENTRY_DSN 等）を注入する
 name: 🧪 E2E Tests
 
 on:
@@ -105,6 +110,8 @@ jobs:
       # そこでビルド＆テストを実行してスクリーンショットを取得する。
       - name: Generate baselines from base branch
         if: github.event_name == 'pull_request'
+        env:
+          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY_WEB }}
         run: |
           BASE_REF="${{ github.event.pull_request.base.ref }}"
           git worktree add /tmp/baseline "origin/${BASE_REF}" --detach
@@ -122,6 +129,8 @@ jobs:
       - name: Build
         run: bun run build
         working-directory: apps/web
+        env:
+          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY_WEB }}
 
       # Playwright テスト実行（ページ遷移・レスポンシブ検証）
       - name: Run Playwright tests

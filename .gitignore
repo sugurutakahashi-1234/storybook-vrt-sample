@@ -28,8 +28,10 @@ coverage/
 # 環境変数（機密情報を含むためコミットしない）
 .env
 !infra/**/.env
+!apps/web/.env
 .env.local
 .env.*.local
+.env.sentry-build-plugin
 
 # Next.js 自動生成ファイル（next dev / next build のたびに再生成される）
 # https://nextjs.org/docs/app/api-reference/config/typescript
