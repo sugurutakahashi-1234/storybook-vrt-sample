@@ -1,1 +1,4 @@
+# lefthook の rc で指定されるシェルスクリプト
+# 各フックコマンド実行前に source され、mise の環境変数（DOTENV_PRIVATE_KEY 等）をロードする
+# mise のシェル統合がない環境（Claude Code 等）でも動作させるために必要
 eval "$(mise env 2>/dev/null)" 2>/dev/null || true
