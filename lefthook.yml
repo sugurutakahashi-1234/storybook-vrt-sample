@@ -13,6 +13,10 @@ output:
   - summary
   - failure
 
+# mise の [env] セクション（DOTENV_PRIVATE_KEY 等）をフック実行前にロード
+# mise のシェル統合がない環境（Claude Code 等）でも動作させるために必要
+rc: .lefthookrc
+
 # ブランチ切替時: bun.lock に変更があれば依存関係を自動同期
 # post-checkout は 3 引数（前 HEAD, 後 HEAD, ブランチフラグ）を受け取る
 # {1} = ブランチ切替フラグ（1: ブランチ切替、0: ファイルチェックアウト）
