@@ -19,6 +19,18 @@
 #   1. https://suguru-takahashi.sentry.io/settings/auth-tokens/ > Create New Token
 #   2. 権限: project:read, project:write, alerts:read, alerts:write, org:read
 #   3. トークンを .env に設定（dotenvx encrypt で暗号化）
+#
+# インテグレーション（Slack・GitHub）の設定手順（初回のみ・手動）:
+#   Slack:
+#     1. https://suguru-takahashi.sentry.io/settings/integrations/slack/ でインストール
+#     2. Slack ワークスペースを認証し、通知先チャンネルを作成（例: #sentry-alerts）
+#     3. integration ID は Sentry API で取得:
+#        curl -H "Authorization: Bearer $SENTRY_AUTH_TOKEN" \
+#          https://sentry.io/api/0/organizations/suguru-takahashi/integrations/ | jq '.[] | select(.provider.key=="slack")'
+#   GitHub:
+#     1. https://suguru-takahashi.sentry.io/settings/integrations/github/ でインストール
+#     2. GitHub App として対象リポジトリへのアクセスを許可
+#     3. integration ID は同様に API で取得（provider.key=="github"）
 # ==============================================
 
 terraform {
@@ -92,7 +104,7 @@ resource "sentry_key" "web" {
 # アラートルール
 # ──────────────────────────────────────────────
 
-# 新しいエラーが発生したらメールで通知する
+# 新しいエラーが発生したら Slack・GitHub Issue で通知する
 # 既知のエラーの再発は通知しない（ノイズ防止）
 resource "sentry_issue_alert" "new_issue" {
   organization = local.organization
@@ -106,14 +118,22 @@ resource "sentry_issue_alert" "new_issue" {
     }
   ]
 
-  # アクション: プロジェクトメンバー全員にメール通知
+  # アクション: Slack + GitHub Issue で通知
   actions_v2 = [
+    # Slack: #sentry-alerts チャンネルに通知
     {
-      notify_email = {
-        target_type      = "IssueOwners"
-        fallthrough_type = "ActiveMembers"
+      slack_notify_service = {
+        workspace = "378176"
+        channel   = "#sentry-alerts"
       }
-    }
+    },
+    # GitHub: Issue を自動作成してトラッキング
+    {
+      github_create_ticket = {
+        integration = "378175"
+        repo        = "sugurutakahashi-1234/storybook-vrt-sample"
+      }
+    },
   ]
 
   action_match = "all"
