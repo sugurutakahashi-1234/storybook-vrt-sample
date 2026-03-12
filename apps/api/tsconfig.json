@@ -1,0 +1,15 @@
+{
+  // ==============================
+  // apps/api 用 TypeScript 設定
+  // ==============================
+  // - oRPC + Hono API サーバー（Bun ランタイム）の型チェック用
+  // - Bun の組み込み API（Bun.serve 等）を使用するため types に "bun" を指定
+  // - ブラウザ向け lib は不要（サーバーサイドのみ）
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "types": ["bun"]
+  },
+  "include": ["src"]
+}

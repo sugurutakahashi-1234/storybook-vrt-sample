@@ -48,6 +48,9 @@ const config: StorybookConfig = {
     experimentalComponentsManifest: true,
   },
 
+  // MSW Service Worker を配信するための静的ディレクトリ
+  staticDirs: ["../public"],
+
   // React + Vite をビルドフレームワークとして使用
   framework: "@storybook/react-vite",
 

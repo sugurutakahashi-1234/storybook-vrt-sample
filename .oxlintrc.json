@@ -1,5 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // MSW が自動生成する Service Worker ファイル（npx msw init で生成、手動編集不可）
+  "ignorePatterns": ["**/mockServiceWorker.js"],
   "extends": [
     "./node_modules/ultracite/config/oxlint/core/.oxlintrc.json",
     "./node_modules/ultracite/config/oxlint/react/.oxlintrc.json",

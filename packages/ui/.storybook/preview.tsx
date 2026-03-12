@@ -11,10 +11,17 @@
  */
 
 import type { Decorator, Preview } from "@storybook/react";
+import { initialize, mswLoader } from "msw-storybook-addon";
 
 // グローバル CSS を読み込み（Tailwind CSS のベーススタイル）
 // これにより全ストーリーで Tailwind のユーティリティクラスが使用可能になる
 import "../src/styles.css";
+
+// MSW Service Worker を初期化
+// Storybook のプレビュー iframe 内で Service Worker を登録し、
+// ストーリーの parameters.msw.handlers で定義したハンドラーでリクエストをインターセプトする。
+// Service Worker ファイル（mockServiceWorker.js）は main.ts の staticDirs 経由で配信される。
+initialize();
 
 const withTheme: Decorator = (Story, { globals: { theme } }) => {
   if (theme === "side-by-side") {
@@ -74,6 +81,8 @@ const preview: Preview = {
     theme: "side-by-side",
   },
   tags: ["autodocs", "snapshot"],
+  // msw-storybook-addon: ストーリー描画前に parameters.msw.handlers のハンドラーを MSW に登録する
+  loaders: [mswLoader],
   decorators: [withTheme],
   parameters: {
     controls: {

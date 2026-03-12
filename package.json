@@ -8,6 +8,7 @@
   "scripts": {
     "🏗️": "========== Dev & Build ==========",
     "dev": "bun run --filter web dev",
+    "dev:api": "bun run --filter @storybook-vrt-sample/api dev",
     "build": "bun run --filter web build",
     "🧪": "========== Testing ==========",
     "test": "bun run --filter '*' test",

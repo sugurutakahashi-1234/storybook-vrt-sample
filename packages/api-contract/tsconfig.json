@@ -1,0 +1,15 @@
+{
+  // ==============================
+  // packages/api-contract 用 TypeScript 設定
+  // ==============================
+  // - API コントラクト（oRPC スキーマ定義）の型チェック用
+  // - サーバー（apps/api）と UI（packages/ui の MSW モック）の両方から参照される
+  // - ランタイム環境に依存しない純粋な型定義パッケージのため、
+  //   ルートの tsconfig.json をそのまま継承し、追加の lib や types は不要
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  "include": ["src"]
+}

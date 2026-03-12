@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@storybook-vrt-sample/api-contract": "workspace:*",
     "clsx": "^2.1.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -43,6 +44,8 @@
     "@types/react-dom": "^19.2.3",
     "@vitest/browser-playwright": "^4.0.18",
     "@vitest/coverage-v8": "^4.0.18",
+    "msw": "^2.10.3",
+    "msw-storybook-addon": "^2.0.6",
     "playwright": "^1.58.2",
     "reg-cli": "^0.18.14",
     "storybook": "^10.2.16",
@@ -51,5 +54,10 @@
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }
