@@ -53,13 +53,13 @@
       automerge: false,
     },
 
-    // digest 更新は⚠️ラベル付きの draft PR にして目立たせる
+    // digest 更新は draft PR にして目立たせる
     // バージョン変更なしで SHA だけ変わった＝タグ改ざんの可能性があるため、
     // 通常の更新 PR と区別して慎重にレビューする
     {
       matchUpdateTypes: ["digest"],
       draftPR: true,
-      labels: ["⚠️ security-review"],
+      commitMessagePrefix: "chore(⚠️ digest):",
     },
 
     // pin タイプの更新を無効化（既存のキャレットレンジを維持）
