@@ -82,13 +82,20 @@ pre-commit:
       run: terraform fmt -recursive infra/
       glob: "infra/**/*.tf"
       stage_fixed: true
-    # Terraform バリデーション（init は .terraform がなければ自動実行）
+    # Terraform バリデーション（infra/ 配下の全モジュールを自動検出）
     - name: terraform-validate
-      run: "[ -d infra/cloudflare-access/.terraform ] || terraform -chdir=infra/cloudflare-access init -backend=false -input=false > /dev/null 2>&1 && terraform -chdir=infra/cloudflare-access validate"
+      run: |
+        for dir in infra/*/; do
+          [ -d "$dir.terraform" ] || terraform -chdir="$dir" init -backend=false -input=false > /dev/null 2>&1
+          terraform -chdir="$dir" validate
+        done
       glob: "infra/**/*.tf"
-    # Terraform リンター（ベストプラクティス・非推奨属性のチェック）
+    # Terraform リンター（infra/ 配下の全モジュールを自動検出）
     - name: tflint
-      run: tflint --chdir=infra/cloudflare-access
+      run: |
+        for dir in infra/*/; do
+          tflint --chdir="$dir"
+        done
       glob: "infra/**/*.tf"
 
 # プッシュ時: プロジェクト全体に対して実行
