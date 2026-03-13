@@ -289,7 +289,7 @@ PR 作成時（Ready for review）に GitHub Actions が自動実行されます
 - 🧪 **E2E テスト** (`web-e2e.yml`): 全 PR で起動し、`apps/web/` または `packages/ui/` の変更時のみ実行（変更なしの場合はジョブ skip = pass）
 - 🎨 **Storybook Chromatic Deploy** (`storybook-chromatic-deploy.yml`): main マージ時・PR 時に Storybook を Chromatic へデプロイ（PR 時は `packages/ui/` 変更時のみ）
 - ☁️ **Storybook Cloudflare Deploy** (`storybook-cloudflare-deploy.yml`): main マージ時・PR 時に Storybook を Cloudflare Pages へデプロイ（PR 時は `packages/ui/` 変更時のみ、Cloudflare Access による認証付き）
-- 🚀 **API Cloudflare Workers Deploy** (`api-cloudflare-workers-deploy.yml`): main マージ時は production、PR 時は staging に API をデプロイ（`apps/api/` または `packages/api-contract/` 変更時のみ）
+- ⚡ **API Cloudflare Workers Deploy** (`api-cloudflare-workers-deploy.yml`): main マージ時は production、PR 時は staging に API をデプロイ（`apps/api/` または `packages/api-contract/` 変更時のみ）
 - 🧹 **Cleanup GitHub Pages** (`github-pages-cleanup.yml`): PR クローズ時に gh-pages の容量をチェックし、800MB 超過時に古いレポートを削除
 
 > **Note:** paths フィルタ付きワークフロー（VRT, E2E, Chromatic, Cloudflare, Infra CI）は全 PR で起動し、[AurorNZ/paths-filter](https://github.com/AurorNZ/paths-filter) でジョブレベル skip する設計です。ワークフローレベルの `paths:` だとチェックが「存在しない」状態になり required status checks でマージがブロックされますが、ジョブレベル skip は GitHub 上で pass 扱いになるためこの問題を回避できます。

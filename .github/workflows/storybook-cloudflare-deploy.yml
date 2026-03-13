@@ -11,8 +11,8 @@
 #
 # 必要な設定:
 #   Secrets:
-#     CLOUDFLARE_API_TOKEN    — Cloudflare API Token「GitHub Actions - Cloudflare Pages」
-#       権限: Cloudflare Pages: Edit
+#     CLOUDFLARE_API_TOKEN    — Cloudflare API Token「GitHub Actions - Cloudflare Pages / Workers」
+#       権限: Cloudflare Pages: Edit, Workers Scripts: Edit
 #       ※ Terraform 用トークン（infra/cloudflare-access/.env で管理）とは別トークン
 #   初回セットアップ:
 #     bunx wrangler pages project create <project-name> --production-branch main

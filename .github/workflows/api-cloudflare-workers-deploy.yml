@@ -9,10 +9,11 @@
 #
 # 必要な設定:
 #   Secrets:
-#     CLOUDFLARE_API_TOKEN    — Cloudflare API Token
-#       権限: Workers Scripts: Edit
+#     CLOUDFLARE_API_TOKEN    — Cloudflare API Token「GitHub Actions - Cloudflare Pages / Workers」
+#       権限: Cloudflare Pages: Edit, Workers Scripts: Edit
+#       ※ Storybook Cloudflare Deploy と同一トークンを共有
 # ==============================================
-name: 🚀 API Cloudflare Workers Deploy
+name: ⚡ API Cloudflare Workers Deploy
 
 on:
   push:
@@ -33,7 +34,7 @@ permissions:
 
 jobs:
   changes:
-    name: 🚀 API Workers / changes
+    name: ⚡ API Workers / changes
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -52,7 +53,7 @@ jobs:
               - '.github/workflows/api-cloudflare-workers-deploy.yml'
 
   deploy:
-    name: 🚀 Deploy API to Cloudflare Workers
+    name: ⚡ Deploy API to Cloudflare Workers
     needs: changes
     if: github.event_name != 'pull_request' || needs.changes.outputs.should-run == 'true'
     runs-on: ubuntu-latest
@@ -89,7 +90,7 @@ jobs:
       - name: Add summary
         run: |
           ENV=${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'production' || 'staging' }}
-          echo "## 🚀 API Cloudflare Workers ($ENV)" >> $GITHUB_STEP_SUMMARY
+          echo "## ⚡ API Cloudflare Workers ($ENV)" >> $GITHUB_STEP_SUMMARY
           echo "Deploy completed for environment: **$ENV**" >> $GITHUB_STEP_SUMMARY
 
       - name: Comment PR with deploy info
@@ -98,6 +99,6 @@ jobs:
         with:
           header: cloudflare-api-workers
           message: |
-            ## 🚀 API Cloudflare Workers Preview
+            ## ⚡ API Cloudflare Workers Preview
 
             API が staging 環境にデプロイされました。
