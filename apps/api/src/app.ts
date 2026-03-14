@@ -33,11 +33,7 @@ import { createRouter } from "./router.js";
  * wrangler.toml の [[d1_databases]] binding = "DB" に対応する。
  * Bun ローカル開発では D1 バインディングが存在しないため optional にしている。
  */
-export interface Bindings {
-  DB?: D1Database;
-}
-
-export const app = new Hono<{ Bindings: Bindings }>();
+export const app = new Hono<{ Bindings: { DB?: D1Database } }>();
 
 app.use("*", cors());
 
