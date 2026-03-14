@@ -7,22 +7,44 @@
 #   staging:    bunx wrangler deploy --env staging
 #   production: bunx wrangler deploy --env production
 #
-# ローカル開発は引き続き `bun run dev`（Bun.serve）を使用する。
-# wrangler dev は使わない（Bun のホットリロードの方が高速）。
+# ローカル開発:
+#   bun run dev       → wrangler dev（D1 ローカル SQLite を使用）
+#   bun run dev:bun   → Bun.serve（D1 なし、インメモリフォールバック）
 #
-# 注意: インメモリストレージのため、Workers のリクエスト間でデータは共有されない。
-# Workers はリクエストごとに isolate が起動するため、TODO は永続化されない。
-# 永続化が必要な場合は D1 や KV を検討すること。
+# D1 データベースで TODO を永続化する。
+# マイグレーション生成: bunx drizzle-kit generate
+# マイグレーション適用:
+#   ローカル: bunx wrangler d1 migrations apply storybook-vrt-sample-db --local
+#   リモート: bunx wrangler d1 migrations apply storybook-vrt-sample-db --remote
 # ==============================================
 
 name = "storybook-vrt-sample-api"
 main = "src/worker.ts"
 compatibility_date = "2025-01-01"
 
+# D1 データベースバインディング
+[[d1_databases]]
+binding = "DB"
+database_name = "storybook-vrt-sample-db"
+database_id = "b63022aa-a134-4405-ac8d-dec45b097e73"
+migrations_dir = "drizzle"
+
 # staging 環境
 [env.staging]
 name = "storybook-vrt-sample-api-staging"
 
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "storybook-vrt-sample-db"
+database_id = "b63022aa-a134-4405-ac8d-dec45b097e73"
+migrations_dir = "drizzle"
+
 # production 環境
 [env.production]
 name = "storybook-vrt-sample-api-production"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "storybook-vrt-sample-db"
+database_id = "b63022aa-a134-4405-ac8d-dec45b097e73"
+migrations_dir = "drizzle"

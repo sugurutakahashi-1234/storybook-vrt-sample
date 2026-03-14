@@ -65,6 +65,9 @@ Thumbs.db
 *.swp
 *.swo
 
+# Wrangler（Cloudflare Workers ローカル開発の一時ファイル）
+.wrangler/
+
 # Terraform
 **/.terraform/
 *.tfstate
