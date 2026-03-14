@@ -70,7 +70,7 @@ jobs:
         with:
           # Chromatic はコミット履歴を使って変更差分を検出するため全履歴が必要
           fetch-depth: 0
-      - uses: oven-sh/setup-bun@ecf28ddc73e819eb6fa29df6b34ef8921c743461 # v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
