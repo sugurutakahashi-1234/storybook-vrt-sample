@@ -22,46 +22,54 @@
 #      bunx wrangler d1 migrations apply storybook-vrt-sample-db --local
 #      bun run dev  # wrangler dev で動作確認
 # 4. staging にマイグレーション適用 → デプロイ:
-#      bunx wrangler d1 migrations apply storybook-vrt-sample-db --remote --env staging
+#      bunx wrangler d1 migrations apply storybook-vrt-sample-db-staging --remote --env staging
 #      bun run deploy:staging
 # 5. staging で動作確認後、production にマイグレーション適用 → デプロイ:
-#      bunx wrangler d1 migrations apply storybook-vrt-sample-db --remote --env production
+#      bunx wrangler d1 migrations apply storybook-vrt-sample-db-production --remote --env production
 #      bun run deploy:production
 #
 # 注意:
 # - マイグレーションは必ず staging → production の順で適用する
 # - ロールバック機能はない。破壊的変更は新しいマイグレーションで対応する
-# - 現在は staging / production で同じ D1 データベースを共有している
-#   TODO: 環境ごとに別の D1 データベースを作成して分離する
+#
+# === D1 データベースの環境分離 ===
+#
+# 各環境で独立した D1 データベースを使用する:
+#   ローカル:     storybook-vrt-sample-db（トップレベルの設定。wrangler dev で使用）
+#   staging:      storybook-vrt-sample-db-staging
+#   production:   storybook-vrt-sample-db-production
+#
+# これにより staging でのマイグレーション検証が production に影響しない。
 # ==============================================
 
 name = "storybook-vrt-sample-api"
 main = "src/worker.ts"
 compatibility_date = "2025-01-01"
 
-# D1 データベースバインディング
+# D1 データベースバインディング（ローカル開発用）
+# wrangler dev で使用される。staging / production とは別の DB。
 [[d1_databases]]
 binding = "DB"
 database_name = "storybook-vrt-sample-db"
 database_id = "b63022aa-a134-4405-ac8d-dec45b097e73"
 migrations_dir = "drizzle"
 
-# staging 環境
+# staging 環境（独立した D1 データベース）
 [env.staging]
 name = "storybook-vrt-sample-api-staging"
 
 [[env.staging.d1_databases]]
 binding = "DB"
-database_name = "storybook-vrt-sample-db"
-database_id = "b63022aa-a134-4405-ac8d-dec45b097e73"
+database_name = "storybook-vrt-sample-db-staging"
+database_id = "20698d50-11f5-497a-8451-ae0f493f7b9f"
 migrations_dir = "drizzle"
 
-# production 環境
+# production 環境（独立した D1 データベース）
 [env.production]
 name = "storybook-vrt-sample-api-production"
 
 [[env.production.d1_databases]]
 binding = "DB"
-database_name = "storybook-vrt-sample-db"
-database_id = "b63022aa-a134-4405-ac8d-dec45b097e73"
+database_name = "storybook-vrt-sample-db-production"
+database_id = "8ee524ca-3c07-4cab-89bc-f38a194ec642"
 migrations_dir = "drizzle"
