@@ -48,6 +48,12 @@ pre-commit:
     # main ブランチへの直接コミットを禁止
     - name: protect-main
       run: '[ "$(git branch --show-current)" = "main" ] && echo "❌ main ブランチへの直接コミットは禁止です" && exit 1 || exit 0'
+    # package.json 変更時に bun install を自動実行し bun.lock を同期
+    # syncpack fix 等でバージョンを変えた後に bun install を忘れると CI で lockfile エラーになるため、
+    # コミット時に自動で同期してステージに追加する
+    - name: sync-lockfile
+      run: bun install && git add bun.lock
+      glob: "**/package.json"
     # Oxlint によるリント自動修正
     # oxlint は JS/TS のみ対応のため、JSON/CSS は対象外
     - name: oxlint-fix
