@@ -27,8 +27,7 @@
   enabled: true,
 
   packageRules: [
-    // マイナー・パッチ・pinDigest は CI 通過後に自動マージ
-    // ※ digest は自動マージ対象外にしている（下記参照）
+    // マイナー・パッチ・pinDigest・digest は CI 通過後に自動マージ
     //
     // Renovate の update type:
     //   minor/patch         — 新バージョンのリリース（例: v6.1.0 → v6.2.0）
@@ -36,14 +35,16 @@
     //   pinDigest           — 初回のハッシュピン留め（config:best-practices が推奨）
     //                         → タグ → SHA 固定への変換で、実行内容は同一 → 自動マージ OK
     //   digest              — バージョン変更なしで同じタグの SHA だけ変わった場合
-    //                         → タグ改ざん（サプライチェーン攻撃）の可能性があるため手動レビュー
-    //                         → 主に GitHub Actions で発生（npm パッケージは同じバージョンの中身が変わることはない）
-    //
-    // digest 更新 PR の CI 実行は安全:
-    //   pull_request トリガーはベースブランチ（main）のワークフローファイルで CI を実行するため、
-    //   PR ブランチの改ざんされた SHA は CI では使われない。マージしない限り影響なし。
+    //                         → サプライチェーン攻撃の理論的リスクはあるが、以下の理由で自動マージ OK:
+    //                           1. このリポジトリで secrets を受け取るアクションは公式のもののみ
+    //                              （cloudflare/wrangler-action, chromaui/action）
+    //                           2. secrets を受け取らない setup 系アクションは仮に改ざんされても漏洩しない
+    //                           3. pull_request トリガーは main のワークフローで CI を実行するため、
+    //                              マージしない限り改ざんされた SHA は使われない
+    //                           4. 個人開発リポジトリが標的になるリスクは極めて低い
+    //                           5. digest の diff を毎回手動で読んでも実質的にレビューできない
     {
-      matchUpdateTypes: ["minor", "patch", "pinDigest"],
+      matchUpdateTypes: ["minor", "patch", "pinDigest", "digest"],
       automerge: true,
     },
 
@@ -51,15 +52,6 @@
     {
       matchUpdateTypes: ["major"],
       automerge: false,
-    },
-
-    // digest 更新は draft PR にして目立たせる
-    // バージョン変更なしで SHA だけ変わった＝タグ改ざんの可能性があるため、
-    // 通常の更新 PR と区別して慎重にレビューする
-    {
-      matchUpdateTypes: ["digest"],
-      draftPR: true,
-      commitMessagePrefix: "chore(⚠️ digest):",
     },
 
     // pin タイプの更新を無効化（既存のキャレットレンジを維持）
