@@ -95,6 +95,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 95d6c4c8536abbe739beadf65c380ae4
           workingDirectory: apps/web
+          packageManager: bunx
           command: deploy
 
       # ────────────────────────────────────────
