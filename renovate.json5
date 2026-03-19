@@ -16,6 +16,9 @@
   //   - :pinAllExceptPeerDependencies (peerDependencies 以外をピン留め)
   //   - :pinDevDependencies (devDependencies をピン留め)
   //   - helpers:pinGitHubActionDigests (GitHub Actions をダイジェストでピン留め)
+  //   - security:minimumReleaseAgeNpm (npm パッケージはリリースから3日経過するまで PR を作らない)
+  //     → ダッシュボードの "Detected Dependencies" に更新が表示されても、
+  //       3日間は PR が作成されないのはこの設定による正常な動作
   extends: ["config:best-practices"],
 
   // レンジ内の更新でも package.json を更新する PR を作成する
