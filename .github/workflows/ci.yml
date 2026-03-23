@@ -36,31 +36,6 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
 
-      # ── 静的解析 ──
-      # ローカルでは renovate パッケージの WASM エラーにより実行不可のため CI でのみ検証
-      #
-      # AurorNZ/paths-filter: dorny/paths-filter のフォーク。
-      # 本家は 2024-03 以降メンテナンス停滞し Node20 非推奨化（2026-04）への
-      # 対応が見込めないため、Node24 対応済み・API 完全互換の AurorNZ 版に移行。
-      - uses: AurorNZ/paths-filter@c9dd42e99db87803313ff6f4b1150cc9f6c836af # v5
-        id: changes
-        with:
-          filters: |
-            renovate:
-              - 'renovate.json5'
-
-      - name: Setup Node.js for Renovate Validator
-        if: steps.changes.outputs.renovate == 'true'
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
-        with:
-          node-version: lts/*
-
-      - name: Renovate Config Validator
-        if: steps.changes.outputs.renovate == 'true'
-        uses: suzuki-shunsuke/github-action-renovate-config-validator@ee9f69e1f683ed0d08225086482b34fc9abe9300 # v2.1.0
-        with:
-          config_file_path: renovate.json5
-
       # ── 全チェック並列実行 ──
       # bun run --parallel: Foreman スタイルの出力で各タスクにプレフィックスが付く
       # --no-exit-on-error: 1つ失敗しても残りを最後まで実行し、全結果をまとめて確認できる

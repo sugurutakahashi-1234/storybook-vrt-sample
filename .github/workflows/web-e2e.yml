@@ -38,6 +38,9 @@ jobs:
     outputs:
       should-run: ${{ steps.filter.outputs.app }}
     steps:
+      # AurorNZ/paths-filter: dorny/paths-filter のフォーク。
+      # 本家は 2024-03 以降メンテナンス停滞し Node20 非推奨化（2026-04）への
+      # 対応が見込めないため、Node24 対応済み・API 完全互換の AurorNZ 版に移行。
       - uses: AurorNZ/paths-filter@c9dd42e99db87803313ff6f4b1150cc9f6c836af # v5
         id: filter
         if: github.event_name == 'pull_request'

@@ -4,9 +4,14 @@
   // https://github.com/marketplace/renovate
   // https://github.com/settings/installations
   // https://developer.mend.io/ (ダッシュボード・ジョブログ)
+  //
+  // バリデーション:
+  //   ローカル: lefthook pre-commit で renovate.json5 変更時に自動検証
+  //   コマンド: npx -y -p renovate@latest renovate-config-validator --strict renovate.json5
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
 
-  // 設定の自動マイグレーションを無効化
+  // Renovate が設定を自動マイグレーション（書き換え）する PR を作らないようにする。
+  // 意図しない設定変更を防ぎ、設定の変更履歴を明示的に管理するため。
   configMigration: false,
 
   // "config:best-practices" に含まれる設定:
@@ -27,7 +32,6 @@
   rangeStrategy: "replace",
 
   timezone: "Asia/Tokyo",
-  enabled: true,
 
   packageRules: [
     // マイナー・パッチ・pinDigest・digest は CI 通過後に自動マージ
@@ -93,9 +97,11 @@
     },
   ],
 
-  // PR 設定（時間あたり制限なし、同時最大10件）
-  prHourlyLimit: 0,
-  prConcurrentLimit: 10,
+  // PR 設定
+  prHourlyLimit: 0, // 時間あたりの PR 作成制限なし
+  prConcurrentLimit: 10, // 同時オープン PR の上限
+  // labels を空配列にしないと Renovate がデフォルトラベルを付与しようとしてエラーになる
+  // （このリポジトリには Renovate 用のラベルが存在しないため）
   labels: [],
   draftPR: false,
 
@@ -110,9 +116,12 @@
   rebaseWhen: "behind-base-branch",
 
   // ブランチ設定
+  // デフォルトの "renovate/" ではなく "feature/renovate-" を使用。
+  // プロジェクトのブランチ命名規則（feature/xxx, fix/xxx, chore/xxx）に合わせている。
   branchPrefix: "feature/renovate-",
-  baseBranchPatterns: ["$default"],
+  // ブランチ名に特殊文字（スラッシュ等）が混入しないよう厳密化
   branchNameStrict: true,
+  // PR タイトルに余分なプレフィックスが付かないよう厳密化
   prTitleStrict: true,
 
   // 脆弱性アラート
@@ -121,7 +130,7 @@
     labels: [],
   },
 
-  // 依存関係ダッシュボード
+  // 依存関係ダッシュボード（GitHub Issue として作成される）
   dependencyDashboard: true,
   dependencyDashboardTitle: "[Renovate] Dependency Update Dashboard",
   dependencyDashboardHeader: "This issue is automatically created by Renovate to track the status of all dependency updates. Check the status of each PR and merge as needed.",
@@ -134,7 +143,4 @@
   lockFileMaintenance: {
     enabled: false,
   },
-
-  // 更新を無視する依存関係
-  ignoreDeps: [],
 }

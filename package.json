@@ -25,6 +25,7 @@
     "✅": "========== Validation ==========",
     "syncpack": "syncpack lint",
     "bun-version-check": "bun run scripts/check-bun-version.ts",
+    "github-branch-protection-check": "bun run scripts/check-github-branch-protection.ts",
     "🚀": "========== CI ==========",
     "ci": "bun run lint:fix && bun run --parallel syncpack typecheck knip bun-version-check test && bun run build",
     "ci:full": "bun run ci && bun run storybook:test && bun run storybook:snapshot && bun run e2e",
