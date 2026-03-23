@@ -22,6 +22,18 @@ if (process.env.NEXT_PUBLIC_MSW_ENABLED === "true") {
   await worker.start({ onUnhandledRequest: "bypass" });
 }
 
+// Next.js のクライアントナビゲーションを Sentry のトランザクションとして計測する。
+// @see https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+//
+// oxlint が「captureRouterTransitionStart が見つからない」と報告するが、実行時には正常に動作する。
+// 原因: @sentry/nextjs の package.json exports が条件付き（browser / node / edge）で、
+// captureRouterTransitionStart は browser 条件の index.client.js にのみ存在する。
+// しかし types 条件の index.types.d.ts にはこの export が含まれていないため、
+// oxlint が型定義だけを見て「存在しない」と判定してしまう（Sentry 側の型定義の不備）。
+// @see https://github.com/getsentry/sentry-javascript/issues/19939
+// oxlint-disable-next-line import/namespace
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
