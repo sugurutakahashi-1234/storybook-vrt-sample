@@ -3,9 +3,9 @@
 # 全 PR で起動し、paths-filter でジョブレベル skip する。
 # skip されたジョブは GitHub 上で pass 扱いになるため、
 # required status checks と paths フィルタを両立できる。
-# storybook-addon-vis + vitest browser mode でスクリーンショットを撮影し、
-# reg-cli で差分レポートを生成する。Storybook ビルド不要。
-name: 📸 Storybook VRT
+# storybook:test（a11y + play 関数）と storybook-addon-vis + vitest browser mode で
+# スクリーンショットを撮影し、reg-cli で差分レポートを生成する。Storybook ビルド不要。
+name: 📸 Storybook Test & VRT
 
 on:
   pull_request:
@@ -123,6 +123,12 @@ jobs:
           cp -r .reg/actual/* $GITHUB_WORKSPACE/packages/ui/.reg/expected/ || true
           cd $GITHUB_WORKSPACE
           git worktree remove /tmp/baseline --force
+
+      # Storybook テスト（a11y + play 関数）
+      # VRT と同じ vitest browser mode + Playwright 基盤を使用
+      - name: Run Storybook tests
+        run: bun run storybook:test
+        working-directory: packages/ui
 
       # vitest browser mode でスクリーンショット撮影（Storybook ビルド不要）
       - name: Run VRT snapshots
