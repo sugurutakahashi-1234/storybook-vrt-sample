@@ -91,7 +91,7 @@ jobs:
 
       - name: Deploy to Chromatic
         id: chromatic
-        uses: chromaui/action@0794e6939fe40ce46a88963f818092afc427da5b # v15
+        uses: chromaui/action@eea1606238fd97a70b5af723d103953d1f40967b # v15
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           storybookBuildDir: packages/ui/storybook-static
