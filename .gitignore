@@ -47,6 +47,11 @@ next-env.d.ts
 # reg-cli
 .reg/
 
+# MSW の Service Worker スクリプトは `npx msw init` で自動生成されるが、コミット対象とする。
+# チーム全員が同じバージョンの Worker を使うため .gitignore に含めない。
+# - apps/web/public/mockServiceWorker.js（Next.js アプリ用）
+# - packages/ui/public/mockServiceWorker.js（Storybook 用）
+
 # Playwright MCP（ブラウザ操作ツールの一時ファイル）
 .playwright-mcp/
 

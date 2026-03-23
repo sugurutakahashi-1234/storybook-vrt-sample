@@ -11,7 +11,12 @@ const config: KnipConfig = {
     "apps/web": {
       // bun test のテストファイルをエントリーポイントとして認識させる
       // open-next.config.ts は opennextjs-cloudflare build 時に読み込まれる設定ファイル
-      entry: ["app/**/*.test.ts!", "open-next.config.ts!"],
+      // app/mocks/noop.ts は next.config.ts の turbopack.resolveAlias で参照される
+      entry: [
+        "app/**/*.test.ts!",
+        "open-next.config.ts!",
+        "app/mocks/noop.ts!",
+      ],
     },
     "packages/ui": {
       entry: ["src/**/*.test.ts!"],

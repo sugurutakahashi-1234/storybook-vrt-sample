@@ -11,8 +11,8 @@
     "deploy:production": "wrangler deploy --env production"
   },
   "dependencies": {
-    "@orpc/openapi": "^1.9.0",
-    "@orpc/server": "^1.9.0",
+    "@orpc/openapi": "^1.13.9",
+    "@orpc/server": "^1.13.9",
     "@storybook-vrt-sample/api-contract": "workspace:*",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.8.3"

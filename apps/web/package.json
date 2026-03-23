@@ -6,6 +6,7 @@
   "scripts": {
     "🏗️": "========== Dev & Build ==========",
     "dev": "dotenvx run -- next dev --turbopack",
+    "dev:mock": "NEXT_PUBLIC_MSW_ENABLED=true dotenvx run -- next dev --turbopack",
     "build": "dotenvx run -- next build",
     "build:cf": "opennextjs-cloudflare build",
     "start": "dotenvx run -- next start",
@@ -24,7 +25,11 @@
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.17.1",
+    "@orpc/client": "^1.13.9",
+    "@orpc/contract": "^1.13.9",
+    "@orpc/openapi-client": "^1.13.9",
     "@sentry/nextjs": "^10.43.0",
+    "@storybook-vrt-sample/api-contract": "workspace:*",
     "@storybook-vrt-sample/ui": "workspace:*",
     "next": "^16.1.6",
     "react": "^19.2.4",
@@ -37,10 +42,16 @@
     "@types/node": "^25.3.5",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "msw": "^2.12.14",
     "postcss": "^8.5.8",
     "reg-cli": "^0.18.14",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
     "wrangler": "^4.74.0"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

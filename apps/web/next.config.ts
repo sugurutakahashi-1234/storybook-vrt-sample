@@ -17,11 +17,24 @@ const nextConfig: NextConfig = {
   // モノレポ内の内部パッケージをトランスパイル対象に含める
   // @storybook-vrt-sample/ui は TypeScript のソースを直接参照しているため、
   // Next.js のビルド時にトランスパイルが必要
-  transpilePackages: ["@storybook-vrt-sample/ui"],
+  transpilePackages: [
+    "@storybook-vrt-sample/ui",
+    "@storybook-vrt-sample/api-contract",
+  ],
 
   // E2E テスト時のみデバッグインジケータ（画面右下のバッジ）を無効化
   // Playwright が webServer 経由で dev サーバーを起動する際に PLAYWRIGHT=1 を設定する
   ...(process.env.PLAYWRIGHT && { devIndicators: false as const }),
+
+  // MSW モードが無効な場合、./app/mocks/browser を空モジュールに差し替えて
+  // 本番バンドルに MSW チャンクが含まれないようにする
+  ...(process.env.NEXT_PUBLIC_MSW_ENABLED !== "true" && {
+    turbopack: {
+      resolveAlias: {
+        "./app/mocks/browser": "./app/mocks/noop.ts",
+      },
+    },
+  }),
 };
 
 export default withSentryConfig(nextConfig, {

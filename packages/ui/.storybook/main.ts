@@ -6,7 +6,7 @@
  */
 import path from "node:path";
 
-import type { StorybookConfig } from "@storybook/react-vite";
+import type { StorybookConfig } from "@storybook/nextjs-vite";
 import tailwindcss from "@tailwindcss/vite";
 
 const config: StorybookConfig = {
@@ -51,19 +51,26 @@ const config: StorybookConfig = {
   // MSW Service Worker を配信するための静的ディレクトリ
   staticDirs: ["../public"],
 
-  // React + Vite をビルドフレームワークとして使用
-  framework: "@storybook/react-vite",
+  // Next.js + Vite をビルドフレームワークとして使用
+  // next/link, next/image, next/navigation 等の Next.js モジュールを自動モックする
+  framework: "@storybook/nextjs-vite",
 
   // Vite の設定をカスタマイズ
   // Tailwind CSS v4 の Vite プラグインを追加して、Storybook 内でも Tailwind が動作するようにする
   viteFinal(viteConfig) {
     viteConfig.plugins = viteConfig.plugins || [];
     viteConfig.plugins.push(tailwindcss());
-    // tsconfig.json の paths と同じエイリアスを Vite にも設定
+    // tsconfig.json の paths と同じエイリアスを Vite にも設定。
+    // TypeScript は tsconfig の paths でエイリアスを解決するが、
+    // Vite（ランタイムのバンドラー）は tsconfig を参照しないため、同じ対応が必要。
     viteConfig.resolve = viteConfig.resolve || {};
     viteConfig.resolve.alias = {
       ...viteConfig.resolve.alias,
+      // packages/ui/src 内の import 用（例: @ui/components/Button）
       "@ui": path.resolve(import.meta.dirname, "../src"),
+      // apps/web/app 内の import 用（例: @/todos/page）
+      // ページストーリーが apps/web のコンポーネントを直接 import するために必要
+      "@": path.resolve(import.meta.dirname, "../../../apps/web/app"),
     };
     return viteConfig;
   },

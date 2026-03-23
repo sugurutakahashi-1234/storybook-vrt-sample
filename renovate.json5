@@ -72,6 +72,25 @@
       matchPackageNames: ["clsx"],
       abandonmentThreshold: null,
     },
+
+    // msw 更新時に mockServiceWorker.js を自動再生成。
+    // public/mockServiceWorker.js は MSW のバージョンと一致している必要があるため、
+    // Renovate が msw を更新したら自動で再生成してコミットに含める。
+    // matchPackageNames は完全一致（msw-storybook-addon や orpc-msw にはマッチしない）
+    {
+      matchPackageNames: ["msw"],
+      postUpgradeTasks: {
+        commands: [
+          "npx msw init apps/web/public --no-save",
+          "npx msw init packages/ui/public --no-save",
+        ],
+        fileFilters: [
+          "apps/web/public/mockServiceWorker.js",
+          "packages/ui/public/mockServiceWorker.js",
+        ],
+        executionMode: "update",
+      },
+    },
   ],
 
   // PR 設定（時間あたり制限なし、同時最大10件）

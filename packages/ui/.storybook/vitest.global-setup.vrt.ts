@@ -13,10 +13,23 @@ import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { basename, dirname, join, relative } from "node:path";
 
 /**
+ * カテゴリディレクトリからソート用プレフィックスを返す。
+ * preview.tsx の storySort.order と対応: Pages → 1, Components → 2, Foundations → 3
+ * Introduction は MDX のみでスナップショット対象外のため含まない。
+ * カテゴリを変更する場合は preview.tsx の storySort.order も合わせて更新すること。
+ */
+const categoryPrefix: Record<string, string> = {
+  pages: "1",
+  components: "2",
+  foundations: "3",
+};
+
+/**
  * スナップショットをフラット化してコピーする。
  * 入力: components/Badge/Badge.stories.tsx/error-dark.png
+ * → カテゴリ "components" → プレフィックス "2"
  * → 親ディレクトリ "Badge.stories.tsx" から .stories.tsx を除去 → "Badge"
- * → 出力: destDir/Badge/error-dark.png
+ * → 出力: destDir/2-Badge/error-dark.png
  */
 const copyFlattened = (srcDir: string, destDir: string) => {
   const walkFiles = (dir: string): string[] => {
@@ -31,8 +44,11 @@ const copyFlattened = (srcDir: string, destDir: string) => {
     const fileName = basename(rel);
     const parentDir = basename(dirname(rel));
     // "Badge.stories.tsx" → "Badge"
-    const flatDir = parentDir.replace(/\.stories\.tsx?$/, "");
-    const destPath = join(destDir, flatDir, fileName);
+    const name = parentDir.replace(/\.stories\.tsx?$/, "");
+    // "components/Badge/..." → "components"
+    const [category] = rel.split("/");
+    const prefix = categoryPrefix[category] ?? "9";
+    const destPath = join(destDir, `${prefix}-${name}`, fileName);
 
     mkdirSync(dirname(destPath), { recursive: true });
     cpSync(srcPath, destPath);

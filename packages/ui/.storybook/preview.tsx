@@ -13,9 +13,9 @@
 import type { Decorator, Preview } from "@storybook/react";
 import { initialize, mswLoader } from "msw-storybook-addon";
 
-// グローバル CSS を読み込み（Tailwind CSS のベーススタイル）
-// これにより全ストーリーで Tailwind のユーティリティクラスが使用可能になる
-import "../src/styles.css";
+// グローバル CSS を読み込み（Tailwind CSS のベーススタイル + apps/web のクラス検出）
+// UI パッケージのスタイルに加え、apps/web のページで使われるクラスも Tailwind に検出させる
+import "./styles.css";
 
 // MSW Service Worker を初期化
 // Storybook のプレビュー iframe 内で Service Worker を登録し、
@@ -93,6 +93,13 @@ const preview: Preview = {
         color: /(background|color)$/i,
         // "Date" で終わるプロパティにはデートピッカーを表示
         date: /Date$/i,
+      },
+    },
+    // サイドバーの並び順: Pages を先頭に表示
+    // カテゴリを変更する場合は vitest.global-setup.vrt.ts の categoryPrefix も合わせて更新すること
+    options: {
+      storySort: {
+        order: ["Introduction", "Pages", "Components", "Foundations"],
       },
     },
     // アクセシビリティチェックのグローバル設定

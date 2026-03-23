@@ -1,24 +1,24 @@
-/**
- * TodoList コンポーネントの Storybook ストーリー定義
- *
- * msw-storybook-addon により、ストーリーごとに異なる MSW ハンドラーを設定できる。
- * parameters.msw.handlers に渡したハンドラーが、そのストーリーの描画中のみ有効になる。
- * meta レベルで設定したハンドラーは全ストーリーのデフォルトとなり、
- * 個別ストーリーの parameters.msw.handlers で上書き可能。
- */
+import { TodoSchema } from "@storybook-vrt-sample/api-contract";
 import type { Meta, StoryObj } from "@storybook/react";
-import { createTodoHandlers, defaultTodos } from "@ui/mocks/handlers";
+import { fn } from "storybook/test";
 
 import { TodoList } from "./TodoList";
+
+const sampleTodos = [
+  TodoSchema.parse({ id: "1", title: "Buy groceries" }),
+  TodoSchema.parse({ id: "2", title: "Write tests", completed: true }),
+  TodoSchema.parse({ id: "3", title: "Review PR" }),
+];
 
 const meta = {
   title: "Components/TodoList",
   component: TodoList,
-  parameters: {
-    // デフォルトの MSW ハンドラー（3件の TODO を返す）
-    msw: {
-      handlers: createTodoHandlers(),
-    },
+  args: {
+    todos: sampleTodos,
+    loading: false,
+    error: null,
+    onToggle: fn(),
+    onCreate: fn(),
   },
 } satisfies Meta<typeof TodoList>;
 
@@ -30,20 +30,59 @@ export const Default: Story = {};
 
 /** 空リスト */
 export const Empty: Story = {
-  parameters: {
-    msw: {
-      handlers: createTodoHandlers([]),
-    },
+  args: {
+    todos: [],
   },
 };
 
 /** 全て完了済み */
 export const AllCompleted: Story = {
-  parameters: {
-    msw: {
-      handlers: createTodoHandlers(
-        defaultTodos.map((t) => ({ ...t, completed: true }))
-      ),
-    },
+  args: {
+    todos: [
+      TodoSchema.parse({ id: "1", title: "Buy groceries", completed: true }),
+      TodoSchema.parse({ id: "2", title: "Write tests", completed: true }),
+      TodoSchema.parse({ id: "3", title: "Review PR", completed: true }),
+    ],
+  },
+};
+
+/** タイトルが空文字の TODO を含む */
+export const EmptyTitle: Story = {
+  args: {
+    todos: [
+      TodoSchema.parse({ id: "1", title: "" }),
+      TodoSchema.parse({ id: "2", title: "Normal todo" }),
+    ],
+  },
+};
+
+/** ローディング中 */
+export const Loading: Story = {
+  args: {
+    todos: [],
+    loading: true,
+  },
+};
+
+/** 一覧取得エラー: エラー画面 + Retry ボタン */
+export const FetchError: Story = {
+  args: {
+    todos: [],
+    error: "Failed to load todos.",
+    onRetry: fn(),
+  },
+};
+
+/** 作成エラー: 操作エラーバナー表示 */
+export const CreateError: Story = {
+  args: {
+    error: "Failed to create todo.",
+  },
+};
+
+/** トグルエラー: 操作エラーバナー表示 */
+export const ToggleError: Story = {
+  args: {
+    error: "Failed to toggle todo.",
   },
 };

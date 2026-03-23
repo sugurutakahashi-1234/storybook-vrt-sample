@@ -1,104 +1,65 @@
-/**
- * TodoList コンポーネント
- *
- * oRPC クライアント経由で API サーバーと通信する TODO 管理コンポーネント。
- * apiBaseUrl を props で受け取ることで、環境ごとに接続先を切り替えられる。
- *
- * - ローカル開発: デフォルトの localhost:3001
- * - Storybook: MSW がインターセプトするため URL は問わない
- * - ステージング/本番: apps/web から環境変数で注入
- */
+"use client";
+
 import type { Todo } from "@storybook-vrt-sample/api-contract";
-import { createTodoApiClient } from "@ui/api/client";
-import type { TodoApiClient } from "@ui/api/client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Button } from "@ui/components/Button";
+import { Card } from "@ui/components/Card";
+import { Checkbox } from "@ui/components/Checkbox";
+import { ErrorBanner } from "@ui/components/ErrorBanner";
+import { TextField } from "@ui/components/TextField";
+import { useCallback, useState } from "react";
 
-/** TODO の CRUD 操作をまとめたカスタムフック */
-const useTodos = (client: TodoApiClient) => {
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchTodos = useCallback(async () => {
-    setLoading(true);
-    const data = await client.todo.list();
-    setTodos(data);
-    setLoading(false);
-  }, [client]);
-
-  useEffect(() => {
-    const load = async () => {
-      await fetchTodos();
-    };
-    // eslint-disable-next-line no-void -- useEffect does not support async return
-    void load();
-  }, [fetchTodos]);
-
-  const toggle = useCallback(
-    async (id: string) => {
-      await client.todo.toggle({ id });
-      await fetchTodos();
-    },
-    [client, fetchTodos]
-  );
-
-  const create = useCallback(
-    async (title: string) => {
-      await client.todo.create({ title });
-      await fetchTodos();
-    },
-    [client, fetchTodos]
-  );
-
-  return { todos, loading, toggle, create };
-};
+export interface TodoListProps {
+  /** タスク一覧 */
+  todos: Todo[];
+  /** 初回取得中のローディング状態 */
+  loading: boolean;
+  /** API エラーメッセージ。一覧なしならエラー画面、一覧ありならインラインバナーで表示 */
+  error: string | null;
+  /** タスクの完了/未完了をトグルする */
+  onToggle: (id: string) => void;
+  /** 新しいタスクを作成する */
+  onCreate: (title: string) => void;
+  /** 一覧取得失敗時の再試行。未指定の場合 Retry ボタンは表示されない */
+  onRetry?: () => void;
+}
 
 const TodoItem = ({
   todo,
   onToggle,
 }: {
   todo: Todo;
-  onToggle: (id: string) => Promise<void>;
+  onToggle: (id: string) => void;
 }) => {
   const handleChange = useCallback(() => {
-    // eslint-disable-next-line no-void -- fire-and-forget toggle
-    void onToggle(todo.id);
+    onToggle(todo.id);
   }, [onToggle, todo.id]);
 
   return (
     <li>
-      <label className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={todo.completed}
-          onChange={handleChange}
-          className="accent-primary"
-        />
-        <span
-          className={
-            todo.completed
-              ? "text-on-surface-muted line-through"
-              : "text-on-surface"
-          }
-        >
-          {todo.title}
-        </span>
-      </label>
+      <Checkbox
+        checked={todo.completed}
+        onChange={handleChange}
+        label={todo.title || "Empty"}
+        className={
+          todo.completed
+            ? "text-on-surface-muted line-through"
+            : "text-on-surface"
+        }
+      />
     </li>
   );
 };
 
-export const TodoList = ({ apiBaseUrl }: { apiBaseUrl?: string }) => {
-  const client = useMemo(() => createTodoApiClient(apiBaseUrl), [apiBaseUrl]);
-  const { todos, loading, toggle, create } = useTodos(client);
+const TodoForm = ({ onCreate }: { onCreate: (title: string) => void }) => {
   const [newTitle, setNewTitle] = useState("");
 
-  const handleCreate = useCallback(async () => {
+  const handleCreate = useCallback(() => {
     if (!newTitle.trim()) {
       return;
     }
-    await create(newTitle);
+    onCreate(newTitle);
     setNewTitle("");
-  }, [newTitle, create]);
+  }, [newTitle, onCreate]);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,54 +71,68 @@ export const TodoList = ({ apiBaseUrl }: { apiBaseUrl?: string }) => {
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
-        // eslint-disable-next-line no-void -- fire-and-forget create
-        void handleCreate();
+        handleCreate();
       }
     },
     [handleCreate]
   );
 
-  const handleAddClick = useCallback(() => {
-    // eslint-disable-next-line no-void -- fire-and-forget create
-    void handleCreate();
-  }, [handleCreate]);
+  return (
+    <div className="mb-4 flex gap-2">
+      <TextField
+        value={newTitle}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        placeholder="New todo..."
+        aria-label="New todo title"
+        className="flex-1"
+      />
+      <Button size="sm" onClick={handleCreate}>
+        Add
+      </Button>
+    </div>
+  );
+};
 
+export const TodoList = ({
+  todos,
+  loading,
+  error,
+  onToggle,
+  onCreate,
+  onRetry,
+}: TodoListProps) => {
   if (loading) {
     return <p className="text-on-surface-muted">Loading...</p>;
   }
 
+  // 一覧取得失敗: エラーメッセージ + Retry ボタンのみ表示
+  if (error && todos.length === 0 && onRetry) {
+    return (
+      <Card variant="outlined" header="Todo List" className="w-96">
+        <ErrorBanner message={error} onRetry={onRetry} />
+      </Card>
+    );
+  }
+
   return (
-    <div className="w-80 rounded-lg border border-border bg-surface p-4">
-      <h2 className="mb-3 text-lg font-semibold text-on-background">
-        Todo List
-      </h2>
-      <div className="mb-3 flex gap-2">
-        <input
-          type="text"
-          value={newTitle}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          placeholder="New todo..."
-          aria-label="New todo title"
-          className="flex-1 rounded border border-border-input bg-surface px-2 py-1 text-on-surface placeholder:text-on-surface-muted focus:border-primary focus:outline-none"
-        />
-        <button
-          type="button"
-          onClick={handleAddClick}
-          className="rounded bg-primary px-3 py-1 text-on-primary hover:bg-primary-hover"
-        >
-          Add
-        </button>
-      </div>
+    <Card variant="outlined" header="Todo List" className="w-96">
+      {/* 操作失敗: 既存 UI の上にインラインバナーで表示 */}
+      {error && (
+        <div className="mb-4">
+          <ErrorBanner message={error} />
+        </div>
+      )}
+      <TodoForm onCreate={onCreate} />
       {todos.length === 0 ? (
         <p className="text-on-surface-muted">No todos yet</p>
       ) : (
-        <ul className="space-y-1">
+        <ul className="space-y-2">
           {todos.map((todo) => (
-            <TodoItem key={todo.id} todo={todo} onToggle={toggle} />
+            <TodoItem key={todo.id} todo={todo} onToggle={onToggle} />
           ))}
         </ul>
       )}
-    </div>
+    </Card>
   );
 };

@@ -1,0 +1,15 @@
+/*
+ * Storybook 用グローバルスタイル
+ *
+ * UI パッケージのベーススタイルに加え、apps/web のページコンポーネントで使われる
+ * Tailwind クラスも検出対象に追加する。
+ */
+@import "../src/styles.css";
+
+/*
+ * apps/web のページコンポーネントで使われる Tailwind クラスを検出対象に追加。
+ * ページストーリー（src/pages/）が apps/web/app/ の page.tsx を直接 import しているが、
+ * Tailwind は packages/ui/ 内しかスキャンしないため、ページ固有のクラス（md:grid-cols-2 等）が
+ * 生成されずレイアウトが崩れる。@source は相対パスしか指定できない（Tailwind v4 の制約）。
+ */
+@source "../../../apps/web/app";

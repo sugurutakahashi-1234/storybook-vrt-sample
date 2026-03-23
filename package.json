@@ -7,7 +7,9 @@
   ],
   "scripts": {
     "🏗️": "========== Dev & Build ==========",
-    "dev": "bun run --filter web dev",
+    "dev": "bun run --parallel dev:web dev:api",
+    "dev:web": "bun run --filter web dev",
+    "dev:mock": "bun run --filter web dev:mock",
     "dev:api": "bun run --filter @storybook-vrt-sample/api dev",
     "build": "bun run --filter web build",
     "🧪": "========== Testing ==========",

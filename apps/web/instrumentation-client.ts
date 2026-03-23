@@ -13,6 +13,15 @@
  */
 import * as Sentry from "@sentry/nextjs";
 
+// MSW モード: API サーバーなしで UI を確認するためのモックサーバー
+// NEXT_PUBLIC_MSW_ENABLED=true のときのみ Service Worker を起動する
+if (process.env.NEXT_PUBLIC_MSW_ENABLED === "true") {
+  const { worker } = await import("./app/mocks/browser");
+  // "bypass": ハンドラーに一致しないリクエストはそのまま実際のネットワークに通す。
+  // 静的アセットや Sentry 等のリクエストまで警告・エラーにしないため。
+  await worker.start({ onUnhandledRequest: "bypass" });
+}
+
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 

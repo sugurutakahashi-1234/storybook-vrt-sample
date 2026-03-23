@@ -11,6 +11,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { formatPageTitle } from "./utils/format";
 
+// MSW モック有効時に「MSW MOCK」リボンを表示するためのフラグ。
+// 環境変数は instrumentation-client.ts での MSW 起動と共有。
+const isMswEnabled = process.env.NEXT_PUBLIC_MSW_ENABLED === "true";
+
 /** サイト全体のメタデータ（<title> や <meta> タグに反映される） */
 export const metadata: Metadata = {
   title: formatPageTitle(),
@@ -43,6 +47,16 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-background text-on-background antialiased">
+        {isMswEnabled && (
+          <div
+            className="pointer-events-none fixed top-0 left-0 z-50 overflow-hidden"
+            style={{ width: "150px", height: "150px" }}
+          >
+            <div className="absolute top-10 -left-8.75 w-50 -rotate-45 bg-badge-warning-bg py-1 text-center font-bold text-badge-warning-text text-xs shadow-sm">
+              MSW MOCK
+            </div>
+          </div>
+        )}
         <header className="flex justify-end px-4 py-3">
           <ThemeToggle />
         </header>
