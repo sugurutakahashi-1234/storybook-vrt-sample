@@ -8,10 +8,6 @@
   //   VS Code の Language Server で型チェックされる
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    // バンドラー環境向けにモジュール設定を上書き（Vite / Storybook）
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-
     // ブラウザ向け型定義ライブラリ
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
 

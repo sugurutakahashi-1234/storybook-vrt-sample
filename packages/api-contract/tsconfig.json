@@ -8,9 +8,6 @@
   //   ルートの tsconfig.json をそのまま継承し、追加の lib や types は不要
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    // バンドラー環境向けにモジュール設定を上書き（Turbopack / Vite から直接参照されるため）
-    "module": "ESNext",
-    "moduleResolution": "bundler",
     "rootDir": "./src",
     "outDir": "./dist"
   },

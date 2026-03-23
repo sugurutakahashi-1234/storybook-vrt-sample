@@ -6,10 +6,6 @@
   // - ルートの strict 系オプションを緩める変更は禁止（型安全性が低下する）
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    // バンドラー環境向けにモジュール設定を上書き（Next.js / Turbopack）
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-
     // ブラウザ向け型定義ライブラリ
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
 

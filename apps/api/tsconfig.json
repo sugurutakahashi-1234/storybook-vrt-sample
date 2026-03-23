@@ -9,11 +9,6 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    // Bun はバンドラーとして動作するため esnext + bundler が適切。
-    // ルートの nodenext を継承すると .js 拡張子が必須になり、
-    // api-contract の拡張子なし import が typecheck で失敗する。
-    "module": "esnext",
-    "moduleResolution": "bundler",
     "types": ["bun", "@cloudflare/workers-types"]
   },
   "include": ["src"]

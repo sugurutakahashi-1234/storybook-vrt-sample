@@ -15,8 +15,10 @@
     // "outDir": "./dist",
 
     // Environment Settings
-    // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
+    // 全ワークスペースがバンドラー経由（Next.js Turbopack, Vite, Bun）で実行されるため
+    // esnext + bundler を使用。nodenext は Node.js で直接実行する場合や npm 公開ライブラリ向け。
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "target": "esnext",
     "types": [],
     // For nodejs:
