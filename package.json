@@ -48,7 +48,7 @@
   "devDependencies": {
     "@types/bun": "^1.3.10",
     "@typescript/native-preview": "^7.0.0-dev.20260308.1",
-    "knip": "^5.86.0",
+    "knip": "^6.0.0",
     "lefthook": "^2.1.3",
     "oxfmt": "^0.41.0",
     "oxlint": "^1.51.0",
