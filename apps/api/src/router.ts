@@ -58,6 +58,12 @@ const toggleTodoInD1 = async (db: Database, id: string): Promise<Todo> => {
 
 export const createRouter = (db: Database | null) =>
   implement(contract).router({
+    health: {
+      check: implement(contract.health.check).handler(() => ({
+        status: "ok",
+      })),
+    },
+
     todo: {
       list: implement(contract.todo.list).handler(() => {
         if (db) {

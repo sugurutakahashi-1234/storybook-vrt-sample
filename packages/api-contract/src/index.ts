@@ -17,11 +17,13 @@
  */
 import { oc } from "@orpc/contract";
 
+import { healthContract } from "./health";
 import { todoContract } from "./todo";
 
 export { TodoSchema } from "./todo";
 export type { Todo } from "./todo";
 
 export const contract = oc.router({
+  health: healthContract,
   todo: todoContract,
 });
