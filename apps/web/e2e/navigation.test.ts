@@ -1,12 +1,10 @@
 /**
  * ナビゲーション・レスポンシブ表示の E2E テスト
  *
- * ページタイトルの確認と、各デバイスサイズでのレスポンシブ表示を
- * スクリーンショット比較で検証する。
+ * ページタイトルの確認と、各デバイスサイズでのレスポンシブ表示を検証する。
+ * VRT（スクリーンショット比較）は Storybook VRT でカバーしているため、ここでは行わない。
  */
 import { expect, test } from "@playwright/test";
-
-import { takeScreenshot } from "./reg-screenshot";
 
 test.describe("Navigation", () => {
   /** <title> タグが正しく設定されていることを確認 */
@@ -20,7 +18,6 @@ test.describe("Navigation", () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await takeScreenshot(page, { fullPage: true });
   });
 
   /** タブレット（iPad: 768x1024）でのレスポンシブ表示を検証 */
@@ -28,6 +25,5 @@ test.describe("Navigation", () => {
     await page.setViewportSize({ width: 768, height: 1024 });
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await takeScreenshot(page, { fullPage: true });
   });
 });

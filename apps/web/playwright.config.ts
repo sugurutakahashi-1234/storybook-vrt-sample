@@ -2,19 +2,17 @@
  * E2E テスト用 Playwright 設定
  *
  * Next.js アプリケーションに対するエンドツーエンドテストの設定。
- * ページ遷移、レスポンシブ表示、スクリーンショット比較などを検証する。
+ * ページ遷移、レスポンシブ表示などの機能テストと、ページレベルの a11y チェック（axe-core）を行う。
+ * VRT（スクリーンショット比較）は Storybook VRT でカバーしているため、ここでは行わない。
  *
- * light / dark の2プロジェクトで同じテストを実行し、
- * 各テーマのスクリーンショットを撮影する。
+ * a11y テストは light/dark 両テーマで実行する（テーマ別のコントラスト等を検証するため）。
+ * テーマ切り替えは各テスト内で page.emulateMedia() を使用する。
  *
- * 実行: bun run web:e2e:playwright
+ * 実行: bun run e2e
  */
 import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  // テスト実行前にスクリーンショットディレクトリをクリア（古い画像の残存を防止）
-  globalSetup: "./e2e/global-setup.ts",
-
   // テストファイルの配置ディレクトリ
   testDir: "./e2e",
 
@@ -37,17 +35,9 @@ export default defineConfig({
     // Next.js dev サーバーの URL
     baseURL: "http://localhost:3000",
 
-    // テスト失敗時の自動スクリーンショットは無効（E2E テスト内で明示的に撮影するため不要）
+    // VRT は Storybook VRT でカバーしているため、スクリーンショット撮影は無効
     screenshot: "off",
   },
-
-  // ライト・ダーク両テーマでテストを実行
-  // layout.tsx の FOUC 防止スクリプトが prefers-color-scheme を参照するため、
-  // colorScheme の設定だけで初回描画からテーマが正しく適用される
-  projects: [
-    { name: "light", use: { colorScheme: "light" } },
-    { name: "dark", use: { colorScheme: "dark" } },
-  ],
 
   // テスト実行前に Next.js dev サーバーを自動起動する設定
   webServer: {

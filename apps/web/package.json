@@ -18,8 +18,6 @@
     "🧪": "========== Testing ==========",
     "test": "bun test app/",
     "e2e:playwright": "bunx playwright test",
-    "e2e:reg": "mkdir -p .reg/report .reg/expected && reg-cli .reg/actual .reg/expected .reg/diff -R .reg/report/index.html -J .reg/out.json -M 0.01",
-    "e2e:reg:local": "rm -rf .reg/expected && mkdir -p .reg/expected && (git -C $(git rev-parse --show-toplevel) archive $(git merge-base HEAD main):apps/web/e2e/screenshots/ 2>/dev/null | tar -x -C .reg/expected/ || true) && bun run e2e:playwright && bun run e2e:reg",
     "📦": "========== Dependency Management ==========",
     "deps:update": "bun update --latest"
   },
@@ -36,6 +34,7 @@
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
     "@dotenvx/dotenvx": "^1.54.1",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.2.1",
@@ -44,7 +43,6 @@
     "@types/react-dom": "^19.2.3",
     "msw": "^2.12.14",
     "postcss": "^8.5.8",
-    "reg-cli": "^0.18.14",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
     "wrangler": "^4.74.0"

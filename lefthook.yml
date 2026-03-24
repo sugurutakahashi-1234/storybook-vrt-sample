@@ -194,7 +194,7 @@ pre-push:
       timeout: 20s
       run: CACHE_DIR=packages/ui/node_modules/.cache/sb-snapshot bun run storybook:snapshot && git diff --quiet packages/ui/vrt/screenshots/ && ! git ls-files --others --exclude-standard packages/ui/vrt/screenshots/ | grep -q . || (echo "" && echo "❌ VRT スクリーンショットに差分があります" && echo "👉 bun run storybook:snapshot && git add packages/ui/vrt/screenshots/ && git commit" && exit 1)
     # E2E テスト（Playwright / Next.js dev サーバーを自動起動して実行）
-    # スクリーンショットに差分があれば push を失敗させる（コミットし忘れ防止）
+    # VRT は Storybook VRT でカバーしているため、ここでは機能テストのみ実行する。
     # ポート 3000 が使用中だと dev サーバーが別ポートで起動し Playwright が接続できずタイムアウトするため、
     # テスト前にポート 3000 を占有しているプロセスを強制終了する
     - name: e2e-test
@@ -204,7 +204,7 @@ pre-push:
       timeout: 20s
       run: |
         lsof -ti :3000 | xargs kill -9 2>/dev/null || true
-        bun run e2e && git diff --quiet apps/web/e2e/screenshots/ && ! git ls-files --others --exclude-standard apps/web/e2e/screenshots/ | grep -q . || (echo "" && echo "❌ E2E スクリーンショットに差分があります" && echo "👉 bun run e2e && git add apps/web/e2e/screenshots/ && git commit" && exit 1)
+        bun run e2e || (echo "" && echo "❌ E2E テストが失敗しました" && echo "👉 bun run e2e で詳細を確認" && exit 1)
 
     # ── Terraform ──
     # terraform apply 漏れ検出

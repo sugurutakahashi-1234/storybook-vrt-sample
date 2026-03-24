@@ -3,8 +3,8 @@
 # 全 PR で起動し、paths-filter でジョブレベル skip する。
 # skip されたジョブは GitHub 上で pass 扱いになるため、
 # required status checks と paths フィルタを両立できる。
-# Next.js アプリをビルドし、Playwright でページ遷移やレスポンシブ表示などを検証する。
-# PR 時はベースブランチからベースラインを動的生成し、reg-cli で差分レポートを生成する。
+# Next.js アプリをビルドし、Playwright でページ遷移やレスポンシブ表示などの機能テストを検証する。
+# VRT（スクリーンショット比較）は Storybook VRT でカバーしているため、ここでは行わない。
 #
 # 必要な設定:
 #   Secrets:
@@ -58,8 +58,6 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    outputs:
-      vrt-table: ${{ steps.reg-result.outputs.vrt-table }}
     steps:
       # ────────────────────────────────────────
       # セットアップ
@@ -68,9 +66,6 @@ jobs:
       - uses: Kesin11/actions-timeline@e018cfefea60b4f44266998551211a35a58b8097 # v3
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-        with:
-          # ベースライン生成で base branch を参照するため全履歴が必要
-          fetch-depth: 0
 
       # bun をセットアップ（パッケージマネージャー）
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
@@ -104,29 +99,8 @@ jobs:
         run: bun install --frozen-lockfile
 
       # ────────────────────────────────────────
-      # ベースライン生成 → ビルド → テスト実行
+      # ビルド → テスト実行
       # ────────────────────────────────────────
-
-      # PR 時のみ: ベースブランチのコードからベースラインのスクリーンショットを生成し、
-      # .reg/expected/ にコピーする。これにより reg-cli で差分比較が可能になる。
-      # git worktree を使って別ディレクトリにベースブランチをチェックアウトし、
-      # そこでビルド＆テストを実行してスクリーンショットを取得する。
-      - name: Generate baselines from base branch
-        if: github.event_name == 'pull_request'
-        env:
-          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
-        run: |
-          BASE_REF="${{ github.event.pull_request.base.ref }}"
-          git worktree add /tmp/baseline "origin/${BASE_REF}" --detach
-          cd /tmp/baseline
-          bun install --frozen-lockfile
-          cd apps/web
-          bun run build
-          bunx playwright test || true
-          mkdir -p $GITHUB_WORKSPACE/apps/web/.reg/expected/
-          cp -r .reg/actual/* $GITHUB_WORKSPACE/apps/web/.reg/expected/ || true
-          cd $GITHUB_WORKSPACE
-          git worktree remove /tmp/baseline --force
 
       # 現在のブランチで Next.js ビルド
       - name: Build
@@ -141,42 +115,6 @@ jobs:
         working-directory: apps/web
         env:
           CI: true
-
-      # ────────────────────────────────────────
-      # レポート生成
-      # ────────────────────────────────────────
-
-      # reg-cli: .reg/expected/（ベースライン）と .reg/actual/（現在）を比較し、
-      # 差分レポートを .reg/ に生成する。結果サマリーは PR コメント用に GITHUB_OUTPUT に出力。
-      - name: Run reg-cli comparison
-        if: always()
-        id: reg-result
-        run: |
-          bun run e2e:reg || true
-
-          # .reg/out.json から各カテゴリの件数を取得
-          CHANGED=$(jq '.diffItems | length' .reg/out.json)
-          PASSED=$(jq '.passedItems | length' .reg/out.json)
-          NEW=$(jq '.newItems | length' .reg/out.json)
-          DELETED=$(jq '.deletedItems | length' .reg/out.json)
-
-          # PR コメント用のサマリーテーブルを組み立て（reg-cli レポートと同じ順序、件数 0 は省略）
-          VRT_TABLE="| Status | Count |
-          |--------|-------|"
-          [ "$CHANGED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
-          | ⚠️ Changed | $CHANGED |"
-          [ "$NEW" -gt 0 ] && VRT_TABLE="$VRT_TABLE
-          | 🆕 New | $NEW |"
-          [ "$DELETED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
-          | 🗑️ Deleted | $DELETED |"
-          [ "$PASSED" -gt 0 ] && VRT_TABLE="$VRT_TABLE
-          | ✅ Passed | $PASSED |"
-
-          # GITHUB_OUTPUT にヒアドキュメントで出力（複数行対応）
-          echo "vrt-table<<EOF" >> $GITHUB_OUTPUT
-          echo "$VRT_TABLE" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-        working-directory: apps/web
 
       # ────────────────────────────────────────
       # アップロード＆デプロイ
@@ -200,16 +138,13 @@ jobs:
           path: apps/web/playwright-report/
           retention-days: 30
 
-      # 全レポートを1つのディレクトリにまとめ、1回の push でデプロイする。
-      # keep_files: true で既存のレポートを保持する（他の PR のレポートを消さない）
+      # HTML レポートを GitHub Pages にデプロイするためステージング
       - name: Stage reports for GitHub Pages
         if: always()
         run: |
           DEST="${{ env.REPORT_PREFIX }}/web-e2e"
           mkdir -p _gh-pages-staging/${DEST}/html-report
-          mkdir -p _gh-pages-staging/${DEST}/reg-report
           cp -r playwright-report/* _gh-pages-staging/${DEST}/html-report/ || true
-          cp -r .reg/* _gh-pages-staging/${DEST}/reg-report/ || true
         working-directory: apps/web
 
       # deploy ジョブに渡すためのアーティファクト（ステージング済みディレクトリ一式）
@@ -253,12 +188,7 @@ jobs:
           folder: _gh-pages-staging
           clean: false
 
-      # ────────────────────────────────────────
-      # PR コメント
-      # ────────────────────────────────────────
-
       # sticky-pull-request-comment: 同じ header のコメントがあれば更新、なければ新規作成
-      # 各レポートの GitHub Pages URL と reg-cli の差分サマリーを表示する
       - name: Comment PR with report links
         if: always()
         uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3
@@ -267,9 +197,6 @@ jobs:
           message: |
             ## 🧪 E2E Test Report
 
-            ${{ needs.test.outputs.vrt-table }}
-
             | Report | Link |
             |--------|------|
-            | reg-cli | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/web-e2e/reg-report/report/ |
             | Playwright HTML | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.REPORT_PREFIX }}/web-e2e/html-report/ |
