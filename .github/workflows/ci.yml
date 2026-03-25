@@ -9,9 +9,8 @@
 #
 # 必要な設定:
 #   Secrets:
-#     DOTENV_PRIVATE_KEY — 全 .env ファイル共通の復号キー
-#       dotenvx で暗号化された .env を復号し、Next.js の環境変数（NEXT_PUBLIC_SENTRY_DSN 等）を注入する
-#       ※ 個別の Secrets 登録は不要。.env に変数を追加すれば CI にも自動反映される
+#     DOTENV_PRIVATE_KEY — dotenvx 復号キー（暗号化された環境変数がある場合に必要）
+#       現在は NEXT_PUBLIC_* のみ（平文）で不要だが、Better Auth 導入時に必要になるため維持
 # ==============================================
 name: ✅ CI
 
@@ -42,5 +41,7 @@ jobs:
       - name: Lint / Syncpack / Typecheck / Knip / Test / Build
         run: bun run --parallel --no-exit-on-error lint syncpack typecheck knip test build
         env:
-          # dotenvx が apps/web/.env を復号するために必要（Sentry DSN 等）
+          # dotenvx が暗号化された .env 変数を復号するために必要
+          # 現在は NEXT_PUBLIC_* のみ（平文）で復号不要だが、
+          # Better Auth 導入時に AUTH_SECRET 等の暗号化変数が追加されるため維持
           DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}

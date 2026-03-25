@@ -15,7 +15,7 @@
 #     CLOUDFLARE_API_TOKEN    — Cloudflare API Token
 #       権限: Cloudflare Pages: Edit, Workers Scripts: Edit
 #       ※ API Workers Deploy / Storybook Cloudflare Deploy と同一トークンを共有
-#     DOTENV_PRIVATE_KEY      — dotenvx 復号キー（.env の NEXT_PUBLIC_* をビルド時に注入）
+#     DOTENV_PRIVATE_KEY      — dotenvx 復号キー（暗号化された環境変数がある場合に必要）
 #   Variables:
 #     CLOUDFLARE_ACCOUNT_ID   — Cloudflare アカウント ID
 # ==============================================
@@ -65,7 +65,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      # dotenvx で .env を復号するために必要（NEXT_PUBLIC_SENTRY_DSN 等）
+      # main push → production、PR → development（Staging API）
+      DEPLOY_ENV: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'production' || 'development' }}
+      # dotenvx が暗号化された .env 変数を復号するために必要
+      # 現在は NEXT_PUBLIC_* のみ（平文）で復号不要だが、Better Auth 導入時に必要になるため維持
       DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
     steps:
       # ────────────────────────────────────────
@@ -83,9 +86,11 @@ jobs:
       # ────────────────────────────────────────
 
       # OpenNext で Next.js を Cloudflare Workers 用にビルド
+      # dotenvx で環境別 .env を読み込み、NEXT_PUBLIC_* をビルドに埋め込む
+      # main push → .env.production、PR → .env.development（Staging API）
       - name: Build with OpenNext
         working-directory: apps/web
-        run: bun run build:cf
+        run: bunx dotenvx run -f .env.${{ env.DEPLOY_ENV }} -- bun run build:cf
 
       # main push → production（wrangler deploy）、PR → preview（wrangler versions upload）
       - name: Deploy to Cloudflare Workers
