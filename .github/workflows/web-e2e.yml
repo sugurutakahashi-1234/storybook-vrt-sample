@@ -35,9 +35,9 @@ permissions:
   contents: write
   pull-requests: write
 
-# API 接続先: PR → Staging、main push → Production
+# PR → staging、main push → production
 env:
-  NEXT_PUBLIC_API_BASE_URL: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'https://storybook-vrt-sample-api-production.samonikura100.workers.dev/api' || 'https://storybook-vrt-sample-api-staging.samonikura100.workers.dev/api' }}
+  DEPLOY_ENV: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'production' || 'staging' }}
   REPORT_PREFIX: ${{ github.event.pull_request.number && format('pr/{0}', github.event.pull_request.number) || format('manual/{0}', github.run_id) }}
 
 jobs:
@@ -115,8 +115,9 @@ jobs:
       # ────────────────────────────────────────
 
       # Next.js ビルド（NEXT_PUBLIC_* はビルド時に埋め込まれる）
+      # dotenvx で .env（共通）+ .env.{staging|production}（環境別）を読み込む
       - name: Build
-        run: bun run build
+        run: dotenvx run -f .env -f .env.${{ env.DEPLOY_ENV }} -- next build
         working-directory: apps/web
         env:
           DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}

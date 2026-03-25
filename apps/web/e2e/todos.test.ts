@@ -9,9 +9,10 @@
  *
  * テストデータ: ユニークなプレフィックス `[E2E]` 付きで作成。Staging DB に残るが使い捨て前提。
  *
- * 実行:
- *   NEXT_PUBLIC_API_BASE_URL=https://storybook-vrt-sample-api-staging.samonikura100.workers.dev/api \
- *     bun run web:e2e:playwright
+ * 実行（ローカル）:
+ *   dotenvx run -f .env -f .env.staging -- bunx playwright test e2e/todos.test.ts
+ *
+ * API URL は .env.staging / .env.production で管理。CI では DEPLOY_ENV で自動切り替え。
  */
 import { expect, test } from "@playwright/test";
 
