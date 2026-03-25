@@ -113,9 +113,11 @@ jobs:
       # ────────────────────────────────────────
 
       # Next.js ビルド（NEXT_PUBLIC_* はビルド時に埋め込まれる）
-      # dotenvx で .env.{staging|production} を読み込む
+      # CI では DEPLOY_ENV に応じて .env.development（Staging）or .env.production を明示指定
+      # next build は NODE_ENV=production のため --convention=nextjs だと常に .env.production を読むが、
+      # PR 時は Staging API でテストしたいので -f で上書きする
       - name: Build
-        run: dotenvx run -f .env.${{ env.DEPLOY_ENV }} -- next build
+        run: bunx dotenvx run -f .env.${{ env.DEPLOY_ENV }} -- next build
         working-directory: apps/web
 
       # Playwright テスト実行（next start で本番サーバーを起動）
