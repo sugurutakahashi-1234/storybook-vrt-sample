@@ -120,4 +120,6 @@ jobs:
           message: |
             ## 🌐 Web Cloudflare Deploy
 
-            Web アプリが Cloudflare Workers にデプロイされました。
+            | Key | URL |
+            |-----|-----|
+            | Preview | ${{ steps.deploy.outputs.deployment-url }} |

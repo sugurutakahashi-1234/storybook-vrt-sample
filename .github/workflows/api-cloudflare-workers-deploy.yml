@@ -101,4 +101,7 @@ jobs:
           message: |
             ## ⚡ API Cloudflare Workers Preview
 
-            API が staging 環境にデプロイされました。
+            | Key | URL |
+            |-----|-----|
+            | API (staging) | ${{ steps.deploy.outputs.deployment-url }} |
+            | Health Check | ${{ steps.deploy.outputs.deployment-url }}/api/health |
