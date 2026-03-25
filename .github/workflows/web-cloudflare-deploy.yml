@@ -18,7 +18,7 @@
 # 必要な設定:
 #   Secrets:
 #     CLOUDFLARE_API_TOKEN    — Cloudflare API Token
-#       権限: Cloudflare Pages: Edit, Workers Scripts: Edit
+#       権限: Cloudflare Pages: Edit, Workers Scripts: Edit, Workers KV Storage: Edit
 #       ※ API Workers Deploy / Storybook Cloudflare Deploy と同一トークンを共有
 #     DOTENV_PRIVATE_KEY      — dotenvx 復号キー（暗号化された環境変数がある場合に必要）
 #   Variables:

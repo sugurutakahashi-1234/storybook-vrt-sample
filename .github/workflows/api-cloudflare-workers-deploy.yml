@@ -15,7 +15,7 @@
 # 必要な設定:
 #   Secrets:
 #     CLOUDFLARE_API_TOKEN    — Cloudflare API Token「GitHub Actions - Cloudflare Pages / Workers」
-#       権限: Cloudflare Pages: Edit, Workers Scripts: Edit
+#       権限: Cloudflare Pages: Edit, Workers Scripts: Edit, Workers KV Storage: Edit
 #       ※ Storybook Cloudflare Deploy と同一トークンを共有
 # ==============================================
 name: ⚡ API Cloudflare Workers Deploy
