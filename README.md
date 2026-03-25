@@ -10,6 +10,16 @@
 [![API Cloudflare Workers Deploy](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/api-cloudflare-workers-deploy.yml/badge.svg?branch=main)](https://github.com/sugurutakahashi-1234/storybook-vrt-sample/actions/workflows/api-cloudflare-workers-deploy.yml)
 [![Storybook](https://img.shields.io/badge/Storybook-Chromatic-ff4785)](https://main--69a67d8928ff3a182e0b5dfa.chromatic.com)
 
+### Production URL
+
+| サービス               | URL                                                                              |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| Web                    | https://storybook-vrt-sample-web.samonikura100.workers.dev                       |
+| API                    | https://storybook-vrt-sample-api-production.samonikura100.workers.dev/api        |
+| API Health Check       | https://storybook-vrt-sample-api-production.samonikura100.workers.dev/api/health |
+| Storybook (Chromatic)  | https://main--69a67d8928ff3a182e0b5dfa.chromatic.com                             |
+| Storybook (Cloudflare) | https://storybook-vrt-sample.pages.dev                                           |
+
 Storybook コンポーネントのビジュアルリグレッションテスト（VRT）と E2E テスト（機能テスト + ページレベル a11y）のサンプルプロジェクトです。
 
 ## 技術スタック
