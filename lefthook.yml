@@ -81,7 +81,7 @@ pre-commit:
     # .env.keys は .gitignore で除外済み
     - name: no-secrets
       run: |
-        for f in $(git diff --cached --name-only | grep -E '\.env($|\.)'); do
+        for f in $(git diff --cached --name-only --diff-filter=d | grep -E '\.env($|\.)'); do
           if ! grep -q 'DOTENV_PUBLIC_KEY' "$f" 2>/dev/null; then
             echo "❌ $f は暗号化されていません（dotenvx encrypt で暗号化してください）" && exit 1
           fi

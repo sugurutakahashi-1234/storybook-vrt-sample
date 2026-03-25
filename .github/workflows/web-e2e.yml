@@ -1,18 +1,28 @@
 # E2E テストワークフロー
 #
-# 全 PR で起動し、paths-filter でジョブレベル skip する。
+# PR 時: Staging API に疎通して E2E テストを実行
+# main push 時: Production API に疎通して E2E テストを実行（デプロイ後のスモーク確認）
+#
+# paths-filter でジョブレベル skip する。
 # skip されたジョブは GitHub 上で pass 扱いになるため、
 # required status checks と paths フィルタを両立できる。
-# Next.js アプリをビルドし、Playwright でページ遷移やレスポンシブ表示などの機能テストを検証する。
-# VRT（スクリーンショット比較）は Storybook VRT でカバーしているため、ここでは行わない。
 #
-# 必要な設定:
-#   Secrets:
-#     DOTENV_PRIVATE_KEY — 全 .env ファイル共通の復号キー
-#       dotenvx で暗号化された .env を復号し、Next.js の環境変数（NEXT_PUBLIC_SENTRY_DSN 等）を注入する
+# CI では next build → next start（本番サーバー）でテスト実行。
+# ローカルでは next dev（開発サーバー）で実行（playwright.config.ts で分岐）。
+#
+# 環境変数: .env.staging / .env.production で管理（NEXT_PUBLIC_* は平文）
+# サーバー専用の秘密情報（AUTH_SECRET 等）を追加した場合は DOTENV_PRIVATE_KEY シークレットが必要になる
 name: 🧪 E2E Tests
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "packages/ui/**"
+      - "packages/api-contract/**"
+      - "bun.lock"
+      - ".github/workflows/web-e2e.yml"
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
@@ -23,10 +33,9 @@ permissions:
   contents: write
   pull-requests: write
 
-# レポートの出力先プレフィックス
-# PR 時: pr/{PR番号}  （例: pr/42）
-# 手動実行時: manual/{実行ID}  （例: manual/12345）
+# PR → staging、main push → production
 env:
+  DEPLOY_ENV: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'production' || 'development' }}
   REPORT_PREFIX: ${{ github.event.pull_request.number && format('pr/{0}', github.event.pull_request.number) || format('manual/{0}', github.run_id) }}
 
 jobs:
@@ -49,6 +58,7 @@ jobs:
             app:
               - 'apps/web/**'
               - 'packages/ui/**'
+              - 'packages/api-contract/**'
               - 'bun.lock'
               - '.github/workflows/web-e2e.yml'
 
@@ -102,14 +112,31 @@ jobs:
       # ビルド → テスト実行
       # ────────────────────────────────────────
 
-      # 現在のブランチで Next.js ビルド
+      # Next.js ビルド（NEXT_PUBLIC_* はビルド時に JS に埋め込まれる）
+      #
+      # なぜ `bun run build`（package.json の --convention=nextjs）ではなく
+      # `bunx dotenvx run -f` で明示指定しているか:
+      #
+      #   next build は常に NODE_ENV=production をセットする。
+      #   そのため --convention=nextjs だと .env.production が自動選択され、
+      #   Production API の URL がビルドに埋め込まれてしまう。
+      #   PR 時は Staging API でテストしたいので、DEPLOY_ENV に応じて
+      #   .env.development（Staging）or .env.production を -f で明示指定する。
+      #
+      #   NODE_ENV=development next build で回避しない理由:
+      #   Next.js は NODE_ENV=production でのビルドを前提としており、
+      #   development でビルドすると React が開発モード（パフォーマンス警告、DevTools 有効）
+      #   のままバンドルされ、最適化（minify、tree-shaking）も無効になる。
+      #   本番と異なるバンドルでの E2E テストは「本番に近い環境で検証する」目的に反する。
+      #
+      #   bunx dotenvx を使う理由:
+      #   CI にグローバルの dotenvx はインストールされていないが、
+      #   bunx 経由なら devDependencies の @dotenvx/dotenvx を使える。
       - name: Build
-        run: bun run build
+        run: bunx dotenvx run -f .env.${{ env.DEPLOY_ENV }} -- next build
         working-directory: apps/web
-        env:
-          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
 
-      # Playwright テスト実行（ページ遷移・レスポンシブ検証）
+      # Playwright テスト実行（next start で本番サーバーを起動）
       - name: Run Playwright tests
         run: bunx playwright test
         working-directory: apps/web

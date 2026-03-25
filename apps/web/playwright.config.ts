@@ -8,6 +8,10 @@
  * a11y テストは light/dark 両テーマで実行する（テーマ別のコントラスト等を検証するため）。
  * テーマ切り替えは各テスト内で page.emulateMedia() を使用する。
  *
+ * サーバー起動:
+ * - ローカル: next dev（ビルド不要で素早くテスト）
+ * - CI: next start（ビルド済みの本番サーバーでテスト）
+ *
  * 実行: bun run e2e
  */
 import { defineConfig } from "@playwright/test";
@@ -32,24 +36,24 @@ export default defineConfig({
   reporter: [["html"]],
 
   use: {
-    // Next.js dev サーバーの URL
+    // Next.js サーバーの URL
     baseURL: "http://localhost:3000",
 
     // VRT は Storybook VRT でカバーしているため、スクリーンショット撮影は無効
     screenshot: "off",
   },
 
-  // テスト実行前に Next.js dev サーバーを自動起動する設定
   webServer: {
-    // Next.js を Turbopack モードで起動（ルートの bun run dev 経由）
-    command: "PLAYWRIGHT=1 bun run dev",
+    // ローカル: next dev（Turbopack、ビルド不要）
+    // CI: next start（ビルド済みの本番サーバー）
+    command: process.env.CI ? "bun run start" : "PLAYWRIGHT=1 bun run dev",
     url: "http://localhost:3000",
 
     // ローカルでは既に起動済みのサーバーを再利用（開発効率向上）
     // CI では常に新規起動（クリーンな環境を保証）
     reuseExistingServer: !process.env.CI,
 
-    // dev サーバーの起動待ちタイムアウト（2分）
+    // サーバーの起動待ちタイムアウト（2分）
     timeout: 120_000,
   },
 });
