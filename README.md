@@ -591,12 +591,19 @@ export const Typing: Story = {
 
 ### E2E テスト
 
-Next.js アプリに対するシナリオベースのテスト + ページ全体のスクリーンショット撮影です。
+Next.js アプリに対するシナリオベースのテスト。Staging API に実際に疎通して全フローを検証する。
+API 結合テスト（createRouterClient）では担保できない Hono 層・ネットワーク層・ブラウザ操作をカバー。
 
 ```bash
-# E2E テスト実行（Next.js dev サーバーが自動起動）
+# E2E テスト実行（ローカル: next dev + Staging API に接続）
 bun run web:e2e:playwright
 ```
+
+環境変数は `dotenvx --convention=nextjs` で自動読み込み:
+
+- ローカル（`next dev`）→ `.env.development`（Staging API）
+- CI PR 時 → `.env.development`（Staging API）
+- CI main push 後 → `.env.production`（Production API）
 
 ### reg-cli レポート
 
@@ -631,7 +638,7 @@ PR 作成時（Ready for review）に GitHub Actions が自動実行されます
 - ✅ **CI** (`ci.yml`): 全 PR で Lint / Typecheck / Knip / Test / Build を実行
 - 🏗️ **Infra CI** (`infra-ci.yml`): 全 PR で起動し、`infra/` の変更時のみ Terraform Format / Validate / tflint を実行（変更なしの場合はジョブ skip = pass）
 - 📸 **Storybook VRT** (`storybook-vrt.yml`): 全 PR で起動し、`packages/ui/` の変更時のみ実行（変更なしの場合はジョブ skip = pass）
-- 🧪 **E2E テスト** (`web-e2e.yml`): 全 PR で起動し、`apps/web/` または `packages/ui/` の変更時のみ実行（変更なしの場合はジョブ skip = pass）
+- 🧪 **E2E テスト** (`web-e2e.yml`): PR 時は Staging API、main push 時は Production API に疎通して E2E テスト実行。`apps/web/`、`packages/ui/`、`packages/api-contract/` の変更時のみ（変更なしの場合はジョブ skip = pass）
 - 🎨 **Storybook Chromatic Deploy** (`storybook-chromatic-deploy.yml`): main マージ時・PR 時に Storybook を Chromatic へデプロイ（PR 時は `packages/ui/` 変更時のみ）
 - ☁️ **Storybook Cloudflare Deploy** (`storybook-cloudflare-deploy.yml`): main マージ時・PR 時に Storybook を Cloudflare Pages へデプロイ（PR 時は `packages/ui/` 変更時のみ、Cloudflare Access による認証付き）
 - ⚡ **API Cloudflare Workers Deploy** (`api-cloudflare-workers-deploy.yml`): main マージ時は production、PR 時は staging に API をデプロイ（`apps/api/` または `packages/api-contract/` 変更時のみ）
@@ -895,7 +902,7 @@ dotenvx run -- terraform apply
 | ------------------------- | ----------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | `CHROMATIC_PROJECT_TOKEN` | Chromatic デプロイ                  | `storybook-chromatic-deploy.yml`                                       | [Chromatic](https://www.chromatic.com/) > Project > Configure                  |
 | `CLOUDFLARE_API_TOKEN`    | Cloudflare Pages / Workers デプロイ | `storybook-cloudflare-deploy.yml`, `api-cloudflare-workers-deploy.yml` | Cloudflare > My Profile > API Tokens（権限: Pages Edit, Workers Scripts Edit） |
-| `DOTENV_PRIVATE_KEY`      | 全 .env ファイル共通の復号キー      | `ci.yml`, `web-e2e.yml`, `infra-ci.yml`                                | ルートの `.env.keys` の `DOTENV_PRIVATE_KEY`                                   |
+| `DOTENV_PRIVATE_KEY`      | 全 .env ファイル共通の復号キー      | `ci.yml`, `infra-ci.yml`                                               | ルートの `.env.keys` の `DOTENV_PRIVATE_KEY`                                   |
 | `TF_API_TOKEN`            | Terraform Cloud API トークン        | `infra-ci.yml`                                                         | Terraform Cloud > Organization Settings > Teams > Team Token                   |
 
 ### dotenvx 暗号化
@@ -911,25 +918,28 @@ dotenvx run -- terraform apply
 2. `dotenvx encrypt -fk ../../.env.keys` で暗号化（ルートの `.env.keys` にキーが追加される）
 3. `.gitignore` に `!<dir>/.env` を追加（暗号化済みファイルをコミットするため）
 
-#### `apps/web/.env`（Next.js アプリ）
+#### `apps/web/.env.development` / `.env.production`（Next.js アプリ）
 
-| 変数                     | 用途              | 取得先                                                                                                   |
-| ------------------------ | ----------------- | -------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SENTRY_DSN` | Sentry エラー監視 | [Sentry](https://suguru-takahashi.sentry.io/) > Settings > Projects > storybook-vrt-sample > Client Keys |
+Next.js の規約に従い、環境別ファイルで管理。`dotenvx --convention=nextjs` で NODE_ENV に基づいて自動選択される。
 
-> **Note:** `NEXT_PUBLIC_SENTRY_DSN` の値は `infra/sentry/` の Terraform が管理する `sentry_key.web` リソースと同一の DSN です。
-> DSN はプロジェクト作成時に決まり基本的に変わらないため、Terraform output から自動取得する仕組みは設けず、初回に手動で設定しています。
-> 現在の DSN を確認したい場合: `cd infra/sentry && dotenvx run -- terraform output dsn_public`
+| 変数                         | 用途                   | .env.development              | .env.production               |
+| ---------------------------- | ---------------------- | ----------------------------- | ----------------------------- |
+| `NEXT_PUBLIC_API_BASE_URL`   | API サーバーの接続先   | Staging API URL               | Production API URL            |
+| `NEXT_PUBLIC_SENTRY_DSN`     | Sentry エラー監視      | 共通（同一 DSN）              | 共通（同一 DSN）              |
+
+> **Note:** 現在は `NEXT_PUBLIC_*`（クライアント公開変数）のみで暗号化不要。
+> Better Auth 導入時に `AUTH_SECRET` 等のサーバー専用変数を追加する場合:
+> `dotenvx encrypt -f .env.development --exclude-key NEXT_PUBLIC_API_BASE_URL --exclude-key NEXT_PUBLIC_SENTRY_DSN`
+> で公開変数を平文のまま、秘密情報だけ暗号化できる。
 
 ```bash
 cd apps/web
 
-# 復号された全変数を確認
-dotenvx get | jq .
+# 環境変数を確認（development）
+dotenvx run -f .env.development -- env | grep NEXT_PUBLIC
 
-# 新しい変数を追加する場合
-# 1. .env に平文で追加
-# 2. dotenvx encrypt で暗号化
+# 環境変数を確認（production）
+dotenvx run -f .env.production -- env | grep NEXT_PUBLIC
 ```
 
 #### `infra/cloudflare-access/.env`（Terraform）
