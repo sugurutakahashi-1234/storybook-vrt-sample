@@ -3,12 +3,12 @@
 // ==============================================
 // OpenNext (@opennextjs/cloudflare) 経由で Next.js を Cloudflare Workers にデプロイする。
 //
-// ビルド & デプロイ:
-//   bunx opennextjs-cloudflare build    → Next.js ビルド + Workers 用に変換
-//   bunx opennextjs-cloudflare deploy   → Cloudflare にデプロイ
+// デプロイ:
+//   bun run deploy:staging      → staging 環境にデプロイ
+//   bun run deploy:production   → production 環境にデプロイ
 //
 // ローカルプレビュー（Workers ランタイムで動作確認）:
-//   bunx opennextjs-cloudflare build && bunx opennextjs-cloudflare preview
+//   bun run preview
 //
 // 環境変数:
 //   NEXT_PUBLIC_API_URL → API の接続先 URL（ビルド時にインライン化される）
@@ -31,4 +31,24 @@
       "service": "storybook-vrt-sample-web",
     },
   ],
+  "env": {
+    "staging": {
+      "name": "storybook-vrt-sample-web-staging",
+      "services": [
+        {
+          "binding": "WORKER_SELF_REFERENCE",
+          "service": "storybook-vrt-sample-web-staging",
+        },
+      ],
+    },
+    "production": {
+      "name": "storybook-vrt-sample-web",
+      "services": [
+        {
+          "binding": "WORKER_SELF_REFERENCE",
+          "service": "storybook-vrt-sample-web",
+        },
+      ],
+    },
+  },
 }

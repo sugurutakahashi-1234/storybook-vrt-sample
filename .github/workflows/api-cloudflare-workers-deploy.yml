@@ -2,10 +2,15 @@
 # API Cloudflare Workers デプロイワークフロー
 # ==============================================
 # oRPC + Hono API を Cloudflare Workers へデプロイする。
-# - main push 時: production 環境にデプロイ（paths フィルタで対象を限定）
-# - PR 時: 全 PR で起動し、paths-filter でジョブレベル skip する
-#   skip されたジョブは GitHub 上で pass 扱いになるため、
-#   required status checks と paths フィルタを両立できる。
+#
+# 3環境構成:
+#   PR              → staging Worker に versions upload（Preview URL 発行）
+#   main push       → staging Worker にライブデプロイ
+#   workflow_dispatch → production Worker にライブデプロイ
+#
+# paths-filter でジョブレベル skip する。
+# skip されたジョブは GitHub 上で pass 扱いになるため、
+# required status checks と paths フィルタを両立できる。
 #
 # 必要な設定:
 #   Secrets:
@@ -73,7 +78,7 @@ jobs:
       # デプロイ
       # ────────────────────────────────────────
 
-      # main push → production、PR → staging
+      # PR → versions upload（Preview URL 発行）、main push / workflow_dispatch → deploy（ライブ）
       - name: Deploy to Cloudflare Workers
         id: deploy
         uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3
@@ -81,17 +86,18 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 95d6c4c8536abbe739beadf65c380ae4
           workingDirectory: apps/api
-          command: deploy --env ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+          command: ${{ github.event_name == 'pull_request' && 'versions upload' || 'deploy' }} --env ${{ github.event_name == 'workflow_dispatch' && 'production' || 'staging' }}
 
       # ────────────────────────────────────────
       # レポート
       # ────────────────────────────────────────
 
       - name: Add summary
+        env:
+          WRANGLER_ENV: ${{ github.event_name == 'workflow_dispatch' && 'production' || 'staging' }}
         run: |
-          ENV=${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'production' || 'staging' }}
-          echo "## ⚡ API Cloudflare Workers ($ENV)" >> $GITHUB_STEP_SUMMARY
-          echo "Deploy completed for environment: **$ENV**" >> $GITHUB_STEP_SUMMARY
+          echo "## ⚡ API Cloudflare Workers (${{ env.WRANGLER_ENV }})" >> $GITHUB_STEP_SUMMARY
+          echo "Deploy completed for environment: **${{ env.WRANGLER_ENV }}**" >> $GITHUB_STEP_SUMMARY
 
       - name: Comment PR with deploy info
         if: github.event_name == 'pull_request'
@@ -103,5 +109,5 @@ jobs:
 
             | Key | URL |
             |-----|-----|
-            | API (staging) | ${{ steps.deploy.outputs.deployment-url }} |
+            | API Preview | ${{ steps.deploy.outputs.deployment-url }} |
             | Health Check | ${{ steps.deploy.outputs.deployment-url }}/api/health |

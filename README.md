@@ -20,6 +20,14 @@
 | Storybook (Chromatic)  | https://main--69a67d8928ff3a182e0b5dfa.chromatic.com                             |
 | Storybook (Cloudflare) | https://storybook-vrt-sample.pages.dev                                           |
 
+### Staging URL
+
+| サービス         | URL                                                                            |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Web (Staging)    | https://storybook-vrt-sample-web-staging.samonikura100.workers.dev             |
+| API (Staging)    | https://storybook-vrt-sample-api-staging.samonikura100.workers.dev/api         |
+| API Health Check | https://storybook-vrt-sample-api-staging.samonikura100.workers.dev/api/health  |
+
 Storybook コンポーネントのビジュアルリグレッションテスト（VRT）と E2E テスト（機能テスト + ページレベル a11y）のサンプルプロジェクトです。
 
 ## 技術スタック

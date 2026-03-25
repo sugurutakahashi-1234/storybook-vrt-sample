@@ -2,13 +2,18 @@
 # Web Cloudflare Workers デプロイワークフロー
 # ==============================================
 # Next.js Web アプリを OpenNext 経由で Cloudflare Workers へデプロイする。
-# - main push 時: production 環境にデプロイ（paths フィルタで対象を限定）
-# - PR 時: 全 PR で起動し、paths-filter でジョブレベル skip する
-#   skip されたジョブは GitHub 上で pass 扱いになるため、
-#   required status checks と paths フィルタを両立できる。
+#
+# 3環境構成:
+#   PR              → staging Worker に versions upload（Preview URL 発行）
+#   main push       → staging Worker にライブデプロイ
+#   workflow_dispatch → production Worker にライブデプロイ
+#
+# paths-filter でジョブレベル skip する。
+# skip されたジョブは GitHub 上で pass 扱いになるため、
+# required status checks と paths フィルタを両立できる。
 #
 # ビルドフロー:
-#   opennextjs-cloudflare build → .open-next/ に出力 → wrangler deploy
+#   opennextjs-cloudflare build → .open-next/ に出力 → wrangler deploy/versions upload
 #
 # 必要な設定:
 #   Secrets:
@@ -65,8 +70,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      # main push → production、PR → development（Staging API）
-      DEPLOY_ENV: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'production' || 'development' }}
+      # workflow_dispatch → production、それ以外（PR / main push）→ development（Staging API）
+      DEPLOY_ENV: ${{ github.event_name == 'workflow_dispatch' && 'production' || 'development' }}
+      # workflow_dispatch → production、それ以外 → staging
+      WRANGLER_ENV: ${{ github.event_name == 'workflow_dispatch' && 'production' || 'staging' }}
       # dotenvx が暗号化された .env 変数を復号するために必要
       # 現在は NEXT_PUBLIC_* のみ（平文）で復号不要だが、Better Auth 導入時に必要になるため維持
       DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
@@ -87,12 +94,12 @@ jobs:
 
       # OpenNext で Next.js を Cloudflare Workers 用にビルド
       # dotenvx で環境別 .env を読み込み、NEXT_PUBLIC_* をビルドに埋め込む
-      # main push → .env.production、PR → .env.development（Staging API）
+      # workflow_dispatch → .env.production、それ以外 → .env.development（Staging API）
       - name: Build with OpenNext
         working-directory: apps/web
         run: bunx dotenvx run -f .env.${{ env.DEPLOY_ENV }} -- bun run build:cf
 
-      # main push → production（wrangler deploy）、PR → preview（wrangler versions upload）
+      # PR → versions upload（Preview URL 発行）、main push / workflow_dispatch → deploy（ライブ）
       - name: Deploy to Cloudflare Workers
         id: deploy
         uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3
@@ -101,7 +108,7 @@ jobs:
           accountId: 95d6c4c8536abbe739beadf65c380ae4
           workingDirectory: apps/web
           packageManager: bun
-          command: deploy
+          command: ${{ github.event_name == 'pull_request' && 'versions upload' || 'deploy' }} --env ${{ env.WRANGLER_ENV }}
 
       # ────────────────────────────────────────
       # レポート
@@ -109,8 +116,8 @@ jobs:
 
       - name: Add summary
         run: |
-          echo "## 🌐 Web Cloudflare Deploy" >> $GITHUB_STEP_SUMMARY
-          echo "Deploy completed." >> $GITHUB_STEP_SUMMARY
+          echo "## 🌐 Web Cloudflare Deploy (${{ env.WRANGLER_ENV }})" >> $GITHUB_STEP_SUMMARY
+          echo "Deploy completed for environment: **${{ env.WRANGLER_ENV }}**" >> $GITHUB_STEP_SUMMARY
 
       - name: Comment PR with deploy info
         if: github.event_name == 'pull_request'
@@ -118,7 +125,7 @@ jobs:
         with:
           header: cloudflare-web
           message: |
-            ## 🌐 Web Cloudflare Deploy
+            ## 🌐 Web Cloudflare Preview
 
             | Key | URL |
             |-----|-----|

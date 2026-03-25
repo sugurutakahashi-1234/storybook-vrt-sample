@@ -1,7 +1,7 @@
 # E2E テストワークフロー
 #
-# PR 時: Staging API に疎通して E2E テストを実行
-# main push 時: Production API に疎通して E2E テストを実行（デプロイ後のスモーク確認）
+# PR / main push 時: Staging API に疎通して E2E テストを実行
+# workflow_dispatch 時: Production API に疎通して E2E テストを実行
 #
 # paths-filter でジョブレベル skip する。
 # skip されたジョブは GitHub 上で pass 扱いになるため、
@@ -10,7 +10,7 @@
 # CI では next build → next start（本番サーバー）でテスト実行。
 # ローカルでは next dev（開発サーバー）で実行（playwright.config.ts で分岐）。
 #
-# 環境変数: .env.staging / .env.production で管理（NEXT_PUBLIC_* は平文）
+# 環境変数: .env.development（Staging API）/ .env.production で管理（NEXT_PUBLIC_* は平文）
 # サーバー専用の秘密情報（AUTH_SECRET 等）を追加した場合は DOTENV_PRIVATE_KEY シークレットが必要になる
 name: 🧪 E2E Tests
 
@@ -33,9 +33,9 @@ permissions:
   contents: write
   pull-requests: write
 
-# PR → staging、main push → production
+# workflow_dispatch → production、それ以外（PR / main push）→ development（Staging API）
 env:
-  DEPLOY_ENV: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'production' || 'development' }}
+  DEPLOY_ENV: ${{ github.event_name == 'workflow_dispatch' && 'production' || 'development' }}
   REPORT_PREFIX: ${{ github.event.pull_request.number && format('pr/{0}', github.event.pull_request.number) || format('manual/{0}', github.run_id) }}
 
 jobs:
@@ -120,7 +120,7 @@ jobs:
       #   next build は常に NODE_ENV=production をセットする。
       #   そのため --convention=nextjs だと .env.production が自動選択され、
       #   Production API の URL がビルドに埋め込まれてしまう。
-      #   PR 時は Staging API でテストしたいので、DEPLOY_ENV に応じて
+      #   PR / main push 時は Staging API でテストしたいので、DEPLOY_ENV に応じて
       #   .env.development（Staging）or .env.production を -f で明示指定する。
       #
       #   NODE_ENV=development next build で回避しない理由:

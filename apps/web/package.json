@@ -12,6 +12,8 @@
     "start": "dotenvx run --convention=nextjs -- next start",
     "preview": "bun run build:cf && opennextjs-cloudflare preview",
     "deploy": "bun run build:cf && opennextjs-cloudflare deploy",
+    "deploy:staging": "bun run build:cf && opennextjs-cloudflare deploy --env staging",
+    "deploy:production": "bun run build:cf && opennextjs-cloudflare deploy --env production",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "🎨": "========== Code Quality ==========",
     "typecheck": "tsgo --noEmit",
