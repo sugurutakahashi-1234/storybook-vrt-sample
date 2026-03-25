@@ -10,10 +10,8 @@
 # CI では next build → next start（本番サーバー）でテスト実行。
 # ローカルでは next dev（開発サーバー）で実行（playwright.config.ts で分岐）。
 #
-# 必要な設定:
-#   Secrets:
-#     DOTENV_PRIVATE_KEY — 全 .env ファイル共通の復号キー
-#       dotenvx で暗号化された .env を復号し、Next.js の環境変数（NEXT_PUBLIC_SENTRY_DSN 等）を注入する
+# 環境変数: .env.staging / .env.production で管理（NEXT_PUBLIC_* は平文）
+# サーバー専用の秘密情報（AUTH_SECRET 等）を追加した場合は DOTENV_PRIVATE_KEY シークレットが必要になる
 name: 🧪 E2E Tests
 
 on:
@@ -115,12 +113,10 @@ jobs:
       # ────────────────────────────────────────
 
       # Next.js ビルド（NEXT_PUBLIC_* はビルド時に埋め込まれる）
-      # dotenvx で .env（共通）+ .env.{staging|production}（環境別）を読み込む
+      # dotenvx で .env.{staging|production} を読み込む
       - name: Build
-        run: dotenvx run -f .env -f .env.${{ env.DEPLOY_ENV }} -- next build
+        run: dotenvx run -f .env.${{ env.DEPLOY_ENV }} -- next build
         working-directory: apps/web
-        env:
-          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
 
       # Playwright テスト実行（next start で本番サーバーを起動）
       - name: Run Playwright tests
