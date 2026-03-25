@@ -13,7 +13,7 @@
 # 必要な設定:
 #   Secrets:
 #     CLOUDFLARE_API_TOKEN    — Cloudflare API Token
-#       権限: Workers Scripts: Edit
+#       権限: Workers Scripts: Edit, Workers KV Storage: Edit
 # ==============================================
 name: 🧹 Preview Worker Cleanup
 
@@ -27,6 +27,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+
       - name: Compute preview worker names
         id: preview
         run: |
