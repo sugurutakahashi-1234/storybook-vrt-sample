@@ -19,7 +19,6 @@
   "devDependencies": {
     "@orpc/openapi-client": "^1.13.9",
     "msw": "^2.12.14",
-    "orpc-msw": "^0.1.0",
-    "typescript": "^5.9.3"
+    "orpc-msw": "^0.1.0"
   }
 }
