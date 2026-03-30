@@ -15,7 +15,6 @@
  *     const todo = await client.todo.create({ title: "test" });
  *   });
  */
-import { afterAll } from "bun:test";
 import { resolve } from "node:path";
 
 import { createRouterClient } from "@orpc/server";
@@ -29,11 +28,12 @@ import { createRouter } from "../../router.js";
  * miniflare が裏で起動し、.wrangler/state/v3 の SQLite を D1 として提供する。
  * wrangler dev や wrangler d1 migrations apply --local と同じ DB を参照する。
  */
-const { env, dispose } = await getPlatformProxy<{ DB: D1Database }>({
+// dispose() は呼ばない。bun:test ではモジュールレベルの afterAll がファイル間で
+// 共有され、先に完了したファイルの afterAll が dispose() を呼ぶと後続ファイルで
+// "poisoned stub" エラーになる。テストプロセス終了時にクリーンアップされるため実害なし。
+const { env } = await getPlatformProxy<{ DB: D1Database }>({
   configPath: resolve(import.meta.dir, "../../../wrangler.jsonc"),
 });
-
-afterAll(() => dispose());
 
 export { env };
 

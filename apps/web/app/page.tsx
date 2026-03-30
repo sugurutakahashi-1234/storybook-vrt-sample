@@ -1,4 +1,11 @@
-import { Badge, Button, Card, TextField } from "@storybook-vrt-sample/ui";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Chip,
+  TextField,
+} from "@storybook-vrt-sample/ui";
 import Link from "next/link";
 
 /**
@@ -83,6 +90,52 @@ export default function Home() {
           <Badge variant="success">Success</Badge>
           <Badge variant="warning">Warning</Badge>
           <Badge variant="error">Error</Badge>
+        </div>
+      </section>
+
+      {/* Alert コンポーネントのデモ: scv() で5スロットのスタイルを一括制御 */}
+      <section className="mb-12">
+        <h2 className="mb-4 font-semibold text-2xl text-on-surface">Alert</h2>
+        <div className="grid gap-4">
+          <Alert
+            severity="info"
+            title="お知らせ"
+            description="新しいバージョンが利用可能です。"
+          />
+          <Alert
+            severity="success"
+            title="完了"
+            description="変更が正常に保存されました。"
+          />
+          <Alert
+            severity="warning"
+            title="注意"
+            description="この操作は元に戻せません。"
+          />
+          <Alert
+            severity="error"
+            title="エラー"
+            description="サーバーとの通信に失敗しました。"
+          />
+        </div>
+      </section>
+
+      {/* Chip コンポーネントのデモ: compoundVariants で variant × color の組み合わせスタイル */}
+      <section className="mb-12">
+        <h2 className="mb-4 font-semibold text-2xl text-on-surface">Chip</h2>
+        <div className="flex flex-wrap gap-3">
+          <Chip label="Default" color="default" variant="filled" />
+          <Chip label="Info" color="info" variant="filled" />
+          <Chip label="Success" color="success" variant="filled" />
+          <Chip label="Warning" color="warning" variant="filled" />
+          <Chip label="Error" color="error" variant="filled" />
+        </div>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Chip label="Default" color="default" variant="outlined" />
+          <Chip label="Info" color="info" variant="outlined" />
+          <Chip label="Success" color="success" variant="outlined" />
+          <Chip label="Warning" color="warning" variant="outlined" />
+          <Chip label="Error" color="error" variant="outlined" />
         </div>
       </section>
 

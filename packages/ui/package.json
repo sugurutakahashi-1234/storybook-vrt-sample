@@ -35,6 +35,7 @@
     "@heroicons/react": "^2.2.0",
     "@storybook-vrt-sample/api-contract": "workspace:*",
     "clsx": "^2.1.1",
+    "css-variants": "^2.3.5",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tailwind-merge": "^3.5.0"
