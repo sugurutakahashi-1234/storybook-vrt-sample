@@ -15,6 +15,19 @@ import { formatPageTitle } from "./utils/format";
 // 環境変数は instrumentation-client.ts での MSW 起動と共有。
 const isMswEnabled = process.env.NEXT_PUBLIC_MSW_ENABLED === "true";
 
+// 環境名を表示するリボン（production 以外で表示）
+// PR preview の場合は Worker 名（storybook-vrt-sample-web-pr-135-xxx）から
+// "PR-135" 部分を抽出して短く表示する
+const deployEnv = process.env.NEXT_PUBLIC_DEPLOY_ENV ?? "local";
+const showEnvRibbon = deployEnv !== "production";
+const envLabel = (() => {
+  const prMatch = deployEnv.match(/pr-(\d+)/);
+  if (prMatch) {
+    return `PR-${prMatch[1]}`;
+  }
+  return deployEnv.toUpperCase();
+})();
+
 /** サイト全体のメタデータ（<title> や <meta> タグに反映される） */
 export const metadata: Metadata = {
   title: formatPageTitle(),
@@ -54,6 +67,16 @@ export default function RootLayout({
           >
             <div className="absolute top-10 -left-8.75 w-50 -rotate-45 bg-badge-warning-bg py-1 text-center font-bold text-badge-warning-text text-xs shadow-sm">
               MSW MOCK
+            </div>
+          </div>
+        )}
+        {showEnvRibbon && (
+          <div
+            className="pointer-events-none fixed top-0 right-0 z-50 overflow-hidden"
+            style={{ width: "150px", height: "150px" }}
+          >
+            <div className="absolute top-10 -right-8.75 w-50 rotate-45 bg-badge-info-bg py-1 text-center font-bold text-badge-info-text text-xs shadow-sm">
+              {envLabel}
             </div>
           </div>
         )}

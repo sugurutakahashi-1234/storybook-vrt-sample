@@ -56,11 +56,12 @@ const toggleTodoInD1 = async (db: Database, id: string): Promise<Todo> => {
   return updated as Todo;
 };
 
-export const createRouter = (db: Database | null) =>
+export const createRouter = (db: Database | null, deployEnv = "local") =>
   implement(contract).router({
     health: {
       check: implement(contract.health.check).handler(() => ({
         status: "ok",
+        env: deployEnv,
       })),
     },
 

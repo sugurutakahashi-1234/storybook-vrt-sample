@@ -18,7 +18,7 @@
 # 必要な設定:
 #   Secrets:
 #     CLOUDFLARE_API_TOKEN    — Cloudflare API Token
-#       権限: Cloudflare Pages: Edit, Workers Scripts: Edit
+#       権限: Cloudflare Pages: Edit, Workers Scripts: Edit, Workers KV Storage: Edit
 #       ※ API Workers Deploy / Storybook Cloudflare Deploy と同一トークンを共有
 #     DOTENV_PRIVATE_KEY      — dotenvx 復号キー（暗号化された環境変数がある場合に必要）
 #   Variables:
@@ -111,6 +111,12 @@ jobs:
           WORKER_NAME="${{ steps.preview.outputs.worker-name }}"
           sed -i 's/"name": "storybook-vrt-sample-web-staging"/"name": "'"$WORKER_NAME"'"/' wrangler.jsonc
           sed -i 's/"service": "storybook-vrt-sample-web-staging"/"service": "'"$WORKER_NAME"'"/' wrangler.jsonc
+
+      # PR 時: NEXT_PUBLIC_DEPLOY_ENV を Worker 名に上書き（環境リボン表示用）
+      # dotenvx は既存の環境変数を上書きしないため、先に GITHUB_ENV に設定しておけば優先される
+      - name: Set preview deploy env
+        if: github.event_name == 'pull_request'
+        run: echo "NEXT_PUBLIC_DEPLOY_ENV=${{ steps.preview.outputs.worker-name }}" >> $GITHUB_ENV
 
       # OpenNext で Next.js を Cloudflare Workers 用にビルド
       # dotenvx で環境別 .env を読み込み、NEXT_PUBLIC_* をビルドに埋め込む

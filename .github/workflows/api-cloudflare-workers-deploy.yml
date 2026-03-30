@@ -15,7 +15,7 @@
 # 必要な設定:
 #   Secrets:
 #     CLOUDFLARE_API_TOKEN    — Cloudflare API Token「GitHub Actions - Cloudflare Pages / Workers」
-#       権限: Cloudflare Pages: Edit, Workers Scripts: Edit
+#       権限: Cloudflare Pages: Edit, Workers Scripts: Edit, Workers KV Storage: Edit
 #       ※ Storybook Cloudflare Deploy と同一トークンを共有
 # ==============================================
 name: ⚡ API Cloudflare Workers Deploy
@@ -97,7 +97,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 95d6c4c8536abbe739beadf65c380ae4
           workingDirectory: apps/api
-          command: deploy --env ${{ github.event_name == 'workflow_dispatch' && 'production' || 'staging' }}${{ github.event_name == 'pull_request' && format(' --name {0}', steps.preview.outputs.worker-name) || '' }}
+          command: deploy --env ${{ github.event_name == 'workflow_dispatch' && 'production' || 'staging' }}${{ github.event_name == 'pull_request' && format(' --name {0} --var DEPLOY_ENV:{0}', steps.preview.outputs.worker-name) || '' }}
 
       # ────────────────────────────────────────
       # レポート

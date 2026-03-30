@@ -1,5 +1,5 @@
 // ==============================================
-// Cloudflare Workers 設定（Next.js Web アプリ）
+// Cloudflare Workers 設定（Next.js Web アプリ / OpenNext）
 // ==============================================
 // OpenNext (@opennextjs/cloudflare) 経由で Next.js を Cloudflare Workers にデプロイする。
 //

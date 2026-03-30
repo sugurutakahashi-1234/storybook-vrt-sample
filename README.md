@@ -916,12 +916,12 @@ dotenvx run -- terraform apply
 
 ### GitHub Secrets（Settings > Secrets and variables > Actions）
 
-| Secret                    | 用途                                | 使用ワークフロー                                                       | 取得先                                                                         |
-| ------------------------- | ----------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `CHROMATIC_PROJECT_TOKEN` | Chromatic デプロイ                  | `storybook-chromatic-deploy.yml`                                       | [Chromatic](https://www.chromatic.com/) > Project > Configure                  |
-| `CLOUDFLARE_API_TOKEN`    | Cloudflare Pages / Workers デプロイ | `storybook-cloudflare-deploy.yml`, `api-cloudflare-workers-deploy.yml` | Cloudflare > My Profile > API Tokens（権限: Pages Edit, Workers Scripts Edit） |
-| `DOTENV_PRIVATE_KEY`      | 全 .env ファイル共通の復号キー      | `ci.yml`, `infra-ci.yml`                                               | ルートの `.env.keys` の `DOTENV_PRIVATE_KEY`                                   |
-| `TF_API_TOKEN`            | Terraform Cloud API トークン        | `infra-ci.yml`                                                         | Terraform Cloud > Organization Settings > Teams > Team Token                   |
+| Secret                    | 用途                                | 使用ワークフロー                                                                                                           | 取得先                                                                                                  |
+| ------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `CHROMATIC_PROJECT_TOKEN` | Chromatic デプロイ                  | `storybook-chromatic-deploy.yml`                                                                                           | [Chromatic](https://www.chromatic.com/) > Project > Configure                                           |
+| `CLOUDFLARE_API_TOKEN`    | Cloudflare Pages / Workers デプロイ | `storybook-cloudflare-deploy.yml`, `api-cloudflare-workers-deploy.yml`, `web-cloudflare-deploy.yml`, `preview-cleanup.yml` | Cloudflare > My Profile > API Tokens（権限: Pages Edit, Workers Scripts Edit, Workers KV Storage Edit） |
+| `DOTENV_PRIVATE_KEY`      | 全 .env ファイル共通の復号キー      | `ci.yml`, `infra-ci.yml`                                                                                                   | ルートの `.env.keys` の `DOTENV_PRIVATE_KEY`                                                            |
+| `TF_API_TOKEN`            | Terraform Cloud API トークン        | `infra-ci.yml`                                                                                                             | Terraform Cloud > Organization Settings > Teams > Team Token                                            |
 
 ### dotenvx 暗号化
 
