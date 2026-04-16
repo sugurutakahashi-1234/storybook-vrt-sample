@@ -128,7 +128,7 @@ jobs:
       # PR → 動的 Worker にデプロイ、main push → staging、workflow_dispatch → production
       - name: Deploy to Cloudflare Workers
         id: deploy
-        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3
+        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 95d6c4c8536abbe739beadf65c380ae4
