@@ -73,7 +73,7 @@ jobs:
       # セットアップ
       # ────────────────────────────────────────
 
-      - uses: Kesin11/actions-timeline@e018cfefea60b4f44266998551211a35a58b8097 # v3
+      - uses: Kesin11/actions-timeline@44c9c178ffb2fb1d9859614a3ffa79ccfb77565e # v3
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
