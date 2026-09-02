@@ -221,7 +221,7 @@ jobs:
       # Node24 対応が見込めないため、Node24 対応済みの JamesIves 版に移行。
       # 同じ gh-pages ブランチ方式で API 互換性が高い。
       - name: Deploy reports to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           folder: _gh-pages-staging
